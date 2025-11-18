@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "neslxchdtibzhxijxcbg.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "d3mww1g1pfq2pt.cloudfront.net",
+      },
     ],
   },
   eslint: {
