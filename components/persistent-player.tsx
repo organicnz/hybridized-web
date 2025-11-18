@@ -82,7 +82,7 @@ export function PersistentPlayer() {
       </div>
 
       {/* Spacer to prevent content from being hidden behind player */}
-      <div className={isExpanded ? "h-[250px]" : "h-[80px]"} />
+      <div className={isExpanded ? "h-[300px]" : "h-[80px]"} />
     </>
   );
 }

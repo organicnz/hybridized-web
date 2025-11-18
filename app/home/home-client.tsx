@@ -111,6 +111,9 @@ export function HomeClient({
             <p className="text-white/50">No mixes available for this artist</p>
           </div>
         )}
+
+        {/* Bottom padding for persistent player */}
+        <div className="h-24" />
       </div>
 
       {/* Sidebar Panel - 35% */}
