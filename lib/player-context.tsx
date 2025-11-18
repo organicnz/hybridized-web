@@ -1,15 +1,17 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
-import type { Database } from "@/lib/types/database.types";
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { Database } from '@/lib/types/database.types';
 
 type Band = Database['public']['Tables']['bands']['Row'];
 
 interface PlayerContextType {
   currentTrack: Band | null;
-  setCurrentTrack: (track: Band | null) => void;
   isPlaying: boolean;
-  setIsPlaying: (playing: boolean) => void;
+  play: (track: Band) => void;
+  pause: () => void;
+  resume: () => void;
+  stop: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -18,28 +20,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Band | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Listen for track changes from anywhere in the app
-  useEffect(() => {
-    const handleSetTrack = (event: CustomEvent) => {
-      setCurrentTrack(event.detail);
-      setIsPlaying(true);
-    };
+  const play = (track: Band) => {
+    setCurrentTrack(track);
+    setIsPlaying(true);
+  };
 
-    window.addEventListener('set-current-track', handleSetTrack as EventListener);
-    return () => {
-      window.removeEventListener('set-current-track', handleSetTrack as EventListener);
-    };
-  }, []);
+  const pause = () => {
+    setIsPlaying(false);
+  };
+
+  const resume = () => {
+    setIsPlaying(true);
+  };
+
+  const stop = () => {
+    setCurrentTrack(null);
+    setIsPlaying(false);
+  };
 
   return (
-    <PlayerContext.Provider
-      value={{
-        currentTrack,
-        setCurrentTrack,
-        isPlaying,
-        setIsPlaying,
-      }}
-    >
+    <PlayerContext.Provider value={{ currentTrack, isPlaying, play, pause, resume, stop }}>
       {children}
     </PlayerContext.Provider>
   );
@@ -48,7 +48,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 export function usePlayer() {
   const context = useContext(PlayerContext);
   if (context === undefined) {
-    throw new Error("usePlayer must be used within a PlayerProvider");
+    throw new Error('usePlayer must be used within a PlayerProvider');
   }
   return context;
 }
