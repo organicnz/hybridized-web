@@ -47,7 +47,7 @@ export function HomeClient({
 
         {/* Embedded Players Grid */}
         <div className="space-y-4">
-          {displayItems.map((item) => (
+          {items.map((item) => (
             <div
               key={item.id}
               className="bg-[#181818] rounded-lg overflow-hidden border border-white/5 hover:bg-[#282828] transition-colors group"
@@ -89,7 +89,7 @@ export function HomeClient({
           ))}
         </div>
 
-        {displayItems.length === 0 && (
+        {items.length === 0 && (
           <div className="bg-[#181818] rounded-lg p-12 text-center border border-white/5">
             <p className="text-white/50">No mixes available for this artist</p>
           </div>

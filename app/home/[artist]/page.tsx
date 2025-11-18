@@ -3,6 +3,7 @@ import { Footer } from "@/components/footer";
 import { ArtistNav } from "@/components/artist-nav";
 import { HomeClient } from "../home-client";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import { getCachedBands, getCachedArtistBands } from "@/lib/cache";
 
@@ -12,7 +13,7 @@ interface PageProps {
 
 // Enable static generation for known artists
 export async function generateStaticParams() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data: bands } = await supabase
     .from("bands")
     .select("name")
