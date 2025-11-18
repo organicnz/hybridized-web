@@ -19,6 +19,8 @@ export const metadata: Metadata = {
 };
 
 import { RegisterServiceWorker } from "./register-sw";
+import { PlayerProvider } from "@/lib/player-context";
+import { GlobalPlayer } from "@/components/global-player";
 
 export default function RootLayout({
   children,
@@ -29,7 +31,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <RegisterServiceWorker />
-        {children}
+        <PlayerProvider>
+          {children}
+          <GlobalPlayer />
+        </PlayerProvider>
       </body>
     </html>
   );

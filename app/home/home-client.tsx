@@ -70,19 +70,23 @@ export function HomeClient({
                 </div>
               </div>
 
-              {/* Embedded Player */}
+              {/* Play Button */}
               {item.iframe_url && (
-                <div className="bg-black/20">
-                  <iframe
-                    src={item.iframe_url}
-                    width="100%"
-                    height="166"
-                    frameBorder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                    className="w-full"
-                    title={`Player for ${item.name || "mix"}`}
-                  />
+                <div className="p-4 pt-0">
+                  <button
+                    onClick={() => {
+                      // This will be handled by the player context
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('play-track', { detail: item }));
+                      }
+                    }}
+                    className="w-full px-6 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-black font-semibold rounded-full transition-all hover:scale-105 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    Play Mix
+                  </button>
                 </div>
               )}
             </div>
