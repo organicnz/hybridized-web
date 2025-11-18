@@ -1,6 +1,7 @@
 'use client'
 
 import Link from "next/link"
+import Image from "next/image"
 import { User, Menu } from "lucide-react"
 import { useState, useCallback } from "react"
 import { cn } from "@/lib/utils"
@@ -25,12 +26,16 @@ export function Header() {
       <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-          <img 
+          <Image 
             src="/logo.png" 
-            alt="Hybridized Logo" 
-            className="w-10 h-10 rounded-lg group-hover:scale-105 transition-transform"
+            alt="Hybridized Logo"
+            title="Hybridized - Home"
+            width={40}
+            height={40}
+            className="w-10 h-10 md:w-12 md:h-12 rounded-lg group-hover:scale-105 transition-transform"
+            priority
           />
-          <span className="text-xl md:text-2xl font-bold text-white group-hover:text-green-400 transition-colors">
+          <span className="text-xl md:text-2xl font-bold text-white group-hover:text-purple-400 transition-colors">
             Hybridized
           </span>
         </Link>
