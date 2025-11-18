@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Code Quality Analyzer",
+  "description": "Monitors source code files for changes and provides intelligent suggestions for code improvements, including identifying code smells, recommending design patterns, and ensuring best practices for readability, maintainability, and performance",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the modified code in the changed files for potential improvements. Focus on:\n\n1. **Code Smells**: Identify any code smells such as duplicated code, long functions, large classes, or complex conditionals\n2. **Design Patterns**: Suggest appropriate design patterns that could improve the code structure\n3. **Best Practices**: Check adherence to React, Next.js, TypeScript, and general JavaScript best practices\n4. **Readability**: Evaluate code clarity, naming conventions, and comment quality\n5. **Maintainability**: Assess modularity, separation of concerns, and code organization\n6. **Performance**: Identify potential performance bottlenecks or optimization opportunities (e.g., unnecessary re-renders, inefficient algorithms, missing memoization)\n7. **Type Safety**: Ensure proper TypeScript usage with appropriate types and interfaces\n8. **Framework-Specific**: Check for Next.js 16 App Router best practices, proper use of Server/Client Components, and Supabase integration patterns\n\nProvide specific, actionable suggestions with code examples where appropriate. Maintain the existing functionality while proposing improvements. Consider the project's tech stack (Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS) when making recommendations."
+  }
+}
