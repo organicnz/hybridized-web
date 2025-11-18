@@ -41,7 +41,9 @@
         "VERCEL_API_KEY=REDACTED_VERCEL_API_KEY"
       ],
       "disabled": false,
-      "autoApprove": []
+      "autoApprove": [
+        "getDeployments"
+      ]
     }
   }
 }

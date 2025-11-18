@@ -11,15 +11,15 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
-    "next": "^16.0.0-canary",
+    "next": "canary",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "framer-motion": "^11.11.17",
-    "next-intl": "^3.23.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.5.4",
-    "lucide-react": "^0.454.0"
+    "lucide-react": "^0.454.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
@@ -31,5 +31,10 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.14.0",
     "eslint-config-next": "^15.0.3"
+  },
+  "overrides": {
+    "next-intl": {
+      "next": "^16.0.0-canary"
+    }
   }
 }
