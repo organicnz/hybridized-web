@@ -7,7 +7,7 @@
 | 4 | sync-profiles-every-6h | `0 */6 * * *` | sync-profile-data | ✅ Active |
 | 5 | generate-stats-hourly | `0 * * * *` | generate-band-stats | ✅ Active |
 
-**Note**: cleanup-old-bands edge function exists but is NOT scheduled to preserve all band data.
+
 
 ## Schedule Explanation
 

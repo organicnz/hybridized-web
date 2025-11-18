@@ -2,28 +2,7 @@
 
 ## Deployed Functions
 
-### 1. cleanup-old-bands
-**Purpose**: Manually removes incomplete band entries older than 30 days
-
-**Schedule**: Manual only (not automated)
-
-**Endpoint**: `https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/cleanup-old-bands`
-
-**What it does**:
-- Deletes bands with no name or description
-- Only removes entries older than 30 days
-- Returns count of deleted records
-- **Note**: This function is available but NOT scheduled to run automatically
-
-**Manual trigger**:
-```bash
-curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/cleanup-old-bands \
-  -H "Authorization: Bearer YOUR_ANON_KEY"
-```
-
----
-
-### 2. sync-profile-data
+### 1. sync-profile-data
 **Purpose**: Syncs user profiles with auth.users data
 
 **Schedule**: Every 6 hours
@@ -43,7 +22,7 @@ curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/sync-profile-
 
 ---
 
-### 3. search-bands
+### 2. search-bands
 **Purpose**: Advanced full-text search for bands
 
 **Endpoint**: `https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/search-bands?q=rock&limit=10`
@@ -72,7 +51,7 @@ const { results, count } = await response.json();
 
 ---
 
-### 4. generate-band-stats
+### 3. generate-band-stats
 **Purpose**: Generates platform statistics
 
 **Schedule**: Every hour
@@ -108,8 +87,6 @@ Active cron jobs managed by `pg_cron` extension:
 |----------|----------|----------|-------------|
 | sync-profiles-every-6h | `0 */6 * * *` | sync-profile-data | Every 6 hours |
 | generate-stats-hourly | `0 * * * *` | generate-band-stats | Every hour |
-
-**Note**: cleanup-old-bands is available but NOT scheduled automatically to preserve all band data.
 
 ### View Cron Jobs
 ```sql
