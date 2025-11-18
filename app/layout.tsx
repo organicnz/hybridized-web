@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { RegisterServiceWorker } from "./register-sw";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,7 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <RegisterServiceWorker />
+        {children}
+      </body>
     </html>
   );
 }
