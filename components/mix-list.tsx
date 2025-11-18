@@ -4,7 +4,7 @@ import type { Database } from '@/lib/types/database.types'
 import { Calendar, Clock, MoreVertical, Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type HybridizedItem = Database['public']['Tables']['hybridized']['Row']
+type HybridizedItem = Database['public']['Tables']['bands']['Row']
 
 interface MixListProps {
   items: HybridizedItem[]

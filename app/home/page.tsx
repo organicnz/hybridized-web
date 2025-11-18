@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: items, error } = await supabase
-    .from("hybridized")
+    .from("bands")
     .select("*")
     .order("created_at", { ascending: false });
 
