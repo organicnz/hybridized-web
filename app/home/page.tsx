@@ -16,7 +16,7 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-zinc-950 via-zinc-900 to-black">
+    <div className="min-h-screen flex flex-col bg-[#121212]">
       <Header />
       <ArtistNav />
       <HomeClient items={items || []} />

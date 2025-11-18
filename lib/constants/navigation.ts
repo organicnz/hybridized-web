@@ -29,8 +29,9 @@ export type NavLinkItem = typeof NAV_LINKS[number]
 
 /**
  * Reusable style classes for header components
+ * Using Spotify color palette
  */
 export const HEADER_STYLES = {
-  button: "w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors",
+  button: "w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors",
   icon: "w-5 h-5 text-white/70"
 } as const
