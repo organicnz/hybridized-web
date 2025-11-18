@@ -57,30 +57,30 @@ export function HomeClient({
             {currentArtist || "All Mixes"}
           </h1>
           <p className="text-white/50">
-            {displayItems.length} {displayItems.length === 1 ? "mix" : "mixes"} available
+            {displayItems.length} {displayItems.length === 1 ? "playlist" : "playlists"}
           </p>
         </div>
 
         {/* Embedded Players Grid */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {displayItems.map((item) => (
             <div
               key={item.id}
-              className="bg-[#181818] rounded-lg overflow-hidden border border-white/5 hover:bg-[#282828] transition-colors group"
+              className="bg-[#181818] rounded-xl overflow-hidden border border-white/5 hover:border-white/10 transition-all group"
             >
               {/* Mix Info */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-[#1DB954] transition-colors">
-                  {item.name || "Untitled Mix"}
+              <div className="p-6 pb-4">
+                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-[#1DB954] transition-colors">
+                  {item.name || "Untitled Playlist"}
                 </h3>
                 {item.description && (
-                  <p className="text-sm text-white/50 line-clamp-2 mb-3">
+                  <p className="text-sm text-white/60 line-clamp-3 mb-4">
                     {item.description}
                   </p>
                 )}
 
                 {/* Metadata */}
-                <div className="flex items-center gap-4 text-xs text-white/40 mb-3">
+                <div className="flex items-center gap-4 text-xs text-white/40">
                   <span>{new Date(item.created_at).toLocaleDateString()}</span>
                   {item.formula && <span>• {item.formula}</span>}
                 </div>
@@ -92,12 +92,12 @@ export function HomeClient({
                   <iframe
                     src={item.iframe_url}
                     width="100%"
-                    height="166"
+                    height="450"
                     frameBorder="0"
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                     loading="lazy"
                     className="w-full"
-                    title={`Player for ${item.name || "mix"}`}
+                    title={`Player for ${item.name || "playlist"}`}
                     sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                   />
                 </div>
