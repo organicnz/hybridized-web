@@ -8,25 +8,29 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const { data: items } = await supabase
+  const { data: items, error } = await supabase
     .from("hybridized")
     .select("*")
     .order("created_at", { ascending: false });
 
+  if (error) {
+    console.error('Error fetching items:', error);
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#5B6B7F]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-zinc-950 via-zinc-900 to-black">
       <Header />
       <ArtistNav />
       
-      <main className="flex-1 flex gap-0">
+      <main className="flex-1 flex flex-col lg:flex-row gap-6 p-4 md:p-6">
         {/* Main Content Panel - 65% */}
-        <div className="flex-1 lg:w-[65%] p-6 space-y-4">
+        <div className="w-full lg:w-[65%] space-y-4">
           <NowPlaying />
           <MixList items={items || []} />
         </div>
 
         {/* Sidebar Panel - 35% */}
-        <aside className="hidden lg:block lg:w-[35%] p-6">
+        <aside className="w-full lg:w-[35%]">
           <ArtistProfile />
         </aside>
       </main>

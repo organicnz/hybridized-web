@@ -1,54 +1,74 @@
-import Link from "next/link";
-import { Search, User } from "lucide-react";
+'use client'
+
+import Link from "next/link"
+import { User, Menu } from "lucide-react"
+import { useState, useCallback } from "react"
+import { cn } from "@/lib/utils"
+import { SearchBar } from "./search-bar"
+import { MobileMenu } from "./mobile-menu"
+import { NavLink } from "./nav-link"
+import { NAV_LINKS, HEADER_STYLES } from "@/lib/constants/navigation"
 
 export function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev)
+  }, [])
+  
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false)
+  }, [])
+
   return (
-    <header className="bg-[#4A5568] border-b border-black/10">
-      <div className="px-8 py-4 flex items-center justify-between">
+    <header className="bg-black border-b border-white/5 sticky top-0 z-50 backdrop-blur-md bg-black/95">
+      <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">H</span>
-          </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
+        <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
+          <img 
+            src="/logo.png" 
+            alt="Hybridized Logo" 
+            className="w-10 h-10 rounded-lg group-hover:scale-105 transition-transform"
+          />
+          <span className="text-xl md:text-2xl font-bold text-white group-hover:text-green-400 transition-colors">
             Hybridized
           </span>
         </Link>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/home" className="text-white hover:text-white/80 transition-colors font-medium">
-            Main
-          </Link>
-          <Link href="/about" className="text-white hover:text-white/80 transition-colors font-medium">
-            About
-          </Link>
-          <Link href="/contact" className="text-white hover:text-white/80 transition-colors font-medium">
-            Contact
-          </Link>
-          <Link href="/donation" className="text-orange-400 hover:text-orange-300 transition-colors font-medium">
-            Donation
-          </Link>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+          {NAV_LINKS.map((link) => (
+            <NavLink key={link.href} {...link} variant="desktop" />
+          ))}
         </nav>
 
         {/* Search & User */}
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-64 px-4 py-2 bg-[#5B6B7F] text-white placeholder:text-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400/50"
-            />
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-          </div>
+        <div className="flex items-center gap-2 md:gap-3">
+          <SearchBar />
           <Link
             href="/auth/login"
-            className="w-10 h-10 rounded-full bg-[#5B6B7F] flex items-center justify-center hover:bg-[#6B7B8F] transition-colors"
+            className={HEADER_STYLES.button}
+            aria-label="User account"
           >
-            <User className="w-5 h-5 text-white" />
+            <User className={HEADER_STYLES.icon} />
           </Link>
+          
+          <button
+            onClick={toggleMobileMenu}
+            className={cn("md:hidden", HEADER_STYLES.button)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <Menu className={HEADER_STYLES.icon} />
+          </button>
         </div>
       </div>
+
+      <MobileMenu 
+        isOpen={mobileMenuOpen} 
+        onClose={closeMobileMenu} 
+        navLinks={NAV_LINKS} 
+      />
     </header>
-  );
+  )
 }
