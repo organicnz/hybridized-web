@@ -22,7 +22,7 @@ export function Header() {
   }, [])
 
   return (
-    <header className="bg-black border-b border-white/5 sticky top-0 z-50 backdrop-blur-md bg-black/95">
+    <header className="bg-[#000000] border-b border-white/5 sticky top-0 z-50 backdrop-blur-md bg-black/95">
       <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
@@ -35,7 +35,7 @@ export function Header() {
             className="w-10 h-10 md:w-12 md:h-12 rounded-lg group-hover:scale-105 transition-transform"
             priority
           />
-          <span className="text-xl md:text-2xl font-bold text-white group-hover:text-purple-400 transition-colors">
+          <span className="text-xl md:text-2xl font-bold text-white group-hover:text-[#1DB954] transition-colors">
             Hybridized
           </span>
         </Link>
