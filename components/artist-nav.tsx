@@ -23,15 +23,17 @@ const ARTISTS = [
 
 interface ArtistNavProps {
   activeArtist?: string
-  onArtistChange?: (artist: string) => void
   className?: string
 }
 
 export function ArtistNav({ 
-  activeArtist = 'Hybrid', 
-  onArtistChange,
+  activeArtist = 'Hybrid',
   className 
 }: ArtistNavProps) {
+  const getArtistSlug = (artist: string) => {
+    return artist.toLowerCase().replace(/\s+/g, '-');
+  };
+
   return (
     <nav 
       className={cn("bg-zinc-900/50 backdrop-blur-sm border-b border-white/5 h-14 px-6 flex items-center gap-8 overflow-x-auto scrollbar-hide", className)}
@@ -39,19 +41,19 @@ export function ArtistNav({
       aria-label="Artist navigation"
     >
       {ARTISTS.map((artist) => (
-        <button
+        <a
           key={artist}
-          onClick={() => onArtistChange?.(artist)}
+          href={`/home/${getArtistSlug(artist)}`}
           className={cn(
             "whitespace-nowrap text-sm font-semibold pb-4 border-b-2 transition-all",
             activeArtist === artist 
-              ? 'text-white border-green-400' 
+              ? 'text-white border-[#1DB954]' 
               : 'text-white/60 border-transparent hover:text-white hover:border-white/20'
           )}
           aria-current={activeArtist === artist ? 'page' : undefined}
         >
           {artist}
-        </button>
+        </a>
       ))}
     </nav>
   )
