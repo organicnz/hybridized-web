@@ -1,0 +1,47 @@
+{
+  "mcpServers": {
+    "Supabase-hybridized": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=neslxchdtibzhxijxcbg"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_22739de136972d62a4af616cf3b47ad2df2bd938"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "list_tables",
+        "describe_table",
+        "run_sql",
+        "execute_sql",
+        "list_projects",
+        "get_project",
+        "apply_migration",
+        "list_edge_functions",
+        "get_edge_function",
+        "deploy_edge_function",
+        "get_project_url",
+        "get_logs",
+        "get_advisors",
+        "list_extensions",
+        "get_anon_key",
+        "search_docs",
+        "generate_typescript_types",
+        "list_migrations",
+        "get_publishable_keys"
+      ]
+    },
+    "Vercel-organicnz": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "vercel-mcp",
+        "VERCEL_API_KEY=oqQFB6Mwggwgi8v8h8rf9Gwv"
+      ],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
