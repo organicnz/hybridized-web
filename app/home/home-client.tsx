@@ -6,7 +6,7 @@ import { MixList } from "@/components/mix-list";
 import { ArtistProfile } from "@/components/artist-profile";
 import type { Database } from "@/lib/types/database.types";
 
-type HybridizedItem = Database['public']['Tables']['hybridized']['Row'];
+type HybridizedItem = Database['public']['Tables']['bands']['Row'];
 
 interface HomeClientProps {
   items: HybridizedItem[];
