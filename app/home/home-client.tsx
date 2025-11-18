@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { NowPlaying } from "@/components/now-playing";
-import { MixList } from "@/components/mix-list";
+import { useEffect } from "react";
 import { ArtistProfile } from "@/components/artist-profile";
 import type { Database } from "@/lib/types/database.types";
+import { useCachedBands } from "@/hooks/use-cached-bands";
+import { cacheBands } from "@/lib/music-cache";
 
 type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"];
 
@@ -19,6 +19,18 @@ export function HomeClient({
   allBands,
   currentArtist,
 }: HomeClientProps) {
+  const { bands: cachedBands } = useCachedBands(items);
+
+  // Cache the data when component mounts
+  useEffect(() => {
+    if (items.length > 0) {
+      cacheBands(items).catch(console.error);
+    }
+  }, [items]);
+
+  // Use cached data if available, otherwise use server data
+  const displayItems = cachedBands.length > 0 ? cachedBands : items;
+
   return (
     <main className="flex-1 flex flex-col lg:flex-row gap-6 p-4 md:p-6">
       {/* Main Content Panel - 65% */}
@@ -35,7 +47,7 @@ export function HomeClient({
 
         {/* Embedded Players Grid */}
         <div className="space-y-4">
-          {items.map((item) => (
+          {displayItems.map((item) => (
             <div
               key={item.id}
               className="bg-[#181818] rounded-lg overflow-hidden border border-white/5 hover:bg-[#282828] transition-colors group"
@@ -77,7 +89,7 @@ export function HomeClient({
           ))}
         </div>
 
-        {items.length === 0 && (
+        {displayItems.length === 0 && (
           <div className="bg-[#181818] rounded-lg p-12 text-center border border-white/5">
             <p className="text-white/50">No mixes available for this artist</p>
           </div>
@@ -89,8 +101,8 @@ export function HomeClient({
         <ArtistProfile
           artist={{
             name: currentArtist || "Hybrid",
-            bio: items[0]?.description || "No description available",
-            coverUrl: items[0]?.cover_url || undefined,
+            bio: displayItems[0]?.description || "No description available",
+            coverUrl: displayItems[0]?.cover_url || undefined,
           }}
         />
       </aside>
