@@ -20,6 +20,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Band | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Listen for play-track events from anywhere in the app
+  useEffect(() => {
+    const handlePlayTrack = (event: CustomEvent) => {
+      setCurrentTrack(event.detail);
+      setIsPlaying(true);
+    };
+
+    window.addEventListener('play-track', handlePlayTrack as EventListener);
+    return () => window.removeEventListener('play-track', handlePlayTrack as EventListener);
+  }, []);
+
   const play = (track: Band) => {
     setCurrentTrack(track);
     setIsPlaying(true);
