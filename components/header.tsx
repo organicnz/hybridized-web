@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { User, Menu } from "lucide-react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, Suspense } from "react"
 import { cn } from "@/lib/utils"
 import { SearchBar } from "./search-bar"
 import { MobileMenu } from "./mobile-menu"
@@ -49,7 +49,9 @@ export function Header() {
 
         {/* Search & User */}
         <div className="flex items-center gap-2 md:gap-3">
-          <SearchBar />
+          <Suspense fallback={<div className="w-40 md:w-64 h-10" />}>
+            <SearchBar />
+          </Suspense>
           <Link
             href="/auth/login"
             className={HEADER_STYLES.button}
