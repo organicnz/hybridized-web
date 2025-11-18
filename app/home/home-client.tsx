@@ -57,13 +57,13 @@ export function HomeClient({
             {currentArtist || "All Mixes"}
           </h1>
           <p className="text-white/50">
-            {items.length} {items.length === 1 ? "mix" : "mixes"} available
+            {displayItems.length} {displayItems.length === 1 ? "mix" : "mixes"} available
           </p>
         </div>
 
         {/* Embedded Players Grid */}
         <div className="space-y-4">
-          {items.map((item) => (
+          {displayItems.map((item) => (
             <div
               key={item.id}
               className="bg-[#181818] rounded-lg overflow-hidden border border-white/5 hover:bg-[#282828] transition-colors group"
@@ -106,7 +106,7 @@ export function HomeClient({
           ))}
         </div>
 
-        {items.length === 0 && (
+        {displayItems.length === 0 && (
           <div className="bg-[#181818] rounded-lg p-12 text-center border border-white/5">
             <p className="text-white/50">No mixes available for this artist</p>
           </div>
