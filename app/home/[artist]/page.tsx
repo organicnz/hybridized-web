@@ -35,13 +35,22 @@ export default async function ArtistPage({ params }: PageProps) {
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
 
-  // Fetch data with caching
-  const [allBands, artistBands] = await Promise.all([
-    getCachedBands(),
-    getCachedArtistBands(artistName),
-  ]);
+  const supabase = await createClient();
+  
+  // Fetch all bands for the list
+  const { data: allBands } = await supabase
+    .from("bands")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  if (!artistBands || artistBands.length === 0) {
+  // Fetch specific artist's mixes
+  const { data: artistBands, error } = await supabase
+    .from("bands")
+    .select("*")
+    .ilike("name", artistName)
+    .order("created_at", { ascending: false });
+
+  if (error || !artistBands || artistBands.length === 0) {
     notFound();
   }
 
