@@ -5,8 +5,24 @@ import { ArtistProfile } from "@/components/artist-profile";
 import type { Database } from "@/lib/types/database.types";
 import { useCachedBands } from "@/hooks/use-cached-bands";
 import { cacheBands } from "@/lib/music-cache";
+import { usePlayer } from "@/lib/player-context";
+import { Play } from "lucide-react";
 
 type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"];
+
+function PlayButton({ item }: { item: HybridizedItem }) {
+  const { play } = usePlayer();
+
+  return (
+    <button
+      onClick={() => play(item)}
+      className="w-full px-6 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-black font-semibold rounded-full transition-all hover:scale-105 flex items-center justify-center gap-2"
+    >
+      <Play className="w-5 h-5" fill="currentColor" />
+      Play Mix
+    </button>
+  );
+}
 
 interface HomeClientProps {
   items: HybridizedItem[];

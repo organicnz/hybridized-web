@@ -1,21 +1,22 @@
 "use client";
 
 import { usePlayer } from '@/lib/player-context';
-import { Play, Pause, X, Maximize2 } from 'lucide-react';
+import { Play, Pause, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 export function PersistentPlayer() {
   const { currentTrack, isPlaying, pause, resume, stop } = usePlayer();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   if (!currentTrack) return null;
 
   return (
     <>
       {/* Fixed Bottom Player */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#181818] border-t border-white/10 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-4">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-[#181818] to-[#282828] border-t border-white/10 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          {/* Player Header */}
+          <div className="flex items-center gap-4 mb-3">
             {/* Track Info */}
             <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-white truncate">
@@ -31,14 +32,18 @@ export function PersistentPlayer() {
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                aria-label="Expand player"
+                aria-label={isExpanded ? 'Collapse player' : 'Expand player'}
               >
-                <Maximize2 className="w-4 h-4 text-white" />
+                {isExpanded ? (
+                  <ChevronDown className="w-4 h-4 text-white" />
+                ) : (
+                  <ChevronUp className="w-4 h-4 text-white" />
+                )}
               </button>
               
               <button
                 onClick={isPlaying ? pause : resume}
-                className="w-10 h-10 rounded-full bg-[#1DB954] hover:bg-[#1ed760] flex items-center justify-center transition-all hover:scale-105"
+                className="w-10 h-10 rounded-full bg-[#1DB954] hover:bg-[#1ed760] flex items-center justify-center transition-all hover:scale-105 shadow-lg"
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
@@ -50,17 +55,17 @@ export function PersistentPlayer() {
 
               <button
                 onClick={stop}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-500/20 flex items-center justify-center transition-colors group"
                 aria-label="Close player"
               >
-                <X className="w-4 h-4 text-white" />
+                <X className="w-4 h-4 text-white group-hover:text-red-400" />
               </button>
             </div>
           </div>
 
-          {/* Expanded Player */}
+          {/* Embedded Player */}
           {isExpanded && currentTrack.iframe_url && (
-            <div className="mt-4 rounded-lg overflow-hidden">
+            <div className="rounded-lg overflow-hidden bg-black/20 shadow-inner">
               <iframe
                 src={currentTrack.iframe_url}
                 width="100%"
