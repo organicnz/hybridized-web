@@ -1,9 +1,19 @@
+/**
+ * Navigation link configuration
+ * @property href - Route path
+ * @property label - Display text
+ * @property highlight - Whether to apply accent styling (e.g., donation button)
+ */
 export type NavLink = {
   href: string
   label: string
   highlight?: boolean
 }
 
+/**
+ * Main navigation links for the site header
+ * Ordered as they should appear in the navigation bar
+ */
 export const NAV_LINKS = [
   { href: '/home', label: 'Main' },
   { href: '/about', label: 'About' },
@@ -11,7 +21,8 @@ export const NAV_LINKS = [
   { href: '/donation', label: 'Donation', highlight: true },
 ] as const satisfies readonly NavLink[]
 
-export const HEADER_STYLES = {
-  button: "w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors",
-  icon: "w-4 h-4 text-white",
-} as const
+/**
+ * Type helper for individual navigation link items
+ * Provides literal types for href and label
+ */
+export type NavLinkItem = typeof NAV_LINKS[number]

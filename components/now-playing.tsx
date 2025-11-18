@@ -3,18 +3,18 @@
 import { X, Play, Pause } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useMemo, memo, useRef, useEffect } from 'react'
 
 interface NowPlayingProps {
   artistName?: string
   trackName?: string
   artistImage?: string
-  currentTime: number
-  duration: number
-  isPlaying: boolean
-  onClose: () => void
-  onPlayPause: () => void
-  onSeek: (time: number) => void
+  currentTime?: number
+  duration?: number
+  isPlaying?: boolean
+  onClose?: () => void
+  onPlayPause?: () => void
+  onSeek?: (time: number) => void
   className?: string
 }
 
@@ -32,7 +32,7 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-function ArtistAvatar({ name, image }: { name: string; image?: string }) {
+const ArtistAvatar = memo(function ArtistAvatar({ name, image }: { name: string; image?: string }) {
   const [imageError, setImageError] = useState(false)
 
   return (
@@ -48,12 +48,13 @@ function ArtistAvatar({ name, image }: { name: string; image?: string }) {
         />
       ) : (
         <span className="text-white font-bold text-xs" aria-hidden="true">
+          {/* Display artist name in lowercase with period as fallback branding */}
           {name.toLowerCase()}.
         </span>
       )}
     </div>
   )
-}
+})
 
 export function NowPlaying({
   artistName = 'Hybrid',
@@ -67,30 +68,59 @@ export function NowPlaying({
   onSeek = () => {},
   className
 }: NowPlayingProps) {
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0
+  // Use refs for frequently changing values to prevent callback recreation
+  const currentTimeRef = useRef(currentTime)
+  const durationRef = useRef(duration)
+  
+  useEffect(() => {
+    currentTimeRef.current = currentTime
+    durationRef.current = duration
+  }, [currentTime, duration])
+
+  // Memoize progress calculation
+  const progress = useMemo(
+    () => (duration > 0 ? (currentTime / duration) * 100 : 0),
+    [currentTime, duration]
+  )
 
   const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (duration === 0) return
+    if (durationRef.current === 0) return
     
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const percentage = Math.max(0, Math.min(1, x / rect.width))
-    onSeek(percentage * duration)
-  }, [onSeek, duration])
+    onSeek(percentage * durationRef.current)
+  }, [onSeek])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (duration === 0) return
+    if (durationRef.current === 0) return
     
-    const step = duration * SEEK_STEP_PERCENTAGE
+    const step = durationRef.current * SEEK_STEP_PERCENTAGE
     
-    if (e.key === 'ArrowRight') {
-      e.preventDefault()
-      onSeek(Math.min(currentTime + step, duration))
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault()
-      onSeek(Math.max(currentTime - step, 0))
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault()
+        onSeek(Math.min(currentTimeRef.current + step, durationRef.current))
+        break
+      case 'ArrowLeft':
+        e.preventDefault()
+        onSeek(Math.max(currentTimeRef.current - step, 0))
+        break
+      case 'Home':
+        e.preventDefault()
+        onSeek(0)
+        break
+      case 'End':
+        e.preventDefault()
+        onSeek(durationRef.current)
+        break
+      case ' ':
+      case 'Enter':
+        e.preventDefault()
+        onPlayPause()
+        break
     }
-  }, [onSeek, duration, currentTime])
+  }, [onSeek, onPlayPause])
 
   return (
     <div className={cn("bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-xl p-6 shadow-2xl border border-white/10", className)}>
@@ -119,8 +149,9 @@ export function NowPlaying({
           <div
             role="slider"
             aria-valuemin={0}
-            aria-valuemax={duration}
-            aria-valuenow={currentTime}
+            aria-valuemax={Math.floor(duration)}
+            aria-valuenow={Math.floor(currentTime)}
+            aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
             aria-label="Seek position"
             tabIndex={0}
             onClick={handleSeek}
