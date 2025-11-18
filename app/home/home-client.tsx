@@ -35,8 +35,6 @@ export function HomeClient({
   allBands,
   currentArtist,
 }: HomeClientProps) {
-  const { bands: cachedBands } = useCachedBands(items);
-
   // Cache the data when component mounts
   useEffect(() => {
     if (items.length > 0) {
@@ -44,8 +42,8 @@ export function HomeClient({
     }
   }, [items]);
 
-  // Use cached data if available, otherwise use server data
-  const displayItems = cachedBands.length > 0 ? cachedBands : items;
+  // Always use server-provided items (already filtered by artist)
+  const displayItems = items;
 
   return (
     <main className="flex-1 flex flex-col lg:flex-row gap-6 p-4 md:p-6">
