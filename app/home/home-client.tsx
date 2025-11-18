@@ -10,9 +10,11 @@ type HybridizedItem = Database['public']['Tables']['bands']['Row'];
 
 interface HomeClientProps {
   items: HybridizedItem[];
+  allBands?: HybridizedItem[];
+  currentArtist?: string;
 }
 
-export function HomeClient({ items }: HomeClientProps) {
+export function HomeClient({ items, allBands, currentArtist }: HomeClientProps) {
   const [currentItem, setCurrentItem] = useState<HybridizedItem | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -75,7 +77,13 @@ export function HomeClient({ items }: HomeClientProps) {
 
       {/* Sidebar Panel - 35% */}
       <aside className="w-full lg:w-[35%]">
-        <ArtistProfile />
+        <ArtistProfile 
+          artist={{
+            name: currentArtist || 'Hybrid',
+            bio: items[0]?.description || 'No description available',
+            coverUrl: items[0]?.cover_url || undefined
+          }}
+        />
       </aside>
     </main>
   );
