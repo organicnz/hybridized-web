@@ -28,10 +28,10 @@ export function SearchResults({
 }) {
   if (results.length === 0) {
     return (
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8 text-center">
-        <Music className="w-16 h-16 text-white/20 mx-auto mb-4" />
-        <p className="text-white/60 text-lg">No results found for "{query}"</p>
-        <p className="text-white/40 text-sm mt-2">
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 text-center">
+        <Music className="w-16 h-16 text-purple-400/30 mx-auto mb-4" />
+        <p className="text-white/70 text-lg">No results found for "{query}"</p>
+        <p className="text-white/50 text-sm mt-2">
           Try a different search term
         </p>
       </div>
@@ -40,7 +40,7 @@ export function SearchResults({
 
   return (
     <div className="space-y-6">
-      <p className="text-white/60 mb-4">
+      <p className="text-white/70 mb-4">
         Found {results.length} {results.length === 1 ? "episode" : "episodes"}
       </p>
 
@@ -53,7 +53,7 @@ export function SearchResults({
           return (
             <div
               key={episode.id}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition-colors"
+              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:bg-white/10 hover:border-purple-400/20 transition-all group"
             >
               <div className="flex items-center gap-4 p-4">
                 {coverUrl && (
@@ -63,18 +63,18 @@ export function SearchResults({
                       alt={episode.title}
                       width={80}
                       height={80}
-                      className="rounded-lg object-cover"
+                      className="rounded-lg object-cover group-hover:scale-105 transition-transform"
                     />
                   </div>
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-white mb-1 truncate">
+                  <h3 className="text-lg font-semibold text-white mb-1 truncate group-hover:text-purple-300 transition-colors">
                     {episode.title}
                   </h3>
-                  <p className="text-sm text-white/60 mb-2">{artistName}</p>
+                  <p className="text-sm text-purple-300/70 mb-2">{artistName}</p>
                   {episode.description && (
-                    <p className="text-sm text-white/50 line-clamp-2">
+                    <p className="text-sm text-white/60 line-clamp-2">
                       {episode.description}
                     </p>
                   )}

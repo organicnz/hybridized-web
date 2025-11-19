@@ -1,28 +1,59 @@
-import { updateSession } from "@/lib/supabase/middleware";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // Update session
-  const response = await updateSession(request);
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  // Refresh session if expired
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const path = request.nextUrl.pathname;
 
   // Protected routes that require authentication
   const protectedPaths = ["/profile", "/dashboard"];
   const authPaths = ["/auth/login", "/auth/signup"];
 
-  const path = request.nextUrl.pathname;
-
-  // Check if accessing protected route
   const isProtectedPath = protectedPaths.some((p) => path.startsWith(p));
   const isAuthPath = authPaths.some((p) => path.startsWith(p));
 
-  // Get user from response (session was updated in updateSession)
-  const supabaseResponse = response;
+  // Redirect to login if accessing protected route without auth
+  if (isProtectedPath && !user) {
+    const redirectUrl = new URL("/auth/login", request.url);
+    redirectUrl.searchParams.set("redirectTo", path);
+    return NextResponse.redirect(redirectUrl);
+  }
 
-  // If accessing protected route without auth, redirect to login
-  if (isProtectedPath) {
-    // You can add additional auth checks here if needed
-    // For now, the session update handles the auth state
+  // Redirect to home if accessing auth pages while logged in
+  if (isAuthPath && user) {
+    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   return supabaseResponse;
