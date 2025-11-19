@@ -40,8 +40,12 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push(REDIRECT_AFTER_LOGIN);
-      router.refresh();
+      // Get redirect URL from query params or use default
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get("redirectTo") || REDIRECT_AFTER_LOGIN;
+      
+      // Force a hard refresh to ensure session is properly loaded
+      window.location.href = redirectTo;
     }
   };
 
@@ -68,10 +72,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#121212]">
       <Link
         href="/home"
-        className="fixed top-6 left-6 flex items-center gap-2 text-purple-200/70 hover:text-white transition-colors group"
+        className="fixed top-6 left-6 flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
         <span className="font-medium">Back to Home</span>
@@ -87,17 +91,17 @@ export default function LoginPage() {
               height={48}
               className="w-12 h-12 rounded-full group-hover:scale-105 transition-transform"
             />
-            <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
               Hybridized
             </span>
           </Link>
           <h1 className="text-4xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-purple-200/70">
+          <p className="text-white/70">
             Sign in to access your musical journey
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8">
+        <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
           {/* Toggle between password and magic link */}
           <div className="flex gap-2 mb-6 p-1 bg-black/30 rounded-lg">
             <button
@@ -109,7 +113,7 @@ export default function LoginPage() {
               }}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                 !useMagicLink
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                  ? "bg-green-500 text-white shadow-lg"
                   : "text-white/60 hover:text-white"
               }`}
             >
@@ -125,7 +129,7 @@ export default function LoginPage() {
               }}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                 useMagicLink
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                  ? "bg-green-500 text-white shadow-lg"
                   : "text-white/60 hover:text-white"
               }`}
             >
@@ -190,7 +194,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder:text-purple-300/50 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-purple-500/50"
+                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white placeholder:text-white/50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-white/20"
                   placeholder="your@email.com"
                   required
                   aria-required="true"
@@ -217,7 +221,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
-                    className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder:text-purple-300/50 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-purple-500/50"
+                    className="w-full pl-11 pr-4 py-3 bg-black/30 border border-white/10 rounded-lg text-white placeholder:text-white/50 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-white/20"
                     placeholder="••••••••"
                     required
                     aria-required="true"
@@ -227,9 +231,9 @@ export default function LoginPage() {
             )}
 
             {useMagicLink && (
-              <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                <p className="text-purple-200/80 text-sm">
-                  <Sparkles className="w-4 h-4 inline mr-2 text-purple-400" />
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                <p className="text-white/80 text-sm">
+                  <Sparkles className="w-4 h-4 inline mr-2 text-green-400" />
                   We'll send you a magic link to sign in without a password
                 </p>
               </div>
@@ -238,7 +242,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || magicLinkSent}
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-purple-500/50 disabled:opacity-50 disabled:hover:scale-100"
+              className="w-full px-6 py-3 bg-green-500 text-white rounded-full font-semibold hover:bg-green-600 hover:scale-105 transition-all shadow-lg shadow-green-500/50 disabled:opacity-50 disabled:hover:scale-100"
             >
               {loading
                 ? useMagicLink
@@ -254,7 +258,7 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <Link
                 href="/auth/forgot-password"
-                className="text-sm text-purple-200/70 hover:text-white hover:underline transition-colors"
+                className="text-sm text-white/70 hover:text-white hover:underline transition-colors"
               >
                 Forgot password?
               </Link>
@@ -262,11 +266,11 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-sm text-purple-200/50 mt-6">
+        <p className="text-center text-sm text-white/50 mt-6">
           Don't have an account?{" "}
           <Link
             href="/auth/signup"
-            className="text-purple-400 hover:text-pink-400 hover:underline font-semibold transition-colors"
+            className="text-green-400 hover:text-green-300 hover:underline font-semibold transition-colors"
           >
             Sign up
           </Link>

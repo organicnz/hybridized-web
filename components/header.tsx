@@ -9,9 +9,13 @@ import { SearchBar } from "./search-bar";
 import { MobileMenu } from "./mobile-menu";
 import { NavLink } from "./nav-link";
 import { NAV_LINKS, HEADER_STYLES } from "@/lib/constants/navigation";
+import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const { profile } = useProfile();
 
   const toggleMobileMenu = useCallback(() => {
     setMobileMenuOpen((prev) => !prev);
@@ -56,11 +60,27 @@ export function Header() {
             <SearchBar />
           </Suspense>
           <Link
-            href="/auth/login"
-            className={HEADER_STYLES.button}
-            aria-label="User account"
+            href={user ? "/profile" : "/auth/login"}
+            className={cn(
+              HEADER_STYLES.button,
+              user && profile?.avatar_url && "p-0 overflow-hidden"
+            )}
+            aria-label={user ? "Profile" : "Sign in"}
+            title={user ? "Profile" : "Sign in"}
           >
-            <User className={HEADER_STYLES.icon} />
+            {user && profile?.avatar_url ? (
+              <Image
+                src={profile.avatar_url}
+                alt="Profile"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-cover"
+                key={profile.avatar_url}
+                unoptimized
+              />
+            ) : (
+              <User className={HEADER_STYLES.icon} />
+            )}
           </Link>
 
           <button

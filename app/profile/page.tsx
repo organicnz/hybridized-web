@@ -1,19 +1,118 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { User, Mail, Save, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  User,
+  Mail,
+  Save,
+  AlertCircle,
+  CheckCircle,
+  Camera,
+  Upload,
+} from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { createClient } from "@/lib/supabase/client";
+import {
+  compressImage,
+  validateImageFile,
+} from "@/lib/utils/image-compression";
 
 function ProfileContent() {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
-  const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const supabase = createClient();
+
+  // Update fullName when profile loads
+  useEffect(() => {
+    if (profile?.full_name) {
+      setFullName(profile.full_name);
+    }
+    console.log("Profile loaded:", profile);
+  }, [profile]);
+
+  // Get avatar URL with cache busting (memoized to prevent constant re-renders)
+  const avatarUrl = useMemo(() => {
+    if (!profile?.avatar_url) return null;
+    const url = `${profile.avatar_url}?t=${Date.now()}`;
+    console.log("Avatar URL:", url);
+    return url;
+  }, [profile?.avatar_url]);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setError(null);
+
+    try {
+      // Compress image
+      const compressedBlob = await compressImage(file, 400, 400, 0.85);
+
+      // Generate file path: avatars/{user_id}/avatar.jpg
+      const fileExt = "jpg";
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, compressedBlob, {
+          cacheControl: "3600",
+          upsert: true,
+          contentType: "image/jpeg",
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      console.log("Uploading avatar, public URL:", publicUrl);
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await updateProfile({
+        avatar_url: publicUrl,
+      });
+
+      if (updateError) {
+        console.error("Error updating profile:", updateError);
+        throw updateError;
+      }
+
+      console.log("Avatar uploaded successfully");
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to upload avatar"
+      );
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +165,53 @@ function ProfileContent() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Avatar Upload */}
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative group">
+                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30 flex items-center justify-center">
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt="Profile avatar"
+                      width={128}
+                      height={128}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                      key={avatarUrl}
+                    />
+                  ) : (
+                    <User className="w-16 h-16 text-purple-300/50" />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAvatarClick}
+                  disabled={uploadingAvatar}
+                  className="absolute bottom-0 right-0 p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-lg hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+                  aria-label="Upload avatar"
+                >
+                  {uploadingAvatar ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-5 h-5 text-white" />
+                  )}
+                </button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleAvatarChange}
+                className="hidden"
+                aria-label="Avatar file input"
+              />
+              <p className="text-xs text-purple-200/50 mt-3 text-center">
+                Click camera icon to upload avatar
+                <br />
+                Max 5MB • JPEG, PNG, or WebP
+              </p>
+            </div>
+
             <div>
               <label
                 htmlFor="email"

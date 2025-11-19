@@ -59,7 +59,7 @@ export default async function SearchPage({
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900">
       <Link
         href="/home"
-        className="fixed top-6 left-6 flex items-center gap-2 text-purple-200/70 hover:text-white transition-colors group"
+        className="fixed top-6 left-6 flex items-center gap-2 text-purple-300/80 hover:text-white transition-all group z-10"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
         <span className="font-medium">Back to Home</span>
@@ -67,14 +67,14 @@ export default async function SearchPage({
 
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
             Search Results
           </h1>
 
           {query && (
-            <p className="text-white/60 mb-8">
+            <p className="text-white/70 mb-8">
               Showing results for:{" "}
-              <span className="text-white font-semibold">{query}</span>
+              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">{query}</span>
             </p>
           )}
 
@@ -87,8 +87,8 @@ export default async function SearchPage({
           )}
 
           {!query.trim() ? (
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8 text-center">
-              <p className="text-white/60">
+            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 text-center hover:bg-white/10 transition-colors">
+              <p className="text-white/70">
                 Enter a search query to find mixes
               </p>
             </div>

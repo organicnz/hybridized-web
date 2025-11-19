@@ -183,7 +183,10 @@ export function AudioEqualizer({
           });
         }
 
-        console.log("Equalizer initialized successfully, context state:", ctx.state);
+        console.log(
+          "Equalizer initialized successfully, context state:",
+          ctx.state,
+        );
         setAudioContext(ctx);
         setFilters(newFilters);
         setIsInitialized(true);

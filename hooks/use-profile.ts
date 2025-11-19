@@ -11,36 +11,44 @@ export function useProfile() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
-  useEffect(() => {
+  const fetchProfile = async () => {
     if (!user) {
       setProfile(null);
       setLoading(false);
       return;
     }
 
-    async function fetchProfile() {
+    const supabase = createClient();
+
+    try {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user!.id)
+        .eq("id", user.id)
         .single();
 
       if (error) {
         console.error("Error fetching profile:", error);
       } else {
+        console.log("Profile fetched:", data);
         setProfile(data);
       }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
       setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchProfile();
-  }, [user, supabase]);
+  }, [user]);
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: new Error("Not authenticated") };
 
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("profiles")
       .update(updates)
@@ -49,11 +57,19 @@ export function useProfile() {
       .single();
 
     if (!error && data) {
+      console.log("Profile updated:", data);
       setProfile(data);
+      // Force a refetch to ensure we have the latest data
+      await fetchProfile();
     }
 
     return { data, error };
   };
 
-  return { profile, loading, updateProfile };
+  const refetch = () => {
+    setLoading(true);
+    return fetchProfile();
+  };
+
+  return { profile, loading, updateProfile, refetch };
 }

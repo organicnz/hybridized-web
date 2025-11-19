@@ -112,7 +112,14 @@ export function CustomAudioPlayer({
     };
 
     const handleError = (e: Event) => {
-      console.error("❌ Audio ERROR:", e, "src:", audio.src, "error:", (e.target as HTMLAudioElement).error);
+      console.error(
+        "❌ Audio ERROR:",
+        e,
+        "src:",
+        audio.src,
+        "error:",
+        (e.target as HTMLAudioElement).error,
+      );
     };
 
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
