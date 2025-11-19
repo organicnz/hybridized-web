@@ -32,10 +32,10 @@ export function MixList({
       {items.map((item) => (
         <article
           key={item.id}
-          className="bg-gradient-to-br from-zinc-900/80 via-zinc-800/60 to-zinc-900/80 backdrop-blur-sm rounded-lg p-4 hover:bg-zinc-800/70 transition-all border border-white/10 group relative overflow-hidden"
+          className="bg-gradient-to-br from-zinc-900/80 via-zinc-800/60 to-zinc-900/80 backdrop-blur-sm rounded-lg p-4 hover:bg-zinc-800/70 transition-all border border-white/10 group relative overflow-hidden gpu-filter"
         >
           {/* Gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/0 to-blue-500/0 group-hover:from-purple-500/5 group-hover:via-pink-500/5 group-hover:to-blue-500/5 transition-all duration-300 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/0 to-blue-500/0 group-hover:from-purple-500/5 group-hover:via-pink-500/5 group-hover:to-blue-500/5 transition-all duration-300 pointer-events-none gpu-opacity" />
 
           <div className="flex items-center gap-4 relative">
             {/* Cover Image */}
@@ -44,7 +44,7 @@ export function MixList({
                 <img
                   src={item.cover_url}
                   alt={item.name || "Mix cover"}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 gpu"
                   loading="lazy"
                 />
               </div>
@@ -89,14 +89,14 @@ export function MixList({
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => onMenuClick?.(item)}
-                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 gpu-opacity"
                 aria-label={`More options for ${item.name || "mix"}`}
               >
                 <MoreVertical className="w-4 h-4 text-white/70" />
               </button>
               <button
                 onClick={() => onPlay?.(item)}
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-green-500 hover:from-green-300 hover:to-green-400 hover:scale-110 flex items-center justify-center transition-all shadow-lg group-hover:shadow-green-500/50"
+                className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-green-500 hover:from-green-300 hover:to-green-400 hover:scale-110 flex items-center justify-center transition-all shadow-lg group-hover:shadow-green-500/50 gpu"
                 aria-label={`Play ${item.name || "mix"}`}
               >
                 <Play className="w-4 h-4 text-black ml-0.5" fill="black" />

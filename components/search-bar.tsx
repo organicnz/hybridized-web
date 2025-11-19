@@ -108,8 +108,7 @@ export function SearchBar() {
 
           {/* Recent Searches Dropdown */}
           <div
-            className="absolute top-full left-0 right-0 mt-2 bg-gradient-to-br from-zinc-900/95 to-black/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200"
-            style={{ transform: "translateZ(0)", willChange: "transform" }}
+            className="absolute top-full left-0 right-0 mt-2 bg-gradient-to-br from-zinc-900/95 to-black/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200 gpu-filter gpu"
           >
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 pointer-events-none" />
@@ -133,7 +132,7 @@ export function SearchBar() {
                   <button
                     key={index}
                     onClick={() => handleRecentSearchClick(search)}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all duration-200 group text-left border border-transparent hover:border-purple-400/30"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all duration-200 group text-left border border-transparent hover:border-purple-400/30 gpu"
                     type="button"
                   >
                     <Clock className="w-4 h-4 text-white/40 group-hover:text-purple-400 transition-colors flex-shrink-0" />

@@ -32,7 +32,7 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
   return (
     <nav 
       className={cn(
-        "md:hidden border-t border-white/5 bg-black/95 backdrop-blur-md transition-all duration-200 overflow-hidden",
+        "md:hidden border-t border-white/5 bg-black/95 backdrop-blur-md transition-all duration-200 overflow-hidden gpu-filter gpu-opacity",
         isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
       )}
       aria-label="Mobile navigation"

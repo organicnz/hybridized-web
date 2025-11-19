@@ -12,7 +12,7 @@ export default function DonationPage() {
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-16">
-            <Heart className="w-20 h-20 text-green-400 mx-auto mb-6 animate-pulse" />
+            <Heart className="w-20 h-20 text-green-400 mx-auto mb-6 animate-pulse gpu-opacity" />
             <h1 className="text-5xl md:text-7xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-6">
               Support Hybridized
             </h1>
@@ -23,7 +23,7 @@ export default function DonationPage() {
           </div>
 
           {/* Ko-fi Embed */}
-          <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8 md:p-12">
+          <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8 md:p-12 gpu-filter">
             <div className="max-w-2xl mx-auto">
               <iframe
                 id="kofiframe"

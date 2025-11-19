@@ -134,7 +134,7 @@ export function AudioControlsPanel({
           {playbackRate}x
         </button>
 
-        <div className="absolute bottom-full right-0 mb-2 bg-zinc-900 border border-white/10 rounded-lg p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity shadow-xl">
+        <div className="absolute bottom-full right-0 mb-2 bg-zinc-900 border border-white/10 rounded-lg p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity shadow-xl gpu-opacity">
           <div className="flex flex-col gap-1 min-w-[80px]">
             {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
               <button
