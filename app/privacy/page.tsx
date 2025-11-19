@@ -3,24 +3,24 @@ import { ArrowLeft } from "lucide-react";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900">
+    <div className="min-h-screen bg-[#121212]">
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
         </Link>
 
-        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-8 md:p-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <div className="bg-zinc-900/50 backdrop-blur-sm border border-white/10 rounded-lg p-8 md:p-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
             Privacy Policy
           </h1>
 
-          <div className="space-y-6 text-white/90">
+          <div className="space-y-6 text-white/70">
             <section>
-              <h2 className="text-2xl font-semibold text-purple-300 mb-3">
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 Information We Collect
               </h2>
               <p className="leading-relaxed">
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 How We Use Your Information
               </h2>
               <p className="leading-relaxed mb-3">
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 Data Security
               </h2>
               <p className="leading-relaxed">
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 Third-Party Services
               </h2>
               <p className="leading-relaxed">
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 Your Rights
               </h2>
               <p className="leading-relaxed mb-3">You have the right to:</p>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 Cookies
               </h2>
               <p className="leading-relaxed">
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 Contact Us
               </h2>
               <p className="leading-relaxed">
