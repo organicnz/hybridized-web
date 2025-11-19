@@ -35,16 +35,19 @@ export function ArtistNav({
     fetchArtists();
   }, [supabase]);
 
-  // Scroll active artist into view
+  // Scroll active artist into view (only when artists list changes or on mount)
   useEffect(() => {
-    if (activeRef.current && navRef.current) {
-      activeRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
+    if (activeRef.current && navRef.current && artists.length > 0) {
+      // Use setTimeout to avoid layout thrashing
+      setTimeout(() => {
+        activeRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }, 100);
     }
-  }, [activeArtist, artists]);
+  }, [artists.length]); // Only run when artists are loaded, not on every activeArtist change
 
   const getArtistSlug = (artist: string) => {
     return encodeURIComponent(artist.toLowerCase().replace(/\s+/g, "-"));
