@@ -1,11 +1,8 @@
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { ArtistNav } from "@/components/artist-nav";
 import { HomeClient } from "../home-client";
 import { createClient } from "@/lib/supabase/server";
 import { createStaticClient } from "@/lib/supabase/static";
 import { notFound } from "next/navigation";
-import { getCachedBands, getCachedArtistBands } from "@/lib/cache";
 
 interface PageProps {
   params: Promise<{ artist: string }>;
@@ -22,7 +19,9 @@ export async function generateStaticParams() {
   if (!bands) return [];
 
   return bands.map((band) => ({
-    artist: band.name?.toLowerCase().replace(/\s+/g, '-') || '',
+    artist: encodeURIComponent(
+      band.name?.toLowerCase().replace(/\s+/g, "-") || "",
+    ),
   }));
 }
 
@@ -31,35 +30,67 @@ export const revalidate = 300;
 
 export default async function ArtistPage({ params }: PageProps) {
   const { artist } = await params;
-  const artistName = artist.split('-').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ');
+  const decodedArtist = decodeURIComponent(artist);
 
   const supabase = await createClient();
-  
-  // Fetch all bands for the list
-  const { data: allBands } = await supabase
-    .from("bands")
-    .select("*")
-    .order("created_at", { ascending: false });
+
+  // First, try to find the band by matching the slug format
+  // Get all bands and find the one whose slug matches
+  const { data: allBands } = await supabase.from("bands").select("*");
+
+  const matchedBand = allBands?.find((band) => {
+    const bandSlug = band.name?.toLowerCase().replace(/\s+/g, "-") || "";
+    return bandSlug === decodedArtist;
+  });
+
+  if (!matchedBand) {
+    notFound();
+  }
+
+  const artistName = matchedBand.name;
 
   // Fetch specific artist's mixes
   const { data: artistBands, error } = await supabase
     .from("bands")
     .select("*")
-    .ilike("name", artistName)
+    .eq("name", artistName)
     .order("created_at", { ascending: false });
 
   if (error || !artistBands || artistBands.length === 0) {
     notFound();
   }
 
+  // Fetch episodes for each band
+  const bandsWithEpisodes = await Promise.all(
+    artistBands.map(async (band) => {
+      const { data: episodes } = await supabase
+        .from("episodes")
+        .select("*")
+        .eq("band_id", band.id)
+        .order("pub_date", { ascending: false });
+
+      return {
+        ...band,
+        episodes: episodes || [],
+      };
+    }),
+  );
+
+  // Get artist profile data from first band entry
+  const artistProfile = artistBands[0];
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#121212]">
-      <Header />
+    <div className="flex flex-col h-full overflow-hidden">
       <ArtistNav activeArtist={artistName} />
-      <HomeClient items={artistBands} allBands={allBands || []} currentArtist={artistName} />
-      <Footer />
+      <div className="flex-1 min-h-0">
+        <HomeClient
+          items={bandsWithEpisodes}
+          currentArtist={artistName}
+          artistBio={artistProfile.description || undefined}
+          artistCoverUrl={artistProfile.cover_url || undefined}
+          soundcloudUrl={artistProfile.soundcloud_url || undefined}
+        />
+      </div>
     </div>
   );
 }

@@ -1,44 +1,79 @@
 // Service Worker for caching music assets
-const CACHE_NAME = 'hybridized-v1';
-const CACHE_URLS = [
-  '/',
-  '/home',
-  '/logo.png',
-  '/favicon.png',
-];
+const CACHE_NAME = "hybridized-v2";
+const AUDIO_CACHE_NAME = "hybridized-audio-v2";
+const CACHE_URLS = ["/", "/home", "/logo.png", "/favicon.png"];
 
 // Install event - cache essential assets
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(CACHE_URLS);
-    })
+    }),
   );
   self.skipWaiting();
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+          .filter((name) => name !== CACHE_NAME && name !== AUDIO_CACHE_NAME)
+          .map((name) => caches.delete(name)),
       );
-    })
+    }),
   );
   self.clients.claim();
 });
 
+// Check if request is for audio
+function isAudioRequest(url) {
+  return (
+    url.includes(".mp3") ||
+    url.includes(".m4a") ||
+    url.includes(".wav") ||
+    url.includes(".ogg") ||
+    url.includes("audio") ||
+    url.includes("cloudfront.net")
+  );
+}
+
 // Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
+  if (event.request.method !== "GET") return;
 
   // Skip chrome extensions and other protocols
-  if (!event.request.url.startsWith('http')) return;
+  if (!event.request.url.startsWith("http")) return;
 
+  const url = event.request.url;
+
+  // Handle audio files with cache-first strategy
+  if (isAudioRequest(url)) {
+    event.respondWith(
+      caches.open(AUDIO_CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            console.log("Serving audio from cache:", url);
+            return cachedResponse;
+          }
+
+          return fetch(event.request).then((response) => {
+            // Cache successful audio responses
+            if (response && response.status === 200) {
+              console.log("Caching audio:", url);
+              cache.put(event.request, response.clone());
+            }
+            return response;
+          });
+        });
+      }),
+    );
+    return;
+  }
+
+  // Handle other requests
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
@@ -47,7 +82,7 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(event.request).then((response) => {
         // Don't cache non-successful responses
-        if (!response || response.status !== 200 || response.type === 'error') {
+        if (!response || response.status !== 200 || response.type === "error") {
           return response;
         }
 
@@ -56,10 +91,9 @@ self.addEventListener('fetch', (event) => {
 
         // Cache images and static assets
         if (
-          event.request.url.includes('/logo.png') ||
-          event.request.url.includes('/favicon.png') ||
-          event.request.url.includes('cloudfront.net') ||
-          event.request.url.includes('supabase.co')
+          url.includes("/logo.png") ||
+          url.includes("/favicon.png") ||
+          url.includes("supabase.co")
         ) {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
@@ -68,6 +102,6 @@ self.addEventListener('fetch', (event) => {
 
         return response;
       });
-    })
+    }),
   );
 });

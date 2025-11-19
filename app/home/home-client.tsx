@@ -1,126 +1,163 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ArtistProfile } from "@/components/artist-profile";
+import { IframePlayer } from "@/components/iframe-player";
+import { useAudioPlayer } from "@/lib/audio-player-context";
+import { soundCloudManager } from "@/lib/soundcloud-widget-manager";
 import type { Database } from "@/lib/types/database.types";
-import { useCachedBands } from "@/hooks/use-cached-bands";
-import { cacheBands } from "@/lib/music-cache";
-import { usePlayer } from "@/lib/player-context";
-import { Play } from "lucide-react";
 
-type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"];
-
-function PlayButton({ item }: { item: HybridizedItem }) {
-  const { play } = usePlayer();
-
-  return (
-    <button
-      onClick={() => play(item)}
-      className="w-full px-6 py-3 bg-[#1DB954] hover:bg-[#1ed760] text-black font-semibold rounded-full transition-all hover:scale-105 flex items-center justify-center gap-2"
-    >
-      <Play className="w-5 h-5" fill="currentColor" />
-      Play Mix
-    </button>
-  );
-}
+type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"] & {
+  episodes?: Database["public"]["Tables"]["episodes"]["Row"][];
+};
 
 interface HomeClientProps {
   items: HybridizedItem[];
-  allBands?: HybridizedItem[];
   currentArtist?: string;
+  artistBio?: string;
+  artistCoverUrl?: string;
+  soundcloudUrl?: string;
+}
+
+// Extend Window interface for SoundCloud Widget API
+declare global {
+  interface Window {
+    SC: {
+      Widget: {
+        (iframe: HTMLIFrameElement): {
+          bind: (event: string, callback: () => void) => void;
+          pause: () => void;
+        };
+      };
+    };
+  }
 }
 
 export function HomeClient({
   items,
-  allBands,
   currentArtist,
+  artistBio,
+  artistCoverUrl,
+  soundcloudUrl,
 }: HomeClientProps) {
-  // Cache the data when component mounts
-  useEffect(() => {
-    if (items.length > 0) {
-      cacheBands(items).catch(console.error);
-    }
-  }, [items]);
+  const { isPlaying, pauseAudio } = useAudioPlayer();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Always use server-provided items (already filtered by artist)
-  const displayItems = items;
+  // Flatten all episodes from all bands
+  const allEpisodes = items.flatMap((band) =>
+    (band.episodes || []).map((episode) => ({
+      ...episode,
+      bandName: band.name,
+      bandCoverUrl: band.cover_url,
+    })),
+  );
+
+  // Get SoundCloud embed URL without visual header
+  const getSoundCloudEmbedUrl = (url: string) => {
+    const encodedUrl = encodeURIComponent(url);
+    return `https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`;
+  };
+
+  // If SoundCloud URL exists and no episodes, show SoundCloud embed only
+  const showSoundCloudOnly = soundcloudUrl && allEpisodes.length === 0;
+
+  // Load SoundCloud Widget API and setup bidirectional pause control
+  useEffect(() => {
+    if (!showSoundCloudOnly || !iframeRef.current) return;
+
+    // Load SoundCloud Widget API
+    const script = document.createElement("script");
+    script.src = "https://w.soundcloud.com/player/api.js";
+    script.async = true;
+
+    script.onload = () => {
+      if (iframeRef.current && window.SC) {
+        const widget = window.SC.Widget(iframeRef.current);
+
+        // Register widget with global manager
+        soundCloudManager.setWidget(widget);
+
+        // Listen for play events from SoundCloud
+        widget.bind("play", () => {
+          // Pause the global audio player when SoundCloud starts playing
+          pauseAudio();
+        });
+      }
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+      soundCloudManager.clearWidget();
+    };
+  }, [showSoundCloudOnly, pauseAudio]);
+
+  // Pause SoundCloud when global audio player starts
+  useEffect(() => {
+    if (isPlaying) {
+      soundCloudManager.pause();
+    }
+  }, [isPlaying]);
 
   return (
-    <main className="flex-1 flex flex-col lg:flex-row gap-6 p-4 md:p-6">
+    <main className="h-full flex flex-col lg:flex-row gap-6 p-4 md:p-6 min-h-0">
       {/* Main Content Panel - 65% */}
-      <div className="w-full lg:w-[65%] space-y-6">
-        {/* Artist Header */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold text-white">
-            {currentArtist || "All Mixes"}
-          </h1>
-          <p className="text-white/50">
-            {displayItems.length} {displayItems.length === 1 ? "playlist" : "playlists"}
-          </p>
-        </div>
+      <div className="w-full lg:w-[65%] flex flex-col min-h-0">
+        {showSoundCloudOnly ? (
+          <div className="relative flex-1 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20 rounded-lg overflow-hidden border border-white/10 shadow-2xl">
+            {/* Decorative gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-blue-500/5 pointer-events-none" />
 
-        {/* Embedded Players Grid */}
-        <div className="space-y-6">
-          {displayItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-[#181818] rounded-xl overflow-hidden border border-white/5 hover:border-white/10 transition-all group"
-            >
-              {/* Mix Info */}
-              <div className="p-6 pb-4">
-                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-[#1DB954] transition-colors">
-                  {item.name || "Untitled Playlist"}
-                </h3>
-                {item.description && (
-                  <p className="text-sm text-white/60 line-clamp-3 mb-4">
-                    {item.description}
-                  </p>
-                )}
+            {/* Iframe container - fills all available space */}
+            <iframe
+              ref={iframeRef}
+              width="100%"
+              height="100%"
+              scrolling="no"
+              frameBorder="no"
+              allow="autoplay"
+              src={getSoundCloudEmbedUrl(soundcloudUrl)}
+              className="w-full h-full relative z-10"
+              title={`${currentArtist} on SoundCloud`}
+            />
 
-                {/* Metadata */}
-                <div className="flex items-center gap-4 text-xs text-white/40">
-                  <span>{new Date(item.created_at).toLocaleDateString()}</span>
-                  {item.formula && <span>• {item.formula}</span>}
-                </div>
+            {/* Bottom gradient fade */}
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-20" />
+          </div>
+        ) : (
+          <div className="space-y-6 overflow-y-auto pr-2">
+            {allEpisodes.map((episode) => (
+              <IframePlayer
+                key={episode.id}
+                episode={episode}
+                artist={currentArtist || "Hybrid"}
+              />
+            ))}
+
+            {allEpisodes.length === 0 && !soundcloudUrl && (
+              <div className="bg-[#181818] rounded-lg p-12 text-center border border-white/5">
+                <p className="text-white/50">
+                  No episodes available for this artist
+                </p>
               </div>
-
-              {/* Embedded Player */}
-              {item.iframe_url && (
-                <div className="bg-black/20">
-                  <iframe
-                    src={item.iframe_url}
-                    width="100%"
-                    height="450"
-                    frameBorder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                    className="w-full"
-                    title={`Player for ${item.name || "playlist"}`}
-                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {displayItems.length === 0 && (
-          <div className="bg-[#181818] rounded-lg p-12 text-center border border-white/5">
-            <p className="text-white/50">No mixes available for this artist</p>
+            )}
           </div>
         )}
-
-        {/* Bottom padding for persistent player */}
-        <div className="h-24" />
       </div>
 
       {/* Sidebar Panel - 35% */}
-      <aside className="w-full lg:w-[35%]">
+      <aside className="w-full lg:w-[35%] overflow-y-auto">
         <ArtistProfile
           artist={{
             name: currentArtist || "Hybrid",
-            bio: displayItems[0]?.description || "No description available",
-            coverUrl: displayItems[0]?.cover_url || undefined,
+            bio:
+              artistBio ||
+              `${currentArtist || "Hybrid"} brings you cutting-edge electronic music with hardware-accelerated audio processing for the ultimate listening experience.`,
+            coverUrl: artistCoverUrl || items[0]?.cover_url || undefined,
           }}
         />
       </aside>

@@ -1,57 +1,79 @@
-'use client'
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 type NavLinkProps = {
-  href: string
-  label: string
-  highlight?: boolean
-  variant?: 'desktop' | 'mobile'
-  onClick?: () => void
-}
+  href: string;
+  label: string;
+  highlight?: boolean;
+  variant?: "desktop" | "mobile";
+  onClick?: () => void;
+};
 
-export function NavLink({ href, label, highlight, variant = 'desktop', onClick }: NavLinkProps) {
-  const pathname = usePathname()
-  const isActive = pathname === href
-  
-  if (variant === 'mobile') {
+export function NavLink({
+  href,
+  label,
+  highlight,
+  variant = "desktop",
+  onClick,
+}: NavLinkProps) {
+  const pathname = usePathname();
+  // Check if we're on the exact page or within the section (e.g., /home or /home/*)
+  const isActive =
+    pathname === href || (href === "/home" && pathname.startsWith("/home"));
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // Prevent navigation if already on this page
+    if (isActive) {
+      e.preventDefault();
+      return;
+    }
+    onClick?.();
+  };
+
+  if (variant === "mobile") {
     return (
       <Link
         href={href}
-        onClick={onClick}
+        onClick={handleClick}
         className={cn(
           "block px-4 py-2 rounded-lg font-medium transition-colors",
-          isActive && "bg-white/5 text-white",
+          isActive && "bg-white/5 text-white cursor-default",
           highlight
             ? "text-green-400 hover:bg-green-400/10"
-            : "text-white/70 hover:bg-white/10 hover:text-white"
+            : "text-white/70 hover:bg-white/10 hover:text-white",
         )}
-        aria-current={isActive ? 'page' : undefined}
+        aria-current={isActive ? "page" : undefined}
+        aria-disabled={isActive}
       >
         {label}
       </Link>
-    )
+    );
   }
-  
+
   return (
-    <Link 
-      href={href} 
+    <Link
+      href={href}
+      onClick={handleClick}
       className={cn(
         "font-semibold text-sm transition-colors relative group",
-        isActive && "text-white",
-        highlight 
-          ? "text-green-400 hover:text-green-300" 
-          : "text-white/70 hover:text-white"
+        isActive && "text-white cursor-default",
+        highlight
+          ? "text-green-400 hover:text-green-300"
+          : "text-white/70 hover:text-white",
       )}
-      aria-current={isActive ? 'page' : undefined}
+      aria-current={isActive ? "page" : undefined}
+      aria-disabled={isActive}
     >
       {label}
-      <span className={cn(
-        "absolute -bottom-1 left-0 h-0.5 bg-green-400 transition-all",
-        isActive ? "w-full" : "w-0 group-hover:w-full"
-      )} />
+      <span
+        className={cn(
+          "absolute -bottom-1 left-0 h-0.5 bg-green-400 transition-all",
+          isActive ? "w-full" : "w-0 group-hover:w-full",
+        )}
+      />
     </Link>
-  )
+  );
 }
