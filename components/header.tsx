@@ -1,33 +1,33 @@
-'use client'
+"use client";
 
-import Link from "next/link"
-import Image from "next/image"
-import { User, Menu } from "lucide-react"
-import { useState, useCallback, Suspense } from "react"
-import { cn } from "@/lib/utils"
-import { SearchBar } from "./search-bar"
-import { MobileMenu } from "./mobile-menu"
-import { NavLink } from "./nav-link"
-import { NAV_LINKS, HEADER_STYLES } from "@/lib/constants/navigation"
+import Link from "next/link";
+import Image from "next/image";
+import { User, Menu } from "lucide-react";
+import { useState, useCallback, Suspense } from "react";
+import { cn } from "@/lib/utils";
+import { SearchBar } from "./search-bar";
+import { MobileMenu } from "./mobile-menu";
+import { NavLink } from "./nav-link";
+import { NAV_LINKS, HEADER_STYLES } from "@/lib/constants/navigation";
 
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const toggleMobileMenu = useCallback(() => {
-    setMobileMenuOpen(prev => !prev)
-  }, [])
-  
+    setMobileMenuOpen((prev) => !prev);
+  }, []);
+
   const closeMobileMenu = useCallback(() => {
-    setMobileMenuOpen(false)
-  }, [])
+    setMobileMenuOpen(false);
+  }, []);
 
   return (
     <header className="bg-[#000000] border-b border-white/5 sticky top-0 z-50 backdrop-blur-md bg-black/95">
       <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-          <Image 
-            src="/logo.png" 
+          <Image
+            src="/logo.png"
             alt="Hybridized Logo"
             title="Hybridized - Home"
             width={40}
@@ -41,7 +41,10 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+        <nav
+          className="hidden md:flex items-center gap-6"
+          aria-label="Main navigation"
+        >
           {NAV_LINKS.map((link) => (
             <NavLink key={link.href} {...link} variant="desktop" />
           ))}
@@ -59,7 +62,7 @@ export function Header() {
           >
             <User className={HEADER_STYLES.icon} />
           </Link>
-          
+
           <button
             onClick={toggleMobileMenu}
             className={cn("md:hidden", HEADER_STYLES.button)}
@@ -71,11 +74,11 @@ export function Header() {
         </div>
       </div>
 
-      <MobileMenu 
-        isOpen={mobileMenuOpen} 
-        onClose={closeMobileMenu} 
-        navLinks={NAV_LINKS} 
+      <MobileMenu
+        isOpen={mobileMenuOpen}
+        onClose={closeMobileMenu}
+        navLinks={NAV_LINKS}
       />
     </header>
-  )
+  );
 }

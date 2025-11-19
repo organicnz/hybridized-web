@@ -1,143 +1,147 @@
-# Supabase Edge Functions
+# Edge Functions Setup
+
+## ✅ JWT Verification Disabled
+
+All functions have `verify_jwt: false` set. This ensures they use custom `FUNCTION_SECRET` authorization instead of the easily-obtained anon key.
+
+**Deployment Script:**
+Use `scripts/deploy-functions.sh` to deploy all functions with the correct settings:
+
+```bash
+./scripts/deploy-functions.sh
+```
+
+Or deploy individually:
+
+```bash
+supabase functions deploy <function-name> --no-verify-jwt
+```
 
 ## Deployed Functions
 
-### 1. sync-profile-data
-**Purpose**: Syncs user profiles with auth.users data
+All edge functions have been deployed to Supabase with custom authorization:
 
-**Schedule**: Every 6 hours
+### Protected Functions (require FUNCTION_SECRET)
 
-**Endpoint**: `https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/sync-profile-data`
+- **sync-firstory** - Syncs RSS feed from Firstory to episodes table
+- **sync-profile-data** - Syncs auth users with profiles table
+- **generate-band-stats** - Generates statistics about bands
 
-**What it does**:
-- Creates missing profiles for auth users
-- Updates existing profiles with latest email
-- Ensures data consistency between auth and profiles
+### Public Functions (no auth required)
 
-**Manual trigger**:
+- **search-bands** - Full-text search for bands
+- **keep-alive-ping** - Health check endpoint
+
+## Setting Up FUNCTION_SECRET
+
+### 1. Generate a Secret
+
 ```bash
-curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/sync-profile-data \
-  -H "Authorization: Bearer YOUR_ANON_KEY"
+# Generate a secure random secret
+openssl rand -base64 32
 ```
 
----
+### 2. Add to Supabase Dashboard
 
-### 2. search-bands
-**Purpose**: Advanced full-text search for bands
+1. Go to your Supabase project dashboard
+2. Navigate to **Edge Functions** > **Secrets**
+3. Add a new secret:
+   - Name: `FUNCTION_SECRET`
+   - Value: Your generated secret
 
-**Endpoint**: `https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/search-bands?q=rock&limit=10`
+### 3. Add to Local Environment
 
-**Parameters**:
-- `q` (required): Search query
-- `limit` (optional): Max results (default: 10)
+Add to your `.env` file:
 
-**What it does**:
-- Uses PostgreSQL full-text search with ranking
-- Searches across name, description, and formula
-- Returns results sorted by relevance
+```env
+FUNCTION_SECRET=your-generated-secret-here
+```
 
-**Usage example**:
+## Calling Protected Functions
+
+### From Next.js API Routes
+
 ```typescript
 const response = await fetch(
-  `https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/search-bands?q=jazz&limit=20`,
+  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/sync-firstory`,
   {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
-    }
-  }
+      Authorization: `Bearer ${process.env.FUNCTION_SECRET}`,
+      "Content-Type": "application/json",
+    },
+  },
 );
-const { results, count } = await response.json();
 ```
 
----
+### From Command Line
 
-### 3. generate-band-stats
-**Purpose**: Generates platform statistics
-
-**Schedule**: Every hour
-
-**Endpoint**: `https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/generate-band-stats`
-
-**What it does**:
-- Counts total bands
-- Tracks bands with formulas
-- Tracks bands with media
-- Calculates recent activity (last 7 days)
-- Computes completion rate
-
-**Response example**:
-```json
-{
-  "totalBands": 23,
-  "bandsWithFormulas": 18,
-  "bandsWithMedia": 15,
-  "recentBands": 3,
-  "completionRate": "78.3",
-  "timestamp": "2025-11-18T12:00:00.000Z"
-}
-```
-
----
-
-## Cron Jobs
-
-Active cron jobs managed by `pg_cron` extension:
-
-| Job Name | Schedule | Function | Description |
-|----------|----------|----------|-------------|
-| sync-profiles-every-6h | `0 */6 * * *` | sync-profile-data | Every 6 hours |
-| generate-stats-hourly | `0 * * * *` | generate-band-stats | Every hour |
-
-### View Cron Jobs
-```sql
-SELECT * FROM cron.job;
-```
-
-### View Cron Job History
-```sql
-SELECT * FROM cron.job_run_details 
-ORDER BY start_time DESC 
-LIMIT 10;
-```
-
-### Unschedule a Job
-```sql
-SELECT cron.unschedule('cleanup-old-bands-daily');
-```
-
----
-
-## Database Function
-
-### search_bands(search_query TEXT)
-
-SQL function that powers the search-bands edge function:
-
-```sql
-SELECT * FROM search_bands('rock music');
-```
-
-Returns bands ranked by relevance using PostgreSQL's full-text search capabilities.
-
----
-
-## Environment Variables Required
-
-Edge functions need these environment variables (auto-configured in Supabase):
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-
----
-
-## Testing Edge Functions
-
-Test locally using Supabase CLI:
 ```bash
-supabase functions serve search-bands --env-file .env
+curl -X POST \
+  https://your-project.supabase.co/functions/v1/sync-firstory \
+  -H "Authorization: Bearer YOUR_FUNCTION_SECRET"
 ```
 
-Test deployed functions:
+## Function Details
+
+### sync-firstory
+
+- **Method**: POST
+- **Auth**: Required
+- **Purpose**: Fetches RSS feed and syncs episodes with band matching
+- **Returns**: Sync statistics (created, updated, matched, errors)
+
+### sync-profile-data
+
+- **Method**: Any
+- **Auth**: Required
+- **Purpose**: Syncs auth.users with profiles table
+- **Returns**: Sync statistics (created, synced)
+
+### generate-band-stats
+
+- **Method**: Any
+- **Auth**: Required
+- **Purpose**: Generates band statistics
+- **Returns**: Stats object (totalBands, bandsWithFormulas, etc.)
+
+### search-bands
+
+- **Method**: GET
+- **Auth**: None (public)
+- **Query Params**: `q` (required), `limit` (optional, default 10)
+- **Purpose**: Search bands by name, description, or formula
+- **Returns**: Search results array
+
+### keep-alive-ping
+
+- **Method**: Any
+- **Auth**: None (public)
+- **Purpose**: Health check for keeping functions warm
+- **Returns**: Timestamp message
+
+## Deployment Status
+
+All functions deployed successfully:
+
+- ✅ sync-profile-data (v2)
+- ✅ generate-band-stats (v2)
+- ✅ search-bands (v2)
+- ✅ keep-alive-ping (v2)
+- ⚠️ sync-firstory (needs manual deployment via CLI)
+
+## Deployment
+
+**Deploy all functions (recommended):**
+
 ```bash
-supabase functions invoke search-bands --body '{"q":"jazz"}'
+./scripts/deploy-functions.sh
 ```
+
+**Deploy individual function:**
+
+```bash
+supabase functions deploy <function-name> --no-verify-jwt
+```
+
+**Important:** Always use the `--no-verify-jwt` flag to ensure custom authorization is used.

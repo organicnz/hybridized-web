@@ -21,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -38,19 +38,19 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
-      <Link 
-        href="/home" 
+      <Link
+        href="/home"
         className="fixed top-6 left-6 flex items-center gap-2 text-purple-200/70 hover:text-white transition-colors group"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
         <span className="font-medium">Back to Home</span>
       </Link>
-      
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
-            <Image 
-              src="/logo.png" 
+            <Image
+              src="/logo.png"
               alt="Hybridized Logo"
               width={48}
               height={48}
@@ -68,17 +68,31 @@ export default function LoginPage() {
 
         <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8">
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3" role="alert">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <div
+              className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3"
+              role="alert"
+            >
+              <AlertCircle
+                className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"
+                aria-hidden="true"
+              />
               <p className="text-red-200 text-sm">{error}</p>
             </div>
           )}
-          
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-white font-medium mb-2">Email</label>
+              <label
+                htmlFor="email"
+                className="block text-white font-medium mb-2"
+              >
+                Email
+              </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" aria-hidden="true" />
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50"
+                  aria-hidden="true"
+                />
                 <input
                   id="email"
                   type="email"
@@ -93,9 +107,17 @@ export default function LoginPage() {
               </div>
             </div>
             <div>
-              <label htmlFor="password" className="block text-white font-medium mb-2">Password</label>
+              <label
+                htmlFor="password"
+                className="block text-white font-medium mb-2"
+              >
+                Password
+              </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" aria-hidden="true" />
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50"
+                  aria-hidden="true"
+                />
                 <input
                   id="password"
                   type="password"
@@ -119,7 +141,10 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link href="/auth/forgot-password" className="text-sm text-purple-200/70 hover:text-white hover:underline transition-colors">
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm text-purple-200/70 hover:text-white hover:underline transition-colors"
+            >
               Forgot password?
             </Link>
           </div>
@@ -127,7 +152,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-purple-200/50 mt-6">
           Don't have an account?{" "}
-          <Link href="/auth/signup" className="text-purple-400 hover:text-pink-400 hover:underline font-semibold transition-colors">
+          <Link
+            href="/auth/signup"
+            className="text-purple-400 hover:text-pink-400 hover:underline font-semibold transition-colors"
+          >
             Sign up
           </Link>
         </p>
