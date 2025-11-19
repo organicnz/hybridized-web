@@ -121,6 +121,36 @@ export type Database = {
           },
         ];
       };
+      equalizer_settings: {
+        Row: {
+          created_at: string | null;
+          gains: Json;
+          id: string;
+          is_active: boolean;
+          preset_name: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          gains?: Json;
+          id?: string;
+          is_active?: boolean;
+          preset_name?: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          gains?: Json;
+          id?: string;
+          is_active?: boolean;
+          preset_name?: string;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           admin: boolean | null;

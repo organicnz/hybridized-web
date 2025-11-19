@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { SearchResults } from "./search-results";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: Promise<{ q?: string }>;
 }) {
-  const query = searchParams.q || "";
+  const params = await searchParams;
+  const query = params.q || "";
   const supabase = await createClient();
 
   let results = [];
@@ -14,19 +17,54 @@ export default async function SearchPage({
 
   if (query.trim()) {
     const { data, error: fetchError } = await supabase
-      .from("hybridized")
-      .select("*")
-      .or(
-        `name.ilike.%${query}%,description.ilike.%${query}%,formula.ilike.%${query}%`,
+      .from("episodes")
+      .select(
+        `
+        *,
+        bands:band_id (
+          id,
+          name,
+          cover_url,
+          firstory_user_id
+        )
+      `,
       )
-      .order("created_at", { ascending: false });
+      .order("pub_date", { ascending: false });
 
-    results = data || [];
+    // Filter results to match query in episode title, description, creator, or band name
+    // Also filter out episodes from bands with firstory_user_id starting with 'reco'
+    const searchLower = query.toLowerCase();
+    results = (data || []).filter((episode: any) => {
+      // Skip if band has firstory_user_id starting with 'reco'
+      if (episode.bands?.firstory_user_id?.startsWith("reco")) {
+        return false;
+      }
+
+      // Check if query matches episode fields or band name
+      const matchesEpisode =
+        episode.title?.toLowerCase().includes(searchLower) ||
+        episode.description?.toLowerCase().includes(searchLower) ||
+        episode.creator?.toLowerCase().includes(searchLower);
+
+      const matchesBand = episode.bands?.name
+        ?.toLowerCase()
+        .includes(searchLower);
+
+      return matchesEpisode || matchesBand;
+    });
     error = fetchError;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900">
+      <Link
+        href="/home"
+        className="fixed top-6 left-6 flex items-center gap-2 text-purple-200/70 hover:text-white transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="font-medium">Back to Home</span>
+      </Link>
+
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
