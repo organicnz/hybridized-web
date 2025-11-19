@@ -63,14 +63,16 @@ export default function ContactPage() {
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="bg-zinc-900/50 backdrop-blur-sm rounded-lg border border-white/10 p-3">
               <MessageSquare className="w-6 h-6 text-green-400 mb-2" />
-              <h3 className="text-white text-sm font-semibold mb-1">Chat with us</h3>
-              <p className="text-white/70 text-xs">
-                Respond within 24h
-              </p>
+              <h3 className="text-white text-sm font-semibold mb-1">
+                Chat with us
+              </h3>
+              <p className="text-white/70 text-xs">Respond within 24h</p>
             </div>
             <div className="bg-zinc-900/50 backdrop-blur-sm rounded-lg border border-white/10 p-3">
               <Mail className="w-6 h-6 text-green-400 mb-2" />
-              <h3 className="text-white text-sm font-semibold mb-1">Email us</h3>
+              <h3 className="text-white text-sm font-semibold mb-1">
+                Email us
+              </h3>
               <p className="text-white/70 text-xs">hello@hybridized.com</p>
             </div>
           </div>
