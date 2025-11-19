@@ -23,14 +23,14 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: '/',
+        source: "/",
         has: [
           {
-            type: 'host',
-            value: 'www.hybridized.online',
+            type: "host",
+            value: "www.hybridized.online",
           },
         ],
-        destination: 'https://hybridized.online',
+        destination: "https://hybridized.online",
         permanent: true,
       },
     ];

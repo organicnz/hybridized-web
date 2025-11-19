@@ -150,7 +150,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setCurrentTime(0);
     setShouldAutoPlay(true);
     setIsPlaying(true);
-    
+
     // Reset autoPlay flag after a short delay to prevent re-triggering
     setTimeout(() => setShouldAutoPlay(false), 100);
   };
@@ -164,7 +164,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       setCurrentTime(0);
       setShouldAutoPlay(true);
       setIsPlaying(true);
-      
+
       // Reset autoPlay flag after a short delay to prevent re-triggering
       setTimeout(() => setShouldAutoPlay(false), 100);
     }
@@ -177,7 +177,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setCurrentTrackState(playlist[nextIndex]);
     setCurrentTime(0);
     setShouldAutoPlay(true);
-    
+
     // Reset autoPlay flag after a short delay to prevent re-triggering
     setTimeout(() => setShouldAutoPlay(false), 100);
   };
@@ -190,7 +190,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setCurrentTrackState(playlist[prevIndex]);
     setCurrentTime(0);
     setShouldAutoPlay(true);
-    
+
     // Reset autoPlay flag after a short delay to prevent re-triggering
     setTimeout(() => setShouldAutoPlay(false), 100);
   };
@@ -215,18 +215,16 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
         const volumePercent = Math.round(vol * 100); // Convert from 0-1 to 0-100
 
-        const { error } = await supabase
-          .from("settings")
-          .upsert(
-            {
-              user_id: user.id,
-              volume_settings: { master: volumePercent },
-              updated_at: new Date().toISOString(),
-            },
-            {
-              onConflict: "user_id",
-            },
-          );
+        const { error } = await supabase.from("settings").upsert(
+          {
+            user_id: user.id,
+            volume_settings: { master: volumePercent },
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: "user_id",
+          },
+        );
 
         if (error) {
           console.error("Error saving volume settings:", error);

@@ -145,7 +145,7 @@ export function CustomAudioPlayer({
 
     console.log("Attempting autoplay for:", audio.src);
     const playPromise = audio.play();
-    
+
     if (playPromise !== undefined) {
       playPromise.catch((error) => {
         console.error("Autoplay failed:", error);
