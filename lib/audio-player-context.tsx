@@ -24,6 +24,7 @@ interface AudioPlayerContextType {
   isPlaying: boolean;
   currentTime: number;
   shouldAutoPlay: boolean;
+  volume: number;
   audioRef: React.RefObject<HTMLAudioElement | null> | null;
   setCurrentTrack: (track: Track | null) => void;
   setPlaylist: (tracks: Track[], startIndex?: number) => void;
@@ -33,6 +34,7 @@ interface AudioPlayerContextType {
   playPrevious: () => void;
   setIsPlaying: (playing: boolean) => void;
   setCurrentTime: (time: number) => void;
+  setVolume: (volume: number) => void;
   pauseAudio: () => void;
 }
 
@@ -48,6 +50,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolumeState] = useState(0.7);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -63,6 +66,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
           setPlaylistState(state.playlist || []);
           setCurrentIndex(state.currentIndex || 0);
           setCurrentTime(state.currentTime || 0);
+          setVolumeState(state.volume ?? 0.7);
           // Don't autoplay on page load
           setShouldAutoPlay(false);
         }
@@ -83,13 +87,14 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         playlist,
         currentIndex,
         currentTime,
+        volume,
         isPlaying: false, // Always restore as paused on page load
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
       console.error("Failed to save audio state:", error);
     }
-  }, [currentTrack, playlist, currentIndex, currentTime, isHydrated]);
+  }, [currentTrack, playlist, currentIndex, currentTime, volume, isHydrated]);
 
   const setCurrentTrack = (track: Track | null) => {
     setCurrentTrackState(track);
@@ -109,7 +114,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   };
 
   // Play a single track immediately
-  const playTrack = (track: Track) => {
+  const playTrack = async (track: Track) => {
     setCurrentTrackState(track);
     setPlaylistState([track]);
     setCurrentIndex(0);
@@ -119,7 +124,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   };
 
   // Play a playlist immediately
-  const playPlaylist = (tracks: Track[], startIndex: number = 0) => {
+  const playPlaylist = async (tracks: Track[], startIndex: number = 0) => {
     setPlaylistState(tracks);
     setCurrentIndex(startIndex);
     if (tracks.length > 0 && startIndex < tracks.length) {
@@ -149,6 +154,13 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setShouldAutoPlay(true);
   };
 
+  const setVolume = (vol: number) => {
+    setVolumeState(vol);
+    if (audioRef.current) {
+      audioRef.current.volume = vol;
+    }
+  };
+
   const pauseAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -164,6 +176,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         currentIndex,
         isPlaying,
         currentTime,
+        volume,
         shouldAutoPlay,
         audioRef,
         setCurrentTrack,
@@ -174,6 +187,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         playPrevious,
         setIsPlaying,
         setCurrentTime,
+        setVolume,
         pauseAudio,
       }}
     >

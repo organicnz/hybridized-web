@@ -86,7 +86,7 @@ export default function AboutPage() {
 
             <div className="text-center pt-8">
               <div className="inline-flex items-center gap-2 text-white/50">
-                <span>Made with</span>
+                <span>Made in California with</span>
                 <Heart className="w-5 h-5 text-green-400" />
                 <span>for music lovers everywhere</span>
               </div>

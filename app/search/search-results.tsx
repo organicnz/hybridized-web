@@ -1,22 +1,29 @@
 "use client";
 
-import { Music } from "lucide-react";
+import { Music, Play } from "lucide-react";
 import Image from "next/image";
+import { IframePlayer } from "@/components/iframe-player";
 
-type Hybrid = {
+type Episode = {
   id: number;
-  name: string;
-  description: string;
-  formula: string;
+  title: string;
+  description?: string;
+  audio_url: string;
   cover_url?: string;
-  iframe_url?: string;
+  creator?: string;
+  pub_date?: string;
+  bands?: {
+    id: number;
+    name: string;
+    cover_url?: string;
+  };
 };
 
 export function SearchResults({
   results,
   query,
 }: {
-  results: Hybrid[];
+  results: Episode[];
   query: string;
 }) {
   if (results.length === 0) {
@@ -34,60 +41,55 @@ export function SearchResults({
   return (
     <div className="space-y-6">
       <p className="text-white/60 mb-4">
-        Found {results.length} {results.length === 1 ? "result" : "results"}
+        Found {results.length} {results.length === 1 ? "episode" : "episodes"}
       </p>
 
-      <div className="grid gap-6">
-        {results.map((hybrid) => (
-          <div
-            key={hybrid.id}
-            className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 hover:bg-white/10 transition-colors"
-          >
-            <div className="flex gap-6">
-              {hybrid.cover_url && (
-                <div className="flex-shrink-0">
-                  <Image
-                    src={hybrid.cover_url}
-                    alt={hybrid.name}
-                    width={120}
-                    height={120}
-                    className="rounded-lg object-cover"
-                  />
-                </div>
-              )}
+      <div className="grid gap-4">
+        {results.map((episode) => {
+          const coverUrl = episode.cover_url || episode.bands?.cover_url;
+          const artistName =
+            episode.bands?.name || episode.creator || "Unknown Artist";
 
-              <div className="flex-1 min-w-0">
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {hybrid.name}
-                </h3>
-
-                {hybrid.formula && (
-                  <p className="text-purple-400 font-mono text-sm mb-3">
-                    {hybrid.formula}
-                  </p>
-                )}
-
-                {hybrid.description && (
-                  <p className="text-white/70 mb-4">{hybrid.description}</p>
-                )}
-
-                {hybrid.iframe_url && (
-                  <div className="mt-4">
-                    <iframe
-                      src={hybrid.iframe_url}
-                      width="100%"
-                      height="152"
-                      frameBorder="0"
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      loading="lazy"
-                      className="rounded-lg"
+          return (
+            <div
+              key={episode.id}
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden hover:bg-white/10 transition-colors"
+            >
+              <div className="flex items-center gap-4 p-4">
+                {coverUrl && (
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={coverUrl}
+                      alt={episode.title}
+                      width={80}
+                      height={80}
+                      className="rounded-lg object-cover"
                     />
                   </div>
                 )}
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-white mb-1 truncate">
+                    {episode.title}
+                  </h3>
+                  <p className="text-sm text-white/60 mb-2">{artistName}</p>
+                  {episode.description && (
+                    <p className="text-sm text-white/50 line-clamp-2">
+                      {episode.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex-shrink-0">
+                  <IframePlayer
+                    episode={episode as any}
+                    artist={artistName}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
