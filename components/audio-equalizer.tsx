@@ -84,10 +84,9 @@ export function AudioEqualizer({
         if (!user) return;
 
         const { data, error } = await supabase
-          .from("equalizer_settings")
+          .from("settings")
           .select("*")
           .eq("user_id", user.id)
-          .eq("is_active", true)
           .single();
 
         if (error) {
@@ -97,8 +96,8 @@ export function AudioEqualizer({
 
         if (data && Array.isArray(data.gains)) {
           setGains(data.gains);
-          setCurrentPreset(data.preset_name);
-          console.log("Loaded equalizer settings:", data.preset_name);
+          setCurrentPreset("Custom");
+          console.log("Loaded equalizer settings");
         }
       } catch (error) {
         console.error("Error loading equalizer settings:", error);
@@ -199,7 +198,7 @@ export function AudioEqualizer({
     return () => clearTimeout(timer);
   }, [audioRef.current, isInitialized, gains]);
 
-  const saveSettings = async (newGains: number[], presetName: string) => {
+  const saveSettings = async (newGains: number[]) => {
     try {
       const {
         data: { user },
@@ -208,19 +207,19 @@ export function AudioEqualizer({
 
       setIsSaving(true);
 
-      // Deactivate all existing settings
-      await supabase
-        .from("equalizer_settings")
-        .update({ is_active: false })
-        .eq("user_id", user.id);
-
-      // Insert new active settings
-      const { error } = await supabase.from("equalizer_settings").insert({
-        user_id: user.id,
-        preset_name: presetName,
-        gains: newGains,
-        is_active: true,
-      });
+      // Upsert settings (insert or update if exists)
+      const { error } = await supabase
+        .from("settings")
+        .upsert(
+          {
+            user_id: user.id,
+            gains: newGains,
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: "user_id",
+          },
+        );
 
       if (error) {
         console.error("Error saving equalizer settings:", error);
@@ -245,7 +244,7 @@ export function AudioEqualizer({
     }
 
     // Auto-save after a short delay
-    saveSettings(newGains, "Custom");
+    saveSettings(newGains);
   };
 
   const applyPreset = (presetName: string) => {
@@ -260,7 +259,7 @@ export function AudioEqualizer({
     });
 
     // Save preset to database
-    saveSettings(presetGains, presetName);
+    saveSettings(presetGains);
   };
 
   const resetEqualizer = () => {

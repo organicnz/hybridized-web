@@ -7,25 +7,33 @@ GPU acceleration has been implemented across the codebase to improve rendering p
 ## Available Utility Classes
 
 ### `.gpu`
+
 Use for elements with transforms, scales, or position animations:
+
 ```tsx
 <div className="hover:scale-105 transition-transform gpu">
 ```
 
 ### `.gpu-opacity`
+
 Use for elements with opacity transitions or fade effects:
+
 ```tsx
 <div className="opacity-0 hover:opacity-100 transition-opacity gpu-opacity">
 ```
 
 ### `.gpu-filter`
+
 Use for elements with backdrop-blur or filter effects:
+
 ```tsx
 <div className="backdrop-blur-md gpu-filter">
 ```
 
 ### `.smooth-scroll`
+
 Use for scrollable containers on mobile:
+
 ```tsx
 <div className="overflow-auto smooth-scroll">
 ```
@@ -33,6 +41,7 @@ Use for scrollable containers on mobile:
 ## Automatic Optimization
 
 The following classes are automatically GPU-accelerated:
+
 - All `transform` classes
 - All `transition` classes
 - All `animate-` classes
@@ -44,6 +53,7 @@ The following classes are automatically GPU-accelerated:
 ## When to Use Explicit Classes
 
 Add explicit GPU classes when:
+
 1. **Complex hover effects** - Multiple properties changing simultaneously
 2. **Nested animations** - Parent and child elements both animating
 3. **High-frequency updates** - Elements that change rapidly
@@ -53,21 +63,25 @@ Add explicit GPU classes when:
 ## Implementation Examples
 
 ### Header with Sticky Position
+
 ```tsx
 <header className="sticky top-0 backdrop-blur-md gpu-filter">
 ```
 
 ### Image with Hover Scale
+
 ```tsx
 <img className="group-hover:scale-110 transition-transform gpu" />
 ```
 
 ### Dropdown Menu
+
 ```tsx
 <div className="opacity-0 group-hover:opacity-100 transition-opacity gpu-opacity">
 ```
 
 ### Play Button with Scale
+
 ```tsx
 <button className="hover:scale-110 transition-all gpu">
 ```
@@ -83,6 +97,7 @@ Add explicit GPU classes when:
 ## Browser Support
 
 All GPU acceleration techniques are supported in:
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
@@ -91,6 +106,7 @@ All GPU acceleration techniques are supported in:
 ## Troubleshooting
 
 If you see performance issues:
+
 1. Check for too many animated elements on screen
 2. Reduce backdrop-blur intensity if needed
 3. Use `will-change` sparingly (already included in utility classes)

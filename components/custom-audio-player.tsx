@@ -75,11 +75,10 @@ export function CustomAudioPlayer({
     }
   }, [volume]);
 
+  // Separate effect for event listeners
   useEffect(() => {
     const audio = internalAudioRef.current;
     if (!audio) return;
-
-    audio.volume = volume;
 
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
@@ -129,14 +128,6 @@ export function CustomAudioPlayer({
     audio.addEventListener("pause", handlePause);
     audio.addEventListener("error", handleError);
 
-    if (autoPlay) {
-      console.log("Attempting autoplay for:", audio.src);
-      audio.play().catch((error) => {
-        console.error("Autoplay failed:", error);
-        setIsPlaying(false);
-      });
-    }
-
     return () => {
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -145,7 +136,23 @@ export function CustomAudioPlayer({
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("error", handleError);
     };
-  }, [src, autoPlay, initialTime]);
+  }, [src, initialTime, onTimeUpdate, onEnded, onPlay, onPause]);
+
+  // Separate effect for autoplay - only runs when src changes
+  useEffect(() => {
+    const audio = internalAudioRef.current;
+    if (!audio || !autoPlay) return;
+
+    console.log("Attempting autoplay for:", audio.src);
+    const playPromise = audio.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        console.error("Autoplay failed:", error);
+        setIsPlaying(false);
+      });
+    }
+  }, [src]); // Only depend on src, not autoPlay
 
   const togglePlay = () => {
     const audio = internalAudioRef.current;

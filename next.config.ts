@@ -20,6 +20,21 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'www.hybridized.online',
+          },
+        ],
+        destination: 'https://hybridized.online',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

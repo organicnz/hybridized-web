@@ -58,7 +58,7 @@
 - ✅ RLS policies properly configured on profiles table
 - ✅ Auto-profile creation trigger working (`handle_new_user`)
 - ⚠️ Minor security advisories (OTP expiry, leaked password protection)
-- ⚠️ Performance optimization needed for equalizer_settings RLS
+- ⚠️ Performance optimization needed for settings RLS
 
 ## Testing Checklist
 
