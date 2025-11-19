@@ -10,15 +10,15 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
-  
+
   .gpu-opacity {
     will-change: opacity;
   }
-  
+
   .gpu-filter {
     will-change: filter, backdrop-filter;
   }
-  
+
   .smooth-scroll {
     -webkit-overflow-scrolling: touch;
   }

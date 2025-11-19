@@ -8,6 +8,7 @@ import {
   useRef,
   ReactNode,
 } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export interface Track {
   id: string;
@@ -54,27 +55,55 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const supabase = createClient();
+  const volumeSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load state from localStorage on mount
+  // Load state from localStorage and database on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const state = JSON.parse(saved);
-        if (state.currentTrack) {
-          setCurrentTrackState(state.currentTrack);
-          setPlaylistState(state.playlist || []);
-          setCurrentIndex(state.currentIndex || 0);
-          setCurrentTime(state.currentTime || 0);
-          setVolumeState(state.volume ?? 0.7);
-          // Don't autoplay on page load
-          setShouldAutoPlay(false);
+    const loadState = async () => {
+      try {
+        // Load from localStorage first
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const state = JSON.parse(saved);
+          if (state.currentTrack) {
+            setCurrentTrackState(state.currentTrack);
+            setPlaylistState(state.playlist || []);
+            setCurrentIndex(state.currentIndex || 0);
+            setCurrentTime(state.currentTime || 0);
+            setVolumeState(state.volume ?? 0.7);
+            // Don't autoplay on page load
+            setShouldAutoPlay(false);
+          }
         }
+
+        // Load volume from database if user is authenticated
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase
+            .from("settings")
+            .select("volume_settings")
+            .eq("user_id", user.id)
+            .single();
+
+          if (!error && data?.volume_settings) {
+            const volumeSettings = data.volume_settings as { master?: number };
+            if (typeof volumeSettings.master === "number") {
+              const dbVolume = volumeSettings.master / 100; // Convert from 0-100 to 0-1
+              setVolumeState(dbVolume);
+              console.log("Loaded volume from database:", dbVolume);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load audio state:", error);
       }
-    } catch (error) {
-      console.error("Failed to load audio state:", error);
-    }
-    setIsHydrated(true);
+      setIsHydrated(true);
+    };
+
+    loadState();
   }, []);
 
   // Save state to localStorage whenever it changes
@@ -121,6 +150,9 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setCurrentTime(0);
     setShouldAutoPlay(true);
     setIsPlaying(true);
+    
+    // Reset autoPlay flag after a short delay to prevent re-triggering
+    setTimeout(() => setShouldAutoPlay(false), 100);
   };
 
   // Play a playlist immediately
@@ -132,6 +164,9 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       setCurrentTime(0);
       setShouldAutoPlay(true);
       setIsPlaying(true);
+      
+      // Reset autoPlay flag after a short delay to prevent re-triggering
+      setTimeout(() => setShouldAutoPlay(false), 100);
     }
   };
 
@@ -142,6 +177,9 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setCurrentTrackState(playlist[nextIndex]);
     setCurrentTime(0);
     setShouldAutoPlay(true);
+    
+    // Reset autoPlay flag after a short delay to prevent re-triggering
+    setTimeout(() => setShouldAutoPlay(false), 100);
   };
 
   const playPrevious = () => {
@@ -152,6 +190,9 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setCurrentTrackState(playlist[prevIndex]);
     setCurrentTime(0);
     setShouldAutoPlay(true);
+    
+    // Reset autoPlay flag after a short delay to prevent re-triggering
+    setTimeout(() => setShouldAutoPlay(false), 100);
   };
 
   const setVolume = (vol: number) => {
@@ -159,6 +200,43 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     if (audioRef.current) {
       audioRef.current.volume = vol;
     }
+
+    // Debounce database save
+    if (volumeSaveTimeoutRef.current) {
+      clearTimeout(volumeSaveTimeoutRef.current);
+    }
+
+    volumeSaveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const volumePercent = Math.round(vol * 100); // Convert from 0-1 to 0-100
+
+        const { error } = await supabase
+          .from("settings")
+          .upsert(
+            {
+              user_id: user.id,
+              volume_settings: { master: volumePercent },
+              updated_at: new Date().toISOString(),
+            },
+            {
+              onConflict: "user_id",
+            },
+          );
+
+        if (error) {
+          console.error("Error saving volume settings:", error);
+        } else {
+          console.log("Volume settings saved:", volumePercent);
+        }
+      } catch (error) {
+        console.error("Error saving volume settings:", error);
+      }
+    }, 500); // Save after 500ms of no changes
   };
 
   const pauseAudio = () => {

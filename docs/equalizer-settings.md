@@ -6,9 +6,9 @@ The audio player now includes persistent equalizer settings that are automatical
 
 ## Database Schema
 
-### Table: `equalizer_settings`
+### Table: `settings`
 
-Stores user-specific equalizer configurations with the following columns:
+Stores user-specific settings including equalizer and volume configurations with the following columns:
 
 - `id` (uuid): Primary key
 - `user_id` (uuid): References auth.users, links settings to user account
