@@ -1,6 +1,17 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-[#121212]">
+      <Link
+        href="/home"
+        className="fixed top-6 left-6 flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="font-medium">Back to Home</span>
+      </Link>
+
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="bg-zinc-900/50 backdrop-blur-sm border border-white/10 rounded-lg p-8 md:p-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
