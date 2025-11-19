@@ -208,18 +208,16 @@ export function AudioEqualizer({
       setIsSaving(true);
 
       // Upsert settings (insert or update if exists)
-      const { error } = await supabase
-        .from("settings")
-        .upsert(
-          {
-            user_id: user.id,
-            gains: newGains,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            onConflict: "user_id",
-          },
-        );
+      const { error } = await supabase.from("settings").upsert(
+        {
+          user_id: user.id,
+          gains: newGains,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "user_id",
+        },
+      );
 
       if (error) {
         console.error("Error saving equalizer settings:", error);
