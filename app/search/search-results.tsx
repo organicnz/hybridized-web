@@ -81,10 +81,7 @@ export function SearchResults({
                 </div>
 
                 <div className="flex-shrink-0">
-                  <IframePlayer
-                    episode={episode as any}
-                    artist={artistName}
-                  />
+                  <IframePlayer episode={episode as any} artist={artistName} />
                 </div>
               </div>
             </div>
