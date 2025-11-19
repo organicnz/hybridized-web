@@ -32,7 +32,7 @@ export function Header() {
             title="Hybridized - Home"
             width={40}
             height={40}
-            className="w-10 h-10 md:w-12 md:h-12 rounded-lg group-hover:scale-105 transition-transform"
+            className="w-10 h-10 md:w-12 md:h-12 rounded-full group-hover:scale-105 transition-transform"
             priority
           />
           <span className="text-xl md:text-2xl font-bold text-white group-hover:text-[#1DB954] transition-colors">
