@@ -10,7 +10,7 @@ export async function compressImage(
   file: File,
   maxWidth = 800,
   maxHeight = 800,
-  quality = 0.8
+  quality = 0.8,
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -58,7 +58,7 @@ export async function compressImage(
             }
           },
           "image/jpeg",
-          quality
+          quality,
         );
       };
 
@@ -77,10 +77,7 @@ export async function compressImage(
  * @param maxSizeMB - Maximum file size in MB (default: 5)
  * @returns Error message if invalid, null if valid
  */
-export function validateImageFile(
-  file: File,
-  maxSizeMB = 5
-): string | null {
+export function validateImageFile(file: File, maxSizeMB = 5): string | null {
   const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
   if (!validTypes.includes(file.type)) {

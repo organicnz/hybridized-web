@@ -43,7 +43,7 @@ export default function LoginPage() {
       // Get redirect URL from query params or use default
       const params = new URLSearchParams(window.location.search);
       const redirectTo = params.get("redirectTo") || REDIRECT_AFTER_LOGIN;
-      
+
       // Force a hard refresh to ensure session is properly loaded
       window.location.href = redirectTo;
     }
