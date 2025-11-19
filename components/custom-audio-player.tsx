@@ -64,9 +64,9 @@ export function CustomAudioPlayer({
   useEffect(() => {
     if (internalAudioRef.current) {
       audioRef.current = internalAudioRef.current;
-      console.log("Audio element set:", internalAudioRef.current);
+      console.log("Audio element set:", internalAudioRef.current, "src:", src);
     }
-  }, [audioRef]);
+  }, [audioRef, src]);
 
   // Update volume when it changes
   useEffect(() => {
@@ -100,13 +100,19 @@ export function CustomAudioPlayer({
     };
 
     const handlePlay = () => {
+      console.log("✅ Audio PLAY event:", audio.src);
       setIsPlaying(true);
       onPlay?.();
     };
 
     const handlePause = () => {
+      console.log("⏸️ Audio PAUSE event:", audio.src);
       setIsPlaying(false);
       onPause?.();
+    };
+
+    const handleError = (e: Event) => {
+      console.error("❌ Audio ERROR:", e, "src:", audio.src, "error:", (e.target as HTMLAudioElement).error);
     };
 
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -114,8 +120,10 @@ export function CustomAudioPlayer({
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
+    audio.addEventListener("error", handleError);
 
     if (autoPlay) {
+      console.log("Attempting autoplay for:", audio.src);
       audio.play().catch((error) => {
         console.error("Autoplay failed:", error);
         setIsPlaying(false);
@@ -128,12 +136,18 @@ export function CustomAudioPlayer({
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("error", handleError);
     };
   }, [src, autoPlay, initialTime]);
 
   const togglePlay = () => {
     const audio = internalAudioRef.current;
-    if (!audio) return;
+    if (!audio) {
+      console.error("No audio element available");
+      return;
+    }
+
+    console.log("Toggle play - isPlaying:", isPlaying, "audio src:", audio.src);
 
     if (isPlaying) {
       audio.pause();
@@ -184,8 +198,9 @@ export function CustomAudioPlayer({
       <audio
         ref={internalAudioRef}
         src={src}
-        preload="metadata"
+        preload="auto"
         crossOrigin="anonymous"
+        playsInline
       />
 
       {/* Controls */}

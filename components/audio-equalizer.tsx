@@ -108,6 +108,23 @@ export function AudioEqualizer({
     loadSettings();
   }, []);
 
+  // Resume audio context when play is attempted
+  useEffect(() => {
+    if (!audioContext || !audioRef.current) return;
+
+    const handlePlay = () => {
+      if (audioContext.state === "suspended") {
+        console.log("Resuming audio context on play...");
+        audioContext.resume();
+      }
+    };
+
+    audioRef.current.addEventListener("play", handlePlay);
+    return () => {
+      audioRef.current?.removeEventListener("play", handlePlay);
+    };
+  }, [audioContext, audioRef]);
+
   // Initialize Web Audio API
   useEffect(() => {
     if (!audioRef.current || isInitialized) return;
@@ -127,11 +144,13 @@ export function AudioEqualizer({
           console.log("Audio source created successfully");
         } catch (error) {
           console.warn(
-            "Cannot create equalizer - audio element already has a source node:",
+            "Cannot create equalizer - audio element already has a source node. Audio will play without EQ:",
             error,
           );
           setInitError(true);
           ctx.close();
+          // Don't return - let audio play normally without EQ
+          setIsInitialized(true);
           return;
         }
 
@@ -157,7 +176,14 @@ export function AudioEqualizer({
         }
         newFilters[newFilters.length - 1].connect(ctx.destination);
 
-        console.log("Equalizer initialized successfully");
+        // Resume audio context if suspended (required for autoplay)
+        if (ctx.state === "suspended") {
+          ctx.resume().then(() => {
+            console.log("Audio context resumed");
+          });
+        }
+
+        console.log("Equalizer initialized successfully, context state:", ctx.state);
         setAudioContext(ctx);
         setFilters(newFilters);
         setIsInitialized(true);

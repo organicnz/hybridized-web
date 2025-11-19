@@ -48,6 +48,12 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
       return;
     }
 
+    // Check if audio URL exists
+    if (!episode.audio_url) {
+      console.error("No audio URL for episode:", episode.title);
+      return;
+    }
+
     // Create a single track from this episode
     const track = {
       id: `episode-${episode.id}`,
@@ -56,6 +62,8 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
       audioUrl: episode.audio_url,
       coverUrl: episode.cover_url || episode.bandCoverUrl || undefined,
     };
+
+    console.log("Playing track:", track);
 
     // Play immediately as a single-track playlist
     playPlaylist([track], 0);
