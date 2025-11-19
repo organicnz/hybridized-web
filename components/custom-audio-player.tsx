@@ -26,6 +26,19 @@ interface CustomAudioPlayerProps {
   initialTime?: number;
 }
 
+interface AudioEnhancementNodes {
+  context: AudioContext;
+  source: MediaElementAudioSourceNode;
+  preGain: GainNode;
+  lowShelf: BiquadFilterNode;
+  midPeak: BiquadFilterNode;
+  highShelf: BiquadFilterNode;
+  compressor: DynamicsCompressorNode;
+  stereoEnhancer: StereoPannerNode;
+  limiter: DynamicsCompressorNode;
+  masterGain: GainNode;
+}
+
 export function CustomAudioPlayer({
   src,
   autoPlay = false,
