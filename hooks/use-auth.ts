@@ -14,7 +14,9 @@ export function useAuth() {
     // Get initial session
     const initAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         setUser(user);
       } catch (error) {
         console.error("Error fetching user:", error);

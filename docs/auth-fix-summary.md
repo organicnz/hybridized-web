@@ -3,34 +3,41 @@
 ## Issues Fixed
 
 ### 1. Infinite Re-render in Auth Hooks
+
 **Problem:** `useAuth` and `useProfile` hooks were creating Supabase client instances and including them in dependency arrays, causing infinite re-renders.
 
 **Solution:** Moved client creation inside `useEffect` with empty dependency array.
 
 ### 2. Missing Auth Callback Route
+
 **Problem:** Magic link authentication had no callback handler to exchange codes for sessions.
 
 **Solution:** Created `app/auth/callback/route.ts` to handle OAuth code exchange.
 
 ### 3. Middleware Not Protecting Routes
+
 **Problem:** Middleware wasn't checking user authentication before allowing access to protected routes.
 
 **Solution:** Updated middleware to:
+
 - Check user session with `supabase.auth.getUser()`
 - Redirect unauthenticated users from `/profile` and `/dashboard` to login
 - Redirect authenticated users away from auth pages
 
 ### 4. Session Not Persisting After Login
+
 **Problem:** After login, clicking profile button showed login page again due to stale session state.
 
 **Solution:** Changed login redirect to use `window.location.href` for hard refresh, ensuring cookies are properly set.
 
 ### 5. Header Always Showing Login Link
+
 **Problem:** User icon always linked to `/auth/login` regardless of auth state.
 
 **Solution:** Made header dynamic using `useAuth()` hook to show profile link when logged in.
 
 ### 6. Profile Page Not Loading User Data
+
 **Problem:** Profile full name wasn't updating when data loaded.
 
 **Solution:** Added `useEffect` to update `fullName` state when profile loads.

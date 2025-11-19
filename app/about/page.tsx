@@ -23,13 +23,17 @@ export default function AboutPage() {
                 <Music className="w-8 h-8 text-green-400 flex-shrink-0" />
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    Our Mission
+                    About Hybridized
                   </h2>
+                  <p className="text-white/70 leading-relaxed mb-4">
+                    Hybridized features live and DJ mixes from a select group of
+                    electronic artists. With nearly all mixes provided by the
+                    artists themselves, this is your best source for the highest
+                    quality breaks and progressive music.
+                  </p>
                   <p className="text-white/70 leading-relaxed">
-                    Hybridized is dedicated to exploring the intersection of
-                    music, technology, and creativity. We create unique hybrid
-                    sounds by combining different musical elements, formulas,
-                    and genres to produce something entirely new and innovative.
+                    New mixes are posted several times a week, bringing you the
+                    freshest sounds from the electronic music scene.
                   </p>
                 </div>
               </div>
@@ -40,29 +44,98 @@ export default function AboutPage() {
                 <Sparkles className="w-8 h-8 text-green-400 flex-shrink-0" />
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    What We Do
+                    Featured Artists
                   </h2>
                   <p className="text-white/70 leading-relaxed mb-4">
-                    We experiment with musical formulas, create interactive
-                    tests, and provide a platform for music enthusiasts to
-                    discover new sounds. Our approach combines traditional music
-                    theory with cutting-edge technology to push the boundaries
-                    of what's possible.
+                    Featuring mixes from some of the most talented artists in
+                    electronic music:
                   </p>
-                  <ul className="space-y-2 text-white/70">
-                    <li className="flex items-center gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-white/70">
+                    <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      Create unique hybrid musical formulas
-                    </li>
-                    <li className="flex items-center gap-2">
+                      Alex Hall
+                    </div>
+                    <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      Develop interactive musical tests and experiences
-                    </li>
-                    <li className="flex items-center gap-2">
+                      Andrew Kelly
+                    </div>
+                    <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      Build a community of music innovators
-                    </li>
-                  </ul>
+                      Benz & MD
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Burufunk
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Deepsky
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Digital Witchcraft
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Grayarea
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Hybrid
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      James Warren
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Jason Dunne
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      J-Slyde
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      KiloWatts
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Micah
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Nick Lewis
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Noel Sanger
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      NuBreed
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Shiloh
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Stefan Weise
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Trafik
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      V-Sag
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      Way Out West
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -72,13 +145,12 @@ export default function AboutPage() {
                 <Users className="w-8 h-8 text-green-400 flex-shrink-0" />
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-4">
-                    Join Our Community
+                    Our Legacy
                   </h2>
                   <p className="text-white/70 leading-relaxed">
-                    Whether you're a musician, producer, or simply a music
-                    lover, Hybridized welcomes you to explore, experiment, and
-                    contribute to the future of music. Together, we're creating
-                    something extraordinary.
+                    Continuing the amazing work of Andy Grundman, Hybridized
+                    remains committed to bringing you the finest electronic
+                    music from around the world.
                   </p>
                 </div>
               </div>
@@ -86,9 +158,9 @@ export default function AboutPage() {
 
             <div className="text-center pt-8">
               <div className="inline-flex items-center gap-2 text-white/50">
-                <span>Made in California with</span>
+                <span>Made with</span>
                 <Heart className="w-5 h-5 text-green-400" />
-                <span>for music lovers everywhere</span>
+                <span>for electronic music lovers everywhere</span>
               </div>
             </div>
           </div>

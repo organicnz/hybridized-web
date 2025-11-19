@@ -106,9 +106,7 @@ function ProfileContent() {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to upload avatar"
-      );
+      setError(err instanceof Error ? err.message : "Failed to upload avatar");
     } finally {
       setUploadingAvatar(false);
     }

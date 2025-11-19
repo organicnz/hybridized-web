@@ -63,7 +63,7 @@ export function Header() {
             href={user ? "/profile" : "/auth/login"}
             className={cn(
               HEADER_STYLES.button,
-              user && profile?.avatar_url && "p-0 overflow-hidden"
+              user && profile?.avatar_url && "p-0 overflow-hidden",
             )}
             aria-label={user ? "Profile" : "Sign in"}
             title={user ? "Profile" : "Sign in"}

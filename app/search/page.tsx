@@ -74,7 +74,9 @@ export default async function SearchPage({
           {query && (
             <p className="text-white/70 mb-8">
               Showing results for:{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">{query}</span>
+              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">
+                {query}
+              </span>
             </p>
           )}
 

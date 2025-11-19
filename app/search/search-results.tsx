@@ -72,7 +72,9 @@ export function SearchResults({
                   <h3 className="text-lg font-semibold text-white mb-1 truncate group-hover:text-purple-300 transition-colors">
                     {episode.title}
                   </h3>
-                  <p className="text-sm text-purple-300/70 mb-2">{artistName}</p>
+                  <p className="text-sm text-purple-300/70 mb-2">
+                    {artistName}
+                  </p>
                   {episode.description && (
                     <p className="text-sm text-white/60 line-clamp-2">
                       {episode.description}
