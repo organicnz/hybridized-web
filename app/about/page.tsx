@@ -1,6 +1,6 @@
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { Music, Sparkles, Users, Heart } from "lucide-react";
+import { Music, Sparkles, Users, Heart, Download } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -35,6 +35,31 @@ export default function AboutPage() {
                     New mixes are posted several times a week, bringing you the
                     freshest sounds from the electronic music scene.
                   </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+              <div className="flex items-start gap-4 mb-4">
+                <Download className="w-8 h-8 text-green-400 flex-shrink-0" />
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-4">
+                    Download All Sets
+                  </h2>
+                  <p className="text-white/70 leading-relaxed mb-6">
+                    Access the complete collection of Hybridized sets. Download
+                    all mixes from our cloud storage and enjoy the full archive
+                    of electronic music excellence.
+                  </p>
+                  <a
+                    href="https://cloud.mail.ru/public/Beaq/6WtmkWwTe"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-400 text-black font-semibold rounded-lg hover:scale-105 transition-transform gpu"
+                  >
+                    <Download className="w-5 h-5" />
+                    Download Complete Archive
+                  </a>
                 </div>
               </div>
             </div>
