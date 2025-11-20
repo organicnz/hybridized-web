@@ -51,7 +51,7 @@ self.addEventListener("fetch", (event) => {
 
   // IMPORTANT: Don't intercept navigation requests - let them pass through
   // This prevents issues with redirects
-  if (event.request.mode === 'navigate') {
+  if (event.request.mode === "navigate") {
     return;
   }
 
