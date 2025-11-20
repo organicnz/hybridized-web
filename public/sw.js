@@ -1,6 +1,6 @@
 // Service Worker for caching music assets
-const CACHE_NAME = "hybridized-v3";
-const AUDIO_CACHE_NAME = "hybridized-audio-v3";
+const CACHE_NAME = "hybridized-v4";
+const AUDIO_CACHE_NAME = "hybridized-audio-v4";
 const CACHE_URLS = ["/home", "/logo.png", "/favicon.png"];
 
 // Install event - cache essential assets
@@ -49,8 +49,9 @@ self.addEventListener("fetch", (event) => {
 
   const url = event.request.url;
 
-  // Skip root path redirects - let them pass through
-  if (url.endsWith("/") && !url.includes("/home")) {
+  // IMPORTANT: Don't intercept navigation requests - let them pass through
+  // This prevents issues with redirects
+  if (event.request.mode === 'navigate') {
     return;
   }
 
@@ -64,7 +65,7 @@ self.addEventListener("fetch", (event) => {
             return cachedResponse;
           }
 
-          return fetch(event.request, { redirect: "follow" }).then((response) => {
+          return fetch(event.request).then((response) => {
             // Cache successful audio responses
             if (response && response.status === 200) {
               console.log("Caching audio:", url);
@@ -78,16 +79,16 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Handle other requests
+  // Handle other requests (images, static assets)
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
         return response;
       }
 
-      return fetch(event.request, { redirect: "follow" }).then((response) => {
-        // Don't cache redirects or non-successful responses
-        if (!response || response.status !== 200 || response.type === "error" || response.type === "opaqueredirect") {
+      return fetch(event.request).then((response) => {
+        // Don't cache non-successful responses
+        if (!response || response.status !== 200 || response.type === "error") {
           return response;
         }
 
