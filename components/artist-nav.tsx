@@ -50,7 +50,9 @@ export function ArtistNav({
   }, [artists.length]); // Only run when artists are loaded, not on every activeArtist change
 
   const getArtistSlug = (artist: string) => {
-    return encodeURIComponent(artist.toLowerCase().replace(/\s+/g, "-"));
+    return encodeURIComponent(
+      artist.toLowerCase().replace(/[\s\/]+/g, "-").replace(/-+/g, "-"),
+    );
   };
 
   const handleClick = (
