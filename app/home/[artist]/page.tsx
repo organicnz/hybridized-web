@@ -20,7 +20,8 @@ export async function generateStaticParams() {
 
   return bands.map((band) => ({
     artist: encodeURIComponent(
-      band.name?.toLowerCase().replace(/\s+/g, "-") || "",
+      band.name?.toLowerCase().replace(/[\s\/]+/g, "-").replace(/-+/g, "-") ||
+        "",
     ),
   }));
 }
@@ -39,7 +40,9 @@ export default async function ArtistPage({ params }: PageProps) {
   const { data: allBands } = await supabase.from("bands").select("*");
 
   const matchedBand = allBands?.find((band) => {
-    const bandSlug = band.name?.toLowerCase().replace(/\s+/g, "-") || "";
+    const bandSlug =
+      band.name?.toLowerCase().replace(/[\s\/]+/g, "-").replace(/-+/g, "-") ||
+      "";
     return bandSlug === decodedArtist;
   });
 
