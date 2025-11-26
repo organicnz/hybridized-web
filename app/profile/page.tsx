@@ -11,11 +11,12 @@ import {
   AlertCircle,
   CheckCircle,
   Camera,
-  Upload,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import {
   compressImage,
   validateImageFile,
@@ -27,18 +28,27 @@ function ProfileContent() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
+  const router = useRouter();
 
-  // Update fullName when profile loads
+  // Update fullName and check email verification when profile loads
   useEffect(() => {
     if (profile?.full_name) {
       setFullName(profile.full_name);
     }
     console.log("Profile loaded:", profile);
-  }, [profile]);
+
+    // Check if email is verified
+    if (user?.email_confirmed_at) {
+      setEmailVerified(true);
+    }
+  }, [profile, user]);
 
   // Get avatar URL with cache busting (memoized to prevent constant re-renders)
   const avatarUrl = useMemo(() => {
@@ -127,6 +137,48 @@ function ProfileContent() {
       setTimeout(() => setSuccess(false), 3000);
     }
     setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    setError(null);
+
+    try {
+      await supabase.auth.signOut();
+      router.push("/auth/login");
+    } catch (err) {
+      setError("Failed to sign out. Please try again.");
+      setLoggingOut(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!user?.email) return;
+
+    setResendingVerification(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: user.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?type=signup`,
+        },
+      });
+
+      if (error) throw error;
+
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to resend verification",
+      );
+    } finally {
+      setResendingVerification(false);
+    }
   };
 
   return (
@@ -226,10 +278,32 @@ function ProfileContent() {
                   disabled
                   className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white/50 cursor-not-allowed"
                 />
+                {emailVerified && (
+                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-400" />
+                )}
               </div>
-              <p className="text-xs text-purple-200/50 mt-1">
-                Email cannot be changed
-              </p>
+              {emailVerified ? (
+                <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  Email verified
+                </p>
+              ) : (
+                <div className="mt-2">
+                  <p className="text-xs text-yellow-400 mb-2">
+                    Email not verified. Please check your inbox.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resendingVerification}
+                    className="text-xs text-purple-400 hover:text-pink-400 hover:underline transition-colors disabled:opacity-50"
+                  >
+                    {resendingVerification
+                      ? "Sending..."
+                      : "Resend verification email"}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div>
@@ -262,6 +336,17 @@ function ProfileContent() {
               {loading ? "Saving..." : "Save Changes"}
             </button>
           </form>
+
+          <div className="mt-8 pt-8 border-t border-purple-500/20">
+            <button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="w-full px-6 py-3 bg-red-500/10 border border-red-500/30 text-red-300 rounded-full font-semibold hover:bg-red-500/20 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+            >
+              <LogOut className="w-5 h-5" />
+              {loggingOut ? "Signing out..." : "Sign Out"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
