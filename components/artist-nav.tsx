@@ -51,7 +51,10 @@ export function ArtistNav({
 
   const getArtistSlug = (artist: string) => {
     return encodeURIComponent(
-      artist.toLowerCase().replace(/[\s\/]+/g, "-").replace(/-+/g, "-"),
+      artist
+        .toLowerCase()
+        .replace(/[\s\/]+/g, "-")
+        .replace(/-+/g, "-"),
     );
   };
 

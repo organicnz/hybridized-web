@@ -20,8 +20,10 @@ export async function generateStaticParams() {
 
   return bands.map((band) => ({
     artist: encodeURIComponent(
-      band.name?.toLowerCase().replace(/[\s\/]+/g, "-").replace(/-+/g, "-") ||
-        "",
+      band.name
+        ?.toLowerCase()
+        .replace(/[\s\/]+/g, "-")
+        .replace(/-+/g, "-") || "",
     ),
   }));
 }
@@ -41,8 +43,10 @@ export default async function ArtistPage({ params }: PageProps) {
 
   const matchedBand = allBands?.find((band) => {
     const bandSlug =
-      band.name?.toLowerCase().replace(/[\s\/]+/g, "-").replace(/-+/g, "-") ||
-      "";
+      band.name
+        ?.toLowerCase()
+        .replace(/[\s\/]+/g, "-")
+        .replace(/-+/g, "-") || "";
     return bandSlug === decodedArtist;
   });
 

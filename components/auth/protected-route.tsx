@@ -18,7 +18,9 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push(redirectTo);
+      const currentPath = window.location.pathname;
+      const redirectUrl = `${redirectTo}?redirectTo=${encodeURIComponent(currentPath)}`;
+      router.push(redirectUrl);
     }
   }, [user, loading, router, redirectTo]);
 

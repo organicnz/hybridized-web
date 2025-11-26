@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
-import { Lock, AlertCircle, CheckCircle } from "lucide-react";
+import { Lock, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ResetPasswordPage() {
@@ -13,8 +13,45 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [verifying, setVerifying] = useState(true);
+  const [validSession, setValidSession] = useState(false);
   const supabase = createClient();
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if we have a recovery token in the URL hash
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
+
+    if (type === 'recovery' && accessToken) {
+      // Exchange the recovery token for a session
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: hashParams.get('refresh_token') || '',
+      }).then(({ error }) => {
+        if (error) {
+          setError('Invalid or expired reset link. Please request a new one.');
+          setVerifying(false);
+        } else {
+          setValidSession(true);
+          setVerifying(false);
+          // Clean up the URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      });
+    } else {
+      // Check if user already has a valid session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          setValidSession(true);
+        } else {
+          setError('No valid reset link found. Please request a new password reset.');
+        }
+        setVerifying(false);
+      });
+    }
+  }, [supabase.auth]);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +79,24 @@ export default function ResetPasswordPage() {
     }
   };
 
+  if (verifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
+        <div className="w-full max-w-md">
+          <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 text-center">
+            <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-4 animate-spin" />
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Verifying Reset Link
+            </h2>
+            <p className="text-purple-200/70">
+              Please wait while we verify your password reset link...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
@@ -55,6 +110,30 @@ export default function ResetPasswordPage() {
               Your password has been successfully updated. Redirecting to
               login...
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!validSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
+        <div className="w-full max-w-md">
+          <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl border border-red-500/20 p-8 text-center">
+            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Invalid Reset Link
+            </h2>
+            <p className="text-purple-200/70 mb-6">
+              {error || 'This password reset link is invalid or has expired. Please request a new one.'}
+            </p>
+            <Link
+              href="/auth/forgot-password"
+              className="inline-block px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-purple-500/50"
+            >
+              Request New Link
+            </Link>
           </div>
         </div>
       </div>
