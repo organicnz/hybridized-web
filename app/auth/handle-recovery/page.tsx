@@ -10,7 +10,7 @@ export default function HandleRecoveryPage() {
   useEffect(() => {
     // Get the hash from the URL
     const hash = window.location.hash;
-    
+
     // Redirect to reset password page with the hash
     router.replace(`/auth/reset-password${hash}`);
   }, [router]);

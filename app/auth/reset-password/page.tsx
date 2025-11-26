@@ -19,38 +19,69 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if we have a recovery token in the URL hash
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get('access_token');
-    const type = hashParams.get('type');
+    const handleRecoveryToken = async () => {
+      // Check if we have a recovery token in the URL hash
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const type = hashParams.get("type");
 
-    if (type === 'recovery' && accessToken) {
-      // Exchange the recovery token for a session
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: hashParams.get('refresh_token') || '',
-      }).then(({ error }) => {
-        if (error) {
-          setError('Invalid or expired reset link. Please request a new one.');
+      console.log("Recovery handler - type:", type, "has token:", !!accessToken);
+
+      if (type === "recovery" && accessToken && refreshToken) {
+        try {
+          // Exchange the recovery token for a session
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          console.log("setSession result:", { data, error });
+
+          if (error) {
+            console.error("setSession error:", error);
+            setError(
+              "Invalid or expired reset link. Please request a new one.",
+            );
+            setVerifying(false);
+          } else if (data.session) {
+            console.log("Session established successfully");
+            setValidSession(true);
+            setVerifying(false);
+            // Clean up the URL
+            window.history.replaceState(
+              {},
+              document.title,
+              window.location.pathname,
+            );
+          } else {
+            setError("Failed to establish session. Please try again.");
+            setVerifying(false);
+          }
+        } catch (err) {
+          console.error("Exception during setSession:", err);
+          setError("An error occurred. Please try again.");
           setVerifying(false);
-        } else {
-          setValidSession(true);
-          setVerifying(false);
-          // Clean up the URL
-          window.history.replaceState({}, document.title, window.location.pathname);
         }
-      });
-    } else {
-      // Check if user already has a valid session
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      } else {
+        // Check if user already has a valid session
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (session) {
+          console.log("Existing session found");
           setValidSession(true);
         } else {
-          setError('No valid reset link found. Please request a new password reset.');
+          console.log("No session or recovery token found");
+          setError(
+            "No valid reset link found. Please request a new password reset.",
+          );
         }
         setVerifying(false);
-      });
-    }
+      }
+    };
+
+    handleRecoveryToken();
   }, [supabase.auth]);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -126,7 +157,8 @@ export default function ResetPasswordPage() {
               Invalid Reset Link
             </h2>
             <p className="text-purple-200/70 mb-6">
-              {error || 'This password reset link is invalid or has expired. Please request a new one.'}
+              {error ||
+                "This password reset link is invalid or has expired. Please request a new one."}
             </p>
             <Link
               href="/auth/forgot-password"

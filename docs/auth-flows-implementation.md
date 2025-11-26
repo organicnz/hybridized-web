@@ -65,11 +65,13 @@
 ### High Priority (Security & UX)
 
 1. **Email Confirmation Success Page**
+
    ```
    /auth/confirm-email → Shows success message after email verification
    ```
 
 2. **Email Verification Status in Profile**
+
    ```
    Show verified badge or "Verify Email" button in profile
    ```
@@ -82,6 +84,7 @@
 ### Medium Priority (Admin & Management)
 
 4. **Reauthentication Modal**
+
    ```
    Before sensitive actions (delete account, change password)
    Prompt for password re-entry
@@ -131,6 +134,7 @@
 ### 1. Email Confirmation Success Page
 
 Create `/auth/confirm-email/page.tsx`:
+
 ```typescript
 // Handles successful email confirmation
 // Shows success message and redirects to login or home
@@ -139,6 +143,7 @@ Create `/auth/confirm-email/page.tsx`:
 ### 2. Email Verification Status
 
 Update `/app/profile/page.tsx`:
+
 ```typescript
 // Add email_confirmed_at check
 // Show verification badge or resend button
@@ -148,6 +153,7 @@ Update `/app/profile/page.tsx`:
 ### 3. Change Email Flow
 
 Create `/auth/change-email/page.tsx`:
+
 ```typescript
 // Form to enter new email
 // Calls supabase.auth.updateUser({ email: newEmail })
@@ -155,6 +161,7 @@ Create `/auth/change-email/page.tsx`:
 ```
 
 Create `/auth/verify-email-change/page.tsx`:
+
 ```typescript
 // Handles email change verification token
 // Similar to reset password handler
@@ -163,6 +170,7 @@ Create `/auth/verify-email-change/page.tsx`:
 ### 4. Reauthentication Modal
 
 Create `/components/auth/reauth-modal.tsx`:
+
 ```typescript
 // Modal that prompts for password
 // Verifies password before allowing sensitive action
@@ -172,6 +180,7 @@ Create `/components/auth/reauth-modal.tsx`:
 ### 5. Account Deletion
 
 Update `/app/profile/page.tsx`:
+
 ```typescript
 // Add delete account button
 // Trigger reauthentication modal
@@ -182,6 +191,7 @@ Update `/app/profile/page.tsx`:
 ## Testing Checklist
 
 ### Email Flows
+
 - [ ] Signup with email confirmation
 - [ ] Resend confirmation email
 - [ ] Confirm email via link
@@ -194,6 +204,7 @@ Update `/app/profile/page.tsx`:
 - [ ] Verify new email address
 
 ### Security Flows
+
 - [ ] Reauthenticate before password change
 - [ ] Reauthenticate before email change
 - [ ] Reauthenticate before account deletion
@@ -201,6 +212,7 @@ Update `/app/profile/page.tsx`:
 - [ ] Test CAPTCHA on signup/login
 
 ### Edge Cases
+
 - [ ] Expired confirmation link
 - [ ] Expired reset link
 - [ ] Already verified email
