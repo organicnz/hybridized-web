@@ -26,7 +26,12 @@ export default function ResetPasswordPage() {
       const refreshToken = hashParams.get("refresh_token");
       const type = hashParams.get("type");
 
-      console.log("Recovery handler - type:", type, "has token:", !!accessToken);
+      console.log(
+        "Recovery handler - type:",
+        type,
+        "has token:",
+        !!accessToken,
+      );
 
       if (type === "recovery" && accessToken && refreshToken) {
         try {
