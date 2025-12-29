@@ -64,7 +64,6 @@ export function CustomAudioPlayer({
   useEffect(() => {
     if (internalAudioRef.current) {
       audioRef.current = internalAudioRef.current;
-      console.log("Audio element set:", internalAudioRef.current, "src:", src);
     }
   }, [audioRef, src]);
 
@@ -99,26 +98,17 @@ export function CustomAudioPlayer({
     };
 
     const handlePlay = () => {
-      console.log("✅ Audio PLAY event:", audio.src);
       setIsPlaying(true);
       onPlay?.();
     };
 
     const handlePause = () => {
-      console.log("⏸️ Audio PAUSE event:", audio.src);
       setIsPlaying(false);
       onPause?.();
     };
 
-    const handleError = (e: Event) => {
-      console.error(
-        "❌ Audio ERROR:",
-        e,
-        "src:",
-        audio.src,
-        "error:",
-        (e.target as HTMLAudioElement).error,
-      );
+    const handleError = () => {
+      // Audio error occurred - user will see playback stop
     };
 
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -143,12 +133,10 @@ export function CustomAudioPlayer({
     const audio = internalAudioRef.current;
     if (!audio || !autoPlay) return;
 
-    console.log("Attempting autoplay for:", audio.src);
     const playPromise = audio.play();
 
     if (playPromise !== undefined) {
-      playPromise.catch((error) => {
-        console.error("Autoplay failed:", error);
+      playPromise.catch(() => {
         setIsPlaying(false);
       });
     }
@@ -156,18 +144,13 @@ export function CustomAudioPlayer({
 
   const togglePlay = () => {
     const audio = internalAudioRef.current;
-    if (!audio) {
-      console.error("No audio element available");
-      return;
-    }
-
-    console.log("Toggle play - isPlaying:", isPlaying, "audio src:", audio.src);
+    if (!audio) return;
 
     if (isPlaying) {
       audio.pause();
     } else {
-      audio.play().catch((error) => {
-        console.error("Play failed:", error);
+      audio.play().catch(() => {
+        // Play failed - user will see button state unchanged
       });
     }
   };

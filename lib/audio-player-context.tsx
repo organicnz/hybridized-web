@@ -6,9 +6,18 @@ import {
   useState,
   useEffect,
   useRef,
+  useCallback,
   ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
+import {
+  getUserStorageItemSync,
+  setUserStorageItemSync,
+  setCurrentUserId,
+  migrateToUserStorage,
+  clearCurrentUserStorage,
+} from "@/lib/user-storage";
 
 export interface Track {
   id: string;
@@ -56,14 +65,43 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const supabase = createClient();
-  const volumeSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Create settings saver instance (persists across renders)
+  const settingsSaverRef = useRef<ReturnType<typeof createSettingsSaver> | null>(null);
+  if (!settingsSaverRef.current) {
+    settingsSaverRef.current = createSettingsSaver();
+  }
+
+  // Load volume settings from database
+  const loadVolumeFromDb = useCallback(async () => {
+    const settings = await loadUserSettings();
+    if (settings?.volume_settings?.master !== undefined) {
+      const dbVolume = settings.volume_settings.master / 100; // Convert from 0-100 to 0-1
+      setVolumeState(dbVolume);
+    }
+  }, []);
 
   // Load state from localStorage and database on mount
   useEffect(() => {
     const loadState = async () => {
       try {
-        // Load from localStorage first
-        const saved = localStorage.getItem(STORAGE_KEY);
+        // Get current user and update cache
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setCurrentUserId(user?.id ?? null);
+
+        // Migrate old non-scoped storage to user-scoped (one-time)
+        if (user) {
+          await migrateToUserStorage([
+            STORAGE_KEY,
+            "recentSearches",
+            "language",
+          ]);
+        }
+
+        // Load from user-scoped localStorage
+        const saved = getUserStorageItemSync(STORAGE_KEY);
         if (saved) {
           const state = JSON.parse(saved);
           if (state.currentTrack) {
@@ -78,24 +116,8 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         }
 
         // Load volume from database if user is authenticated
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
         if (user) {
-          const { data, error } = await supabase
-            .from("settings")
-            .select("volume_settings")
-            .eq("user_id", user.id)
-            .single();
-
-          if (!error && data?.volume_settings) {
-            const volumeSettings = data.volume_settings as { master?: number };
-            if (typeof volumeSettings.master === "number") {
-              const dbVolume = volumeSettings.master / 100; // Convert from 0-100 to 0-1
-              setVolumeState(dbVolume);
-              console.log("Loaded volume from database:", dbVolume);
-            }
-          }
+          await loadVolumeFromDb();
         }
       } catch (error) {
         console.error("Failed to load audio state:", error);
@@ -104,9 +126,40 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     };
 
     loadState();
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Update cached user ID
+      setCurrentUserId(session?.user?.id ?? null);
+
+      if (event === "SIGNED_IN" && session?.user) {
+        // Migrate storage and reload settings
+        await migrateToUserStorage([
+          STORAGE_KEY,
+          "recentSearches",
+          "language",
+        ]);
+        loadVolumeFromDb();
+      } else if (event === "SIGNED_OUT") {
+        // Clear user-specific storage on sign out
+        clearCurrentUserStorage();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [loadVolumeFromDb]);
+
+  // Flush pending saves on unmount
+  useEffect(() => {
+    const saver = settingsSaverRef.current;
+    return () => {
+      saver?.flush();
+    };
   }, []);
 
-  // Save state to localStorage whenever it changes
+  // Save state to user-scoped localStorage whenever it changes
   useEffect(() => {
     if (!isHydrated) return;
 
@@ -119,7 +172,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         volume,
         isPlaying: false, // Always restore as paused on page load
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setUserStorageItemSync(STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
       console.error("Failed to save audio state:", error);
     }
@@ -201,40 +254,9 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       audioRef.current.volume = vol;
     }
 
-    // Debounce database save
-    if (volumeSaveTimeoutRef.current) {
-      clearTimeout(volumeSaveTimeoutRef.current);
-    }
-
-    volumeSaveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const volumePercent = Math.round(vol * 100); // Convert from 0-1 to 0-100
-
-        const { error } = await supabase.from("settings").upsert(
-          {
-            user_id: user.id,
-            volume_settings: { master: volumePercent },
-            updated_at: new Date().toISOString(),
-          },
-          {
-            onConflict: "user_id",
-          },
-        );
-
-        if (error) {
-          console.error("Error saving volume settings:", error);
-        } else {
-          console.log("Volume settings saved:", volumePercent);
-        }
-      } catch (error) {
-        console.error("Error saving volume settings:", error);
-      }
-    }, 500); // Save after 500ms of no changes
+    // Save to database with debouncing (won't overwrite gains)
+    const volumePercent = Math.round(vol * 100); // Convert from 0-1 to 0-100
+    settingsSaverRef.current?.save({ volume_settings: { master: volumePercent } });
   };
 
   const pauseAudio = () => {

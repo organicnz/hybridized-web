@@ -28,14 +28,11 @@ export function useProfile() {
         .eq("id", user.id)
         .single();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
-      } else {
-        console.log("Profile fetched:", data);
+      if (!error) {
         setProfile(data);
       }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
+    } catch {
+      // Profile fetch failed
     } finally {
       setLoading(false);
     }
@@ -57,7 +54,6 @@ export function useProfile() {
       .single();
 
     if (!error && data) {
-      console.log("Profile updated:", data);
       setProfile(data);
       // Force a refetch to ensure we have the latest data
       await fetchProfile();

@@ -3,17 +3,21 @@
 import { useState, useRef, useEffect } from 'react'
 import { LANGUAGES, type Language } from '@/lib/constants/languages'
 import { cn } from '@/lib/utils'
+import { getUserStorageItemSync, setUserStorageItemSync } from '@/lib/user-storage'
 
 export function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false)
-  const [currentLang, setCurrentLang] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('language')
-      return LANGUAGES.find(l => l.code === saved) || LANGUAGES[0]
-    }
-    return LANGUAGES[0]
-  })
+  const [currentLang, setCurrentLang] = useState<Language>(LANGUAGES[0])
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Load language preference on mount (after user storage is initialized)
+  useEffect(() => {
+    const saved = getUserStorageItemSync('language')
+    if (saved) {
+      const lang = LANGUAGES.find(l => l.code === saved)
+      if (lang) setCurrentLang(lang)
+    }
+  }, [])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -32,7 +36,7 @@ export function LanguageSelector() {
   const handleLanguageChange = (lang: Language) => {
     setCurrentLang(lang)
     setIsOpen(false)
-    localStorage.setItem('language', lang.code)
+    setUserStorageItemSync('language', lang.code)
     // Future: Update i18n router
   }
 
