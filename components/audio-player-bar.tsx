@@ -25,14 +25,6 @@ export function AudioPlayerBar() {
 
   const [isMuted, setIsMuted] = useState(false);
 
-  // Debug log
-  console.log(
-    "AudioPlayerBar render - currentTrack:",
-    currentTrack,
-    "shouldAutoPlay:",
-    shouldAutoPlay,
-  );
-
   const toggleMute = () => {
     if (!audioRef?.current) return;
     const newMuted = !isMuted;
@@ -54,7 +46,6 @@ export function AudioPlayerBar() {
   };
 
   if (!currentTrack) {
-    console.log("AudioPlayerBar: No current track, not rendering");
     return null;
   }
 

@@ -21,6 +21,7 @@ import { RegisterServiceWorker } from "./register-sw";
 import { AudioPlayerProvider } from "@/lib/audio-player-context";
 import { AudioPlayerBar } from "@/components/audio-player-bar";
 import { RecoveryHandler } from "@/components/auth/recovery-handler";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <RegisterServiceWorker />
         <RecoveryHandler />
+        <Toaster position="top-center" richColors />
         <AudioPlayerProvider>
           {children}
           <AudioPlayerBar />

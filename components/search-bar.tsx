@@ -1,8 +1,13 @@
 "use client";
 
-import { Search, Clock, X } from "lucide-react";
+import { Search, Clock } from "lucide-react";
 import { useState, useCallback, FormEvent, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  getUserStorageItemSync,
+  setUserStorageItemSync,
+  removeUserStorageItemSync,
+} from "@/lib/user-storage";
 
 const MAX_RECENT_SEARCHES = 5;
 
@@ -14,9 +19,9 @@ export function SearchBar() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load recent searches from localStorage
+  // Load recent searches from user-scoped localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("recentSearches");
+    const stored = getUserStorageItemSync("recentSearches");
     if (stored) {
       try {
         setRecentSearches(JSON.parse(stored));
@@ -50,7 +55,7 @@ export function SearchBar() {
         (s) => s.toLowerCase() !== trimmed.toLowerCase(),
       );
       const updated = [trimmed, ...filtered].slice(0, MAX_RECENT_SEARCHES);
-      localStorage.setItem("recentSearches", JSON.stringify(updated));
+      setUserStorageItemSync("recentSearches", JSON.stringify(updated));
       return updated;
     });
   }, []);
@@ -78,7 +83,7 @@ export function SearchBar() {
 
   const clearRecentSearches = useCallback(() => {
     setRecentSearches([]);
-    localStorage.removeItem("recentSearches");
+    removeUserStorageItemSync("recentSearches");
   }, []);
 
   const showDropdown = isFocused && recentSearches.length > 0;

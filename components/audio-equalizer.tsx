@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Sliders, LogIn } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
+import { useSyncStatus } from "@/hooks/use-sync-status";
+import { SyncIndicator } from "./sync-indicator";
 import Link from "next/link";
 
 interface AudioEqualizerProps {
@@ -51,60 +54,59 @@ export function AudioEqualizer({
   const [currentPreset, setCurrentPreset] = useState<string>("Flat");
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const supabase = createClient();
 
-  // Check authentication status
+  // Create settings saver instance (persists across renders)
+  const settingsSaverRef = useRef<ReturnType<typeof createSettingsSaver> | null>(null);
+  if (!settingsSaverRef.current) {
+    settingsSaverRef.current = createSettingsSaver();
+  }
+
+  // Subscribe to sync status
+  const syncStatus = useSyncStatus(settingsSaverRef);
+
+  // Load settings when user authenticates
+  const loadSettings = useCallback(async () => {
+    const settings = await loadUserSettings();
+    if (settings?.gains) {
+      setGains(settings.gains);
+      setCurrentPreset("Custom");
+    }
+  }, []);
+
+  // Check authentication status and load settings on sign-in
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setIsAuthenticated(!!user);
+      if (user) {
+        loadSettings();
+      }
     };
     checkAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session?.user);
+      // Reload settings when user signs in
+      if (event === "SIGNED_IN" && session?.user) {
+        loadSettings();
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [loadSettings]);
 
-  // Load saved equalizer settings from database
+  // Flush pending saves on unmount
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data, error } = await supabase
-          .from("settings")
-          .select("*")
-          .eq("user_id", user.id)
-          .single();
-
-        if (error) {
-          console.log("No saved equalizer settings found");
-          return;
-        }
-
-        if (data && Array.isArray(data.gains)) {
-          setGains(data.gains);
-          setCurrentPreset("Custom");
-          console.log("Loaded equalizer settings");
-        }
-      } catch (error) {
-        console.error("Error loading equalizer settings:", error);
-      }
+    const saver = settingsSaverRef.current;
+    return () => {
+      saver?.flush();
     };
-
-    loadSettings();
   }, []);
 
   // Resume audio context when play is attempted
@@ -113,7 +115,6 @@ export function AudioEqualizer({
 
     const handlePlay = () => {
       if (audioContext.state === "suspended") {
-        console.log("Resuming audio context on play...");
         audioContext.resume();
       }
     };
@@ -133,22 +134,16 @@ export function AudioEqualizer({
       if (!audioRef.current) return;
 
       try {
-        console.log("Initializing equalizer...");
         const ctx = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
 
         let source;
         try {
           source = ctx.createMediaElementSource(audioRef.current);
-          console.log("Audio source created successfully");
-        } catch (error) {
-          console.warn(
-            "Cannot create equalizer - audio element already has a source node. Audio will play without EQ:",
-            error,
-          );
+        } catch {
+          // Audio element already has a source node - EQ unavailable
           setInitError(true);
           ctx.close();
-          // Don't return - let audio play normally without EQ
           setIsInitialized(true);
           return;
         }
@@ -177,59 +172,19 @@ export function AudioEqualizer({
 
         // Resume audio context if suspended (required for autoplay)
         if (ctx.state === "suspended") {
-          ctx.resume().then(() => {
-            console.log("Audio context resumed");
-          });
+          ctx.resume();
         }
 
-        console.log(
-          "Equalizer initialized successfully, context state:",
-          ctx.state,
-        );
         setAudioContext(ctx);
         setFilters(newFilters);
         setIsInitialized(true);
-      } catch (error) {
-        console.error("Failed to initialize equalizer:", error);
+      } catch {
         setInitError(true);
       }
     }, 200);
 
     return () => clearTimeout(timer);
   }, [audioRef.current, isInitialized, gains]);
-
-  const saveSettings = async (newGains: number[]) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      setIsSaving(true);
-
-      // Upsert settings (insert or update if exists)
-      const { error } = await supabase.from("settings").upsert(
-        {
-          user_id: user.id,
-          gains: newGains,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: "user_id",
-        },
-      );
-
-      if (error) {
-        console.error("Error saving equalizer settings:", error);
-      } else {
-        console.log("Equalizer settings saved successfully");
-      }
-    } catch (error) {
-      console.error("Error saving equalizer settings:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleGainChange = (index: number, value: number) => {
     const newGains = [...gains];
@@ -241,8 +196,8 @@ export function AudioEqualizer({
       filters[index].gain.value = value;
     }
 
-    // Auto-save after a short delay
-    saveSettings(newGains);
+    // Auto-save with debouncing (won't overwrite volume_settings)
+    settingsSaverRef.current?.save({ gains: newGains });
   };
 
   const applyPreset = (presetName: string) => {
@@ -256,8 +211,8 @@ export function AudioEqualizer({
       filter.gain.value = presetGains[index];
     });
 
-    // Save preset to database
-    saveSettings(presetGains);
+    // Save preset with debouncing (won't overwrite volume_settings)
+    settingsSaverRef.current?.save({ gains: presetGains });
   };
 
   const resetEqualizer = () => {
@@ -334,15 +289,11 @@ export function AudioEqualizer({
             ) : (
               <>
                 <div className="relative flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <h3 className="text-white font-semibold text-sm drop-shadow-lg">
                       Equalizer
                     </h3>
-                    {isSaving && (
-                      <span className="text-[10px] text-purple-400 animate-pulse">
-                        Saving...
-                      </span>
-                    )}
+                    <SyncIndicator status={syncStatus} />
                   </div>
                   <button
                     onClick={resetEqualizer}
