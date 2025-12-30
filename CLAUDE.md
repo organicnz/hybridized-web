@@ -39,7 +39,14 @@ npm run build    # Production build
 npm run lint     # Run linter
 ```
 
-## Infrastructure Notes
+## Infrastructure
+
+### Hosting
+
+- **Vercel** - Web application hosting (serverless)
+- **Supabase** - Database & Auth (remote/hosted, not self-managed)
+- **Cloudflare** - DNS management
+- No self-hosted servers (no EC2, VPS, etc.)
 
 ### DNS (Cloudflare)
 
