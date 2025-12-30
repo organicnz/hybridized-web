@@ -53,7 +53,7 @@ npm run lint     # Run linter
 - Domain: `hybridized.online`
 - A Record: Points to Vercel IP `76.76.21.21`
 - CNAME `www`: Points to `vercel-dns.com`
-- Proxy status: Should be **Proxied** (orange cloud) for security
+- Proxy status: **DNS only (grey cloud)** - Vercel requires this, do NOT proxy
 
 ### Security Configurations
 
