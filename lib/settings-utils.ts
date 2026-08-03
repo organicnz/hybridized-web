@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
 import type { Json } from "@/lib/types/database.types";
+import { toast } from "sonner";
 
 export type SettingsUpdate = {
   gains?: number[];
@@ -94,10 +94,7 @@ export function createSettingsSaver() {
    * Performs the actual save to the database.
    * Uses UPDATE for existing rows to avoid overwriting other fields.
    */
-  async function performSave(
-    userId: string,
-    updates: SettingsUpdate
-  ): Promise<boolean> {
+  async function performSave(userId: string, updates: SettingsUpdate): Promise<boolean> {
     // Check if row exists
     const { data: existing } = await supabase
       .from("settings")
@@ -118,10 +115,7 @@ export function createSettingsSaver() {
 
     if (existing) {
       // UPDATE only the changed fields (doesn't overwrite other fields)
-      const { error } = await supabase
-        .from("settings")
-        .update(payload)
-        .eq("user_id", userId);
+      const { error } = await supabase.from("settings").update(payload).eq("user_id", userId);
 
       if (error) throw error;
     } else {
@@ -150,10 +144,7 @@ export function createSettingsSaver() {
    * Attempts to save with retries on failure.
    * Falls back to offline queue if network is unavailable.
    */
-  async function saveWithRetry(
-    userId: string,
-    updates: SettingsUpdate
-  ): Promise<boolean> {
+  async function saveWithRetry(userId: string, updates: SettingsUpdate): Promise<boolean> {
     // If offline, queue for later
     if (!isOnline()) {
       saveToOfflineQueue(userId, updates);
@@ -178,9 +169,7 @@ export function createSettingsSaver() {
       } catch {
         if (attempt < MAX_RETRIES) {
           // Wait before retry (exponential backoff)
-          await new Promise((resolve) =>
-            setTimeout(resolve, 100 * Math.pow(2, attempt))
-          );
+          await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
         }
       }
     }

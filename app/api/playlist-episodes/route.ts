@@ -1,14 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const playlistId = searchParams.get("playlistId");
 
   if (!playlistId) {
-    return NextResponse.json(
-      { error: "playlistId is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "playlistId is required" }, { status: 400 });
   }
 
   try {
@@ -32,24 +29,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ episodeIds });
   } catch (error) {
     console.error("Error fetching playlist:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to fetch playlist";
+    const message = error instanceof Error ? error.message : "Failed to fetch playlist";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 function extractEpisodeIds(html: string): string[] {
   const episodeIds: string[] = [];
-
-  // Look for episode IDs in the HTML (they appear in story URLs)
   const storyRegex = /story\/(cl[a-z0-9]+)/g;
-  let match;
+  let match: RegExpExecArray | null = storyRegex.exec(html);
 
-  while ((match = storyRegex.exec(html)) !== null) {
+  while (match !== null) {
     const episodeId = match[1];
     if (!episodeIds.includes(episodeId)) {
       episodeIds.push(episodeId);
     }
+    match = storyRegex.exec(html);
   }
 
   return episodeIds;

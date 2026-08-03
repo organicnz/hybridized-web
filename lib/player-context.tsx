@@ -1,9 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { Database } from '@/lib/types/database.types';
+import type { Database } from "@/lib/types/database.types";
+import { type ReactNode, createContext, useContext, useEffect, useState } from "react";
 
-type Band = Database['public']['Tables']['bands']['Row'];
+type Band = Database["public"]["Tables"]["bands"]["Row"];
 
 interface PlayerContextType {
   currentTrack: Band | null;
@@ -27,8 +27,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setIsPlaying(true);
     };
 
-    window.addEventListener('play-track', handlePlayTrack as EventListener);
-    return () => window.removeEventListener('play-track', handlePlayTrack as EventListener);
+    window.addEventListener("play-track", handlePlayTrack as EventListener);
+    return () => window.removeEventListener("play-track", handlePlayTrack as EventListener);
   }, []);
 
   const play = (track: Band) => {
@@ -59,7 +59,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 export function usePlayer() {
   const context = useContext(PlayerContext);
   if (context === undefined) {
-    throw new Error('usePlayer must be used within a PlayerProvider');
+    throw new Error("usePlayer must be used within a PlayerProvider");
   }
   return context;
 }

@@ -66,10 +66,7 @@ export function getUserStorageItemSync(key: string): string | null {
 /**
  * Set an item in user-scoped localStorage.
  */
-export async function setUserStorageItem(
-  key: string,
-  value: string
-): Promise<void> {
+export async function setUserStorageItem(key: string, value: string): Promise<void> {
   const userId = await getUserId();
   localStorage.setItem(getScopedKey(key, userId), value);
 }
@@ -117,7 +114,9 @@ export function clearCurrentUserStorage(): void {
     }
   }
 
-  keysToRemove.forEach((key) => localStorage.removeItem(key));
+  for (const key of keysToRemove) {
+    localStorage.removeItem(key);
+  }
 }
 
 /**

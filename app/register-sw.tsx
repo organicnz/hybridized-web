@@ -7,9 +7,9 @@ export function RegisterServiceWorker() {
     if ("serviceWorker" in navigator) {
       // First, unregister all old service workers
       navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((registration) => {
+        for (const registration of registrations) {
           registration.unregister();
-        });
+        }
 
         // Then register the new one after a short delay
         setTimeout(() => {

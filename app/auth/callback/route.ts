@@ -19,9 +19,7 @@ export async function GET(request: NextRequest) {
 
       // If this is a signup confirmation, redirect to confirmation page
       if (type === "signup") {
-        return NextResponse.redirect(
-          new URL("/auth/confirm-email?confirmed=true", request.url),
-        );
+        return NextResponse.redirect(new URL("/auth/confirm-email?confirmed=true", request.url));
       }
 
       return NextResponse.redirect(new URL(redirectUrl, request.url));

@@ -1,23 +1,23 @@
 "use client";
 
+import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
+import { createClient } from "@/lib/supabase/client";
 import {
+  clearCurrentUserStorage,
+  getUserStorageItemSync,
+  migrateToUserStorage,
+  setCurrentUserId,
+  setUserStorageItemSync,
+} from "@/lib/user-storage";
+import {
+  type ReactNode,
   createContext,
+  useCallback,
   useContext,
-  useState,
   useEffect,
   useRef,
-  useCallback,
-  ReactNode,
+  useState,
 } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
-import {
-  getUserStorageItemSync,
-  setUserStorageItemSync,
-  setCurrentUserId,
-  migrateToUserStorage,
-  clearCurrentUserStorage,
-} from "@/lib/user-storage";
 
 export interface Track {
   id: string;
@@ -48,9 +48,7 @@ interface AudioPlayerContextType {
   pauseAudio: () => void;
 }
 
-const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
-  undefined,
-);
+const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
 
 const STORAGE_KEY = "hybridized-audio-state";
 
@@ -93,11 +91,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
         // Migrate old non-scoped storage to user-scoped (one-time)
         if (user) {
-          await migrateToUserStorage([
-            STORAGE_KEY,
-            "recentSearches",
-            "language",
-          ]);
+          await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
         }
 
         // Load from user-scoped localStorage
@@ -136,11 +130,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
       if (event === "SIGNED_IN" && session?.user) {
         // Migrate storage and reload settings
-        await migrateToUserStorage([
-          STORAGE_KEY,
-          "recentSearches",
-          "language",
-        ]);
+        await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
         loadVolumeFromDb();
       } else if (event === "SIGNED_OUT") {
         // Clear user-specific storage on sign out
@@ -186,7 +176,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const setPlaylist = (tracks: Track[], startIndex: number = 0) => {
+  const setPlaylist = (tracks: Track[], startIndex = 0) => {
     setPlaylistState(tracks);
     setCurrentIndex(startIndex);
     if (tracks.length > 0 && startIndex < tracks.length) {
@@ -209,7 +199,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   };
 
   // Play a playlist immediately
-  const playPlaylist = async (tracks: Track[], startIndex: number = 0) => {
+  const playPlaylist = async (tracks: Track[], startIndex = 0) => {
     setPlaylistState(tracks);
     setCurrentIndex(startIndex);
     if (tracks.length > 0 && startIndex < tracks.length) {
@@ -237,8 +227,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
   const playPrevious = () => {
     if (playlist.length === 0) return;
-    const prevIndex =
-      currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
+    const prevIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
     setCurrentIndex(prevIndex);
     setCurrentTrackState(playlist[prevIndex]);
     setCurrentTime(0);
@@ -256,7 +245,9 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
     // Save to database with debouncing (won't overwrite gains)
     const volumePercent = Math.round(vol * 100); // Convert from 0-1 to 0-100
-    settingsSaverRef.current?.save({ volume_settings: { master: volumePercent } });
+    settingsSaverRef.current?.save({
+      volume_settings: { master: volumePercent },
+    });
   };
 
   const pauseAudio = () => {

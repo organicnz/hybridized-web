@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { AlertCircle, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { CheckCircle, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function ConfirmEmailPage() {
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading",
-  );
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [countdown, setCountdown] = useState(5);
   const router = useRouter();
 
@@ -64,24 +62,18 @@ export default function ConfirmEmailPage() {
         {status === "loading" && (
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 text-center">
             <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-4 animate-spin" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Confirming Email
-            </h2>
-            <p className="text-purple-200/70">
-              Please wait while we verify your email address...
-            </p>
+            <h2 className="text-2xl font-bold text-white mb-2">Confirming Email</h2>
+            <p className="text-purple-200/70">Please wait while we verify your email address...</p>
           </div>
         )}
 
         {status === "success" && (
           <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm rounded-2xl border border-green-500/20 p-8 text-center">
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Email Confirmed!
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Email Confirmed!</h2>
             <p className="text-purple-200/70 mb-6">
-              Your email has been successfully verified. You can now access all
-              features of Hybridized.
+              Your email has been successfully verified. You can now access all features of
+              Hybridized.
             </p>
             <div className="space-y-3">
               <Link
@@ -101,12 +93,9 @@ export default function ConfirmEmailPage() {
         {status === "error" && (
           <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl border border-red-500/20 p-8 text-center">
             <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Confirmation Failed
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Confirmation Failed</h2>
             <p className="text-purple-200/70 mb-6">
-              We couldn't verify your email. The link may have expired or
-              already been used.
+              We couldn't verify your email. The link may have expired or already been used.
             </p>
             <div className="space-y-3">
               <Link

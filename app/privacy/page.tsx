@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function PrivacyPage() {
   return (
@@ -20,14 +20,11 @@ export default function PrivacyPage() {
 
           <div className="space-y-6 text-white/70">
             <section>
-              <h2 className="text-2xl font-semibold text-green-400 mb-3">
-                Information We Collect
-              </h2>
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">Information We Collect</h2>
               <p className="leading-relaxed">
-                When you create an account on Hybridized, we collect your email
-                address, name, and profile information. We use this information
-                to provide you with access to our music discovery platform and
-                personalize your experience.
+                When you create an account on Hybridized, we collect your email address, name, and
+                profile information. We use this information to provide you with access to our music
+                discovery platform and personalize your experience.
               </p>
             </section>
 
@@ -35,9 +32,7 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold text-green-400 mb-3">
                 How We Use Your Information
               </h2>
-              <p className="leading-relaxed mb-3">
-                Your information is used to:
-              </p>
+              <p className="leading-relaxed mb-3">Your information is used to:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Provide and maintain your account</li>
                 <li>Enable access to hybrid sounds and interactive features</li>
@@ -47,33 +42,25 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-green-400 mb-3">
-                Data Security
-              </h2>
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">Data Security</h2>
               <p className="leading-relaxed">
-                We use Supabase for authentication and data storage, which
-                provides enterprise-grade security. Your password is encrypted,
-                and we never store it in plain text. All data transmission is
-                encrypted using SSL/TLS.
+                We use Supabase for authentication and data storage, which provides enterprise-grade
+                security. Your password is encrypted, and we never store it in plain text. All data
+                transmission is encrypted using SSL/TLS.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-green-400 mb-3">
-                Third-Party Services
-              </h2>
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">Third-Party Services</h2>
               <p className="leading-relaxed">
-                We use Supabase for backend services and Vercel for hosting.
-                These services may collect anonymous usage data to improve their
-                platforms. We do not share your personal information with third
-                parties for marketing purposes.
+                We use Supabase for backend services and Vercel for hosting. These services may
+                collect anonymous usage data to improve their platforms. We do not share your
+                personal information with third parties for marketing purposes.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-green-400 mb-3">
-                Your Rights
-              </h2>
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">Your Rights</h2>
               <p className="leading-relaxed mb-3">You have the right to:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Access your personal data</li>
@@ -84,27 +71,18 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-green-400 mb-3">
-                Cookies
-              </h2>
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">Cookies</h2>
               <p className="leading-relaxed">
-                We use essential cookies to maintain your session and
-                authentication state. These are necessary for the platform to
-                function properly.
+                We use essential cookies to maintain your session and authentication state. These
+                are necessary for the platform to function properly.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-green-400 mb-3">
-                Contact Us
-              </h2>
+              <h2 className="text-2xl font-semibold text-green-400 mb-3">Contact Us</h2>
               <p className="leading-relaxed">
-                If you have questions about this privacy policy or your data,
-                please{" "}
-                <Link
-                  href="/contact"
-                  className="text-green-400 hover:text-green-300 underline"
-                >
+                If you have questions about this privacy policy or your data, please{" "}
+                <Link href="/contact" className="text-green-400 hover:text-green-300 underline">
                   contact us
                 </Link>
                 .

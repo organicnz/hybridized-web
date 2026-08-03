@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
+import { AlertCircle, CheckCircle, Loader2, Lock } from "lucide-react";
 import Image from "next/image";
-import { Lock, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -26,12 +26,7 @@ export default function ResetPasswordPage() {
       const refreshToken = hashParams.get("refresh_token");
       const type = hashParams.get("type");
 
-      console.log(
-        "Recovery handler - type:",
-        type,
-        "has token:",
-        !!accessToken,
-      );
+      console.log("Recovery handler - type:", type, "has token:", !!accessToken);
 
       if (type === "recovery" && accessToken && refreshToken) {
         try {
@@ -45,20 +40,14 @@ export default function ResetPasswordPage() {
 
           if (error) {
             console.error("setSession error:", error);
-            setError(
-              "Invalid or expired reset link. Please request a new one.",
-            );
+            setError("Invalid or expired reset link. Please request a new one.");
             setVerifying(false);
           } else if (data.session) {
             console.log("Session established successfully");
             setValidSession(true);
             setVerifying(false);
             // Clean up the URL
-            window.history.replaceState(
-              {},
-              document.title,
-              window.location.pathname,
-            );
+            window.history.replaceState({}, document.title, window.location.pathname);
           } else {
             setError("Failed to establish session. Please try again.");
             setVerifying(false);
@@ -78,9 +67,7 @@ export default function ResetPasswordPage() {
           setValidSession(true);
         } else {
           console.log("No session or recovery token found");
-          setError(
-            "No valid reset link found. Please request a new password reset.",
-          );
+          setError("No valid reset link found. Please request a new password reset.");
         }
         setVerifying(false);
       }
@@ -121,9 +108,7 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md">
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 text-center">
             <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-4 animate-spin" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Verifying Reset Link
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Verifying Reset Link</h2>
             <p className="text-purple-200/70">
               Please wait while we verify your password reset link...
             </p>
@@ -139,12 +124,9 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md">
           <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm rounded-2xl border border-green-500/20 p-8 text-center">
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Password Updated
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Password Updated</h2>
             <p className="text-purple-200/70 mb-6">
-              Your password has been successfully updated. Redirecting to
-              login...
+              Your password has been successfully updated. Redirecting to login...
             </p>
           </div>
         </div>
@@ -158,9 +140,7 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md">
           <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl border border-red-500/20 p-8 text-center">
             <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Invalid Reset Link
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Invalid Reset Link</h2>
             <p className="text-purple-200/70 mb-6">
               {error ||
                 "This password reset link is invalid or has expired. Please request a new one."}
@@ -213,10 +193,7 @@ export default function ResetPasswordPage() {
 
           <form onSubmit={handleUpdatePassword} className="space-y-6">
             <div>
-              <label
-                htmlFor="password"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="password" className="block text-white font-medium mb-2">
                 New Password
               </label>
               <div className="relative">
@@ -240,10 +217,7 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="confirmPassword" className="block text-white font-medium mb-2">
                 Confirm Password
               </label>
               <div className="relative">

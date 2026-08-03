@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Sliders, LogIn } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
 import { useSyncStatus } from "@/hooks/use-sync-status";
-import { SyncIndicator } from "./sync-indicator";
+import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
+import { createClient } from "@/lib/supabase/client";
+import { LogIn, Sliders } from "lucide-react";
 import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { SyncIndicator } from "./sync-indicator";
 
 interface AudioEqualizerProps {
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -41,16 +41,11 @@ const EQ_PRESETS = {
   Acoustic: [5, 4, 3, 1, 2, 2, 3, 4, 4, 3],
 };
 
-export function AudioEqualizer({
-  audioRef,
-  className = "",
-}: AudioEqualizerProps) {
+export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [filters, setFilters] = useState<BiquadFilterNode[]>([]);
-  const [gains, setGains] = useState<number[]>(
-    new Array(FREQUENCY_BANDS.length).fill(0),
-  );
+  const [gains, setGains] = useState<number[]>(new Array(FREQUENCY_BANDS.length).fill(0));
   const [currentPreset, setCurrentPreset] = useState<string>("Flat");
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState(false);
@@ -134,8 +129,7 @@ export function AudioEqualizer({
       if (!audioRef.current) return;
 
       try {
-        const ctx = new (window.AudioContext ||
-          (window as any).webkitAudioContext)();
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
 
         let source;
         try {
@@ -233,10 +227,7 @@ export function AudioEqualizer({
         title={initError ? "Equalizer unavailable" : "Equalizer"}
         disabled={initError}
       >
-        <Sliders
-          size={18}
-          className="transition-transform group-hover:rotate-12"
-        />
+        <Sliders size={18} className="transition-transform group-hover:rotate-12" />
       </button>
 
       {isOpen && (
@@ -262,12 +253,9 @@ export function AudioEqualizer({
                     <LogIn className="w-8 h-8 text-purple-400" />
                   </div>
                 </div>
-                <h3 className="text-white font-semibold text-lg mb-2">
-                  Login Required
-                </h3>
+                <h3 className="text-white font-semibold text-lg mb-2">Login Required</h3>
                 <p className="text-white/60 text-sm mb-6">
-                  Sign in to save and sync your equalizer settings across
-                  devices
+                  Sign in to save and sync your equalizer settings across devices
                 </p>
                 <Link
                   href="/auth/login"
@@ -279,20 +267,14 @@ export function AudioEqualizer({
               </div>
             ) : initError ? (
               <div className="relative text-center py-8">
-                <p className="text-white/70 text-sm mb-2">
-                  Equalizer unavailable
-                </p>
-                <p className="text-white/50 text-xs">
-                  Audio system already initialized
-                </p>
+                <p className="text-white/70 text-sm mb-2">Equalizer unavailable</p>
+                <p className="text-white/50 text-xs">Audio system already initialized</p>
               </div>
             ) : (
               <>
                 <div className="relative flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <h3 className="text-white font-semibold text-sm drop-shadow-lg">
-                      Equalizer
-                    </h3>
+                    <h3 className="text-white font-semibold text-sm drop-shadow-lg">Equalizer</h3>
                     <SyncIndicator status={syncStatus} />
                   </div>
                   <button
@@ -305,9 +287,7 @@ export function AudioEqualizer({
 
                 {/* Presets */}
                 <div className="relative mb-5">
-                  <label className="text-xs text-white/50 mb-2 block font-medium">
-                    Presets
-                  </label>
+                  <label className="text-xs text-white/50 mb-2 block font-medium">Presets</label>
                   <div className="grid grid-cols-4 gap-2">
                     {Object.keys(EQ_PRESETS).map((presetName) => (
                       <button
@@ -352,7 +332,7 @@ export function AudioEqualizer({
                           step="0.5"
                           value={gains[index]}
                           onChange={(e) =>
-                            handleGainChange(index, parseFloat(e.target.value))
+                            handleGainChange(index, Number.parseFloat(e.target.value))
                           }
                           className="absolute inset-0 h-full w-full accent-purple-500 cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
                           style={{

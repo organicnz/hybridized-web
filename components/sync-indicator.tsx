@@ -1,7 +1,7 @@
 "use client";
 
-import { Cloud, CloudOff, Check, Loader2 } from "lucide-react";
 import type { SyncStatus } from "@/lib/settings-utils";
+import { Check, Cloud, CloudOff, Loader2 } from "lucide-react";
 
 interface SyncIndicatorProps {
   status: SyncStatus;
@@ -42,14 +42,8 @@ export function SyncIndicator({ status, className = "" }: SyncIndicatorProps) {
   const Icon = config.icon;
 
   return (
-    <div
-      className={`flex items-center gap-1.5 ${className}`}
-      title={config.title}
-    >
-      <Icon
-        size={14}
-        className={`${config.color} ${config.animate ? "animate-spin" : ""}`}
-      />
+    <div className={`flex items-center gap-1.5 ${className}`} title={config.title}>
+      <Icon size={14} className={`${config.color} ${config.animate ? "animate-spin" : ""}`} />
       <span className={`text-[10px] ${config.color}`}>{config.title}</span>
     </div>
   );

@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface AudioProgressBarProps {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   className?: string;
 }
 
-export function AudioProgressBar({
-  audioRef,
-  className = "",
-}: AudioProgressBarProps) {
+export function AudioProgressBar({ audioRef, className = "" }: AudioProgressBarProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isDragging, setIsDragging] = useState(false);

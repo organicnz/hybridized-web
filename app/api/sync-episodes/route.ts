@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
@@ -50,8 +50,7 @@ export async function POST() {
     });
   } catch (error) {
     console.error("Error syncing episodes:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to sync episodes";
+    const message = error instanceof Error ? error.message : "Failed to sync episodes";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -67,44 +66,22 @@ function parseRSSFeed(xmlText: string) {
   }> = [];
 
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
+  let match: RegExpExecArray | null = itemRegex.exec(xmlText);
 
-  while ((match = itemRegex.exec(xmlText)) !== null) {
+  while (match !== null) {
     const itemContent = match[1];
-
-    // Extract episode ID from guid or link
-    const guidMatch = itemContent.match(/<guid[^>]*>(.*?)<\/guid>/);
-    const episodeId = guidMatch?.[1] || "";
-
-    const titleMatch = itemContent.match(
-      /<title><!\[CDATA\[(.*?)\]\]><\/title>/,
-    );
-    const title = titleMatch?.[1] || "";
-
-    const enclosureMatch = itemContent.match(/<enclosure url="(.*?)"/);
-    const audioUrl = enclosureMatch?.[1] || "";
-
-    const descMatch = itemContent.match(
-      /<description><!\[CDATA\[(.*?)\]\]><\/description>/,
-    );
-    const description = descMatch?.[1] || "";
-
-    const dateMatch = itemContent.match(/<pubDate>(.*?)<\/pubDate>/);
-    const pubDate = dateMatch?.[1] || "";
-
-    const imageMatch = itemContent.match(/<itunes:image href="(.*?)"/);
-    const coverUrl = imageMatch?.[1];
+    const episodeId = itemContent.match(/<guid[^>]*>(.*?)<\/guid>/)?.[1] ?? "";
+    const title = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] ?? "";
+    const audioUrl = itemContent.match(/<enclosure url="(.*?)"/)?.[1] ?? "";
+    const description =
+      itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] ?? "";
+    const pubDate = itemContent.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
+    const coverUrl = itemContent.match(/<itunes:image href="(.*?)"/)?.[1];
 
     if (audioUrl && episodeId) {
-      episodes.push({
-        episodeId,
-        title,
-        audioUrl,
-        description,
-        pubDate,
-        coverUrl,
-      });
+      episodes.push({ episodeId, title, audioUrl, description, pubDate, coverUrl });
     }
+    match = itemRegex.exec(xmlText);
   }
 
   return episodes;

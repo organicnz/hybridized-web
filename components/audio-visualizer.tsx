@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
 import { useAudioVisualizer } from "@/hooks/use-audio-visualizer";
-import { BarChart3, Activity, Radio } from "lucide-react";
+import { Activity, BarChart3, Radio } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface AudioVisualizerProps {
   analyser: AnalyserNode | null;
@@ -12,11 +12,7 @@ interface AudioVisualizerProps {
 
 type VisualizerType = "bars" | "waveform" | "circular";
 
-export function AudioVisualizer({
-  analyser,
-  isPlaying,
-  className = "",
-}: AudioVisualizerProps) {
+export function AudioVisualizer({ analyser, isPlaying, className = "" }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [visualizerType, setVisualizerType] = useState<VisualizerType>("bars");
   const { startAnimation, stopAnimation } = useAudioVisualizer(analyser);
@@ -37,9 +33,7 @@ export function AudioVisualizer({
   return (
     <div className={`space-y-3 ${className}`}>
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-white/90">
-          Audio Visualizer
-        </h4>
+        <h4 className="text-sm font-semibold text-white/90">Audio Visualizer</h4>
         <div className="flex gap-1">
           <button
             onClick={() => setVisualizerType("bars")}

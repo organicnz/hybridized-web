@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { NavLink } from "./nav-link";
 import type { NavLink as NavLinkType } from "@/lib/constants/navigation";
+import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import { NavLink } from "./nav-link";
 
 type MobileMenuProps = {
   isOpen: boolean;

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function TermsPage() {
   return (
@@ -20,25 +20,20 @@ export default function TermsPage() {
 
           <div className="space-y-6 text-white/70">
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                1. Acceptance of Terms
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">1. Acceptance of Terms</h2>
               <p className="leading-relaxed">
-                By accessing and using Hybridized, you accept and agree to be
-                bound by the terms and provision of this agreement. If you do
-                not agree to these terms, please do not use our service.
+                By accessing and using Hybridized, you accept and agree to be bound by the terms and
+                provision of this agreement. If you do not agree to these terms, please do not use
+                our service.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                2. Use License
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">2. Use License</h2>
               <p className="leading-relaxed mb-3">
-                Permission is granted to temporarily access the materials on
-                Hybridized for personal, non-commercial use only. This is the
-                grant of a license, not a transfer of title, and under this
-                license you may not:
+                Permission is granted to temporarily access the materials on Hybridized for
+                personal, non-commercial use only. This is the grant of a license, not a transfer of
+                title, and under this license you may not:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Modify or copy the materials</li>
@@ -49,69 +44,54 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                3. User Accounts
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">3. User Accounts</h2>
               <p className="leading-relaxed">
-                When you create an account with us, you must provide accurate
-                and complete information. You are responsible for safeguarding
-                your account and for all activities that occur under your
-                account.
+                When you create an account with us, you must provide accurate and complete
+                information. You are responsible for safeguarding your account and for all
+                activities that occur under your account.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                4. Content
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">4. Content</h2>
               <p className="leading-relaxed">
-                Our service allows you to discover and explore hybrid music
-                content. We do not claim ownership of any content you access
-                through our platform. All music and media content remains the
-                property of their respective owners.
+                Our service allows you to discover and explore hybrid music content. We do not claim
+                ownership of any content you access through our platform. All music and media
+                content remains the property of their respective owners.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                5. Privacy
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">5. Privacy</h2>
               <p className="leading-relaxed">
-                Your use of Hybridized is also governed by our Privacy Policy.
-                Please review our Privacy Policy to understand our practices
-                regarding the collection and use of your information.
+                Your use of Hybridized is also governed by our Privacy Policy. Please review our
+                Privacy Policy to understand our practices regarding the collection and use of your
+                information.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                6. Limitations
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">6. Limitations</h2>
               <p className="leading-relaxed">
-                Hybridized shall not be held liable for any damages arising out
-                of the use or inability to use the materials on our platform,
-                even if we have been notified of the possibility of such damage.
+                Hybridized shall not be held liable for any damages arising out of the use or
+                inability to use the materials on our platform, even if we have been notified of the
+                possibility of such damage.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                7. Modifications
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">7. Modifications</h2>
               <p className="leading-relaxed">
-                We may revise these terms of service at any time without notice.
-                By using this platform, you agree to be bound by the current
-                version of these terms of service.
+                We may revise these terms of service at any time without notice. By using this
+                platform, you agree to be bound by the current version of these terms of service.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-white">
-                8. Contact
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3 text-white">8. Contact</h2>
               <p className="leading-relaxed">
-                If you have any questions about these Terms of Service, please
-                contact us through our contact page.
+                If you have any questions about these Terms of Service, please contact us through
+                our contact page.
               </p>
             </section>
 

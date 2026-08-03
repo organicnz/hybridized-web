@@ -11,9 +11,7 @@ type SettingsSaver = {
 /**
  * Hook to subscribe to settings sync status changes.
  */
-export function useSyncStatus(
-  saverRef: React.RefObject<SettingsSaver | null>
-): SyncStatus {
+export function useSyncStatus(saverRef: React.RefObject<SettingsSaver | null>): SyncStatus {
   const [status, setStatus] = useState<SyncStatus>("idle");
 
   useEffect(() => {

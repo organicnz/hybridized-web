@@ -1,7 +1,7 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
 
 /**
  * Universal recovery token handler
@@ -41,9 +41,7 @@ export function RecoveryHandler() {
 
     // If this is a recovery link, redirect to reset password page
     if (type === "recovery" && accessToken) {
-      console.log(
-        "RecoveryHandler: Recovery token detected, redirecting to reset password...",
-      );
+      console.log("RecoveryHandler: Recovery token detected, redirecting to reset password...");
       router.replace(`/auth/reset-password${hash}`);
     }
   }, [pathname, router]);

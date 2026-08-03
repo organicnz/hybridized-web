@@ -7,9 +7,7 @@ const FOOTER_LINKS = [
   { href: "/terms", label: "Terms" },
 ] as const;
 
-const SUPPORT_LINKS = [
-  { href: "/support", label: "Support & Resources" },
-] as const;
+const SUPPORT_LINKS = [{ href: "/support", label: "Support & Resources" }] as const;
 
 export function Footer() {
   return (

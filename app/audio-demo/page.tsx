@@ -7,12 +7,10 @@ export default function AudioDemoPage() {
             Hardware-Accelerated Audio Engine
           </h1>
           <p className="text-white/70">
-            Professional-grade audio processing with 10-band EQ, 3D spatial
-            audio, and dynamic compression
+            Professional-grade audio processing with 10-band EQ, 3D spatial audio, and dynamic
+            compression
           </p>
-          <p className="text-white/50 mt-4">
-            Audio player component coming soon
-          </p>
+          <p className="text-white/50 mt-4">Audio player component coming soon</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

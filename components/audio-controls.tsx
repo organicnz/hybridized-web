@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from 'react';
-import { Volume2, VolumeX, Settings } from 'lucide-react';
-import type { AudioEnhancementSettings } from '@/lib/audio/enhancer';
+import type { AudioEnhancementSettings } from "@/lib/audio/enhancer";
+import { Settings, Volume2, VolumeX } from "lucide-react";
+import { useState } from "react";
 
 interface AudioControlsProps {
   settings: AudioEnhancementSettings;
@@ -11,7 +11,12 @@ interface AudioControlsProps {
   onToggle: () => void;
 }
 
-export function AudioControls({ settings, isEnabled, onSettingsChange, onToggle }: AudioControlsProps) {
+export function AudioControls({
+  settings,
+  isEnabled,
+  onSettingsChange,
+  onToggle,
+}: AudioControlsProps) {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
@@ -23,7 +28,7 @@ export function AudioControls({ settings, isEnabled, onSettingsChange, onToggle 
             <Settings className="w-4 h-4" />
             Audio Enhancement
           </h3>
-          
+
           <div className="space-y-4">
             {/* Bass Boost */}
             <div>
@@ -79,9 +84,7 @@ export function AudioControls({ settings, isEnabled, onSettingsChange, onToggle 
           </div>
 
           <div className="mt-4 pt-4 border-t border-white/10">
-            <p className="text-xs text-white/40">
-              🎵 Hardware-accelerated audio processing
-            </p>
+            <p className="text-xs text-white/40">🎵 Hardware-accelerated audio processing</p>
           </div>
         </div>
       )}
@@ -99,11 +102,9 @@ export function AudioControls({ settings, isEnabled, onSettingsChange, onToggle 
         <button
           onClick={onToggle}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-lg ${
-            isEnabled 
-              ? 'bg-[#1DB954] hover:bg-[#1ed760]' 
-              : 'bg-white/10 hover:bg-white/20'
+            isEnabled ? "bg-[#1DB954] hover:bg-[#1ed760]" : "bg-white/10 hover:bg-white/20"
           }`}
-          aria-label={isEnabled ? 'Disable enhancement' : 'Enable enhancement'}
+          aria-label={isEnabled ? "Disable enhancement" : "Enable enhancement"}
         >
           {isEnabled ? (
             <Volume2 className="w-5 h-5 text-black" />

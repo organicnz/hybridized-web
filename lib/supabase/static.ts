@@ -1,5 +1,5 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/lib/types/database.types';
+import type { Database } from "@/lib/types/database.types";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Create a Supabase client for static generation (no cookies)
@@ -8,6 +8,6 @@ import type { Database } from '@/lib/types/database.types';
 export function createStaticClient() {
   return createSupabaseClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 }

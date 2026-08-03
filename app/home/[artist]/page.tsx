@@ -1,8 +1,8 @@
 import { ArtistNav } from "@/components/artist-nav";
-import { HomeClient } from "../home-client";
 import { createClient } from "@/lib/supabase/server";
 import { createStaticClient } from "@/lib/supabase/static";
 import { notFound } from "next/navigation";
+import { HomeClient } from "../home-client";
 
 interface PageProps {
   params: Promise<{ artist: string }>;
@@ -11,10 +11,7 @@ interface PageProps {
 // Enable static generation for known artists
 export async function generateStaticParams() {
   const supabase = createStaticClient();
-  const { data: bands } = await supabase
-    .from("bands")
-    .select("name")
-    .order("name");
+  const { data: bands } = await supabase.from("bands").select("name").order("name");
 
   if (!bands) return [];
 

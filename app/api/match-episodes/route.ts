@@ -1,14 +1,12 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
     const supabase = await createClient();
 
     // Get all bands
-    const { data: bands, error: bandsError } = await supabase
-      .from("bands")
-      .select("id, name");
+    const { data: bands, error: bandsError } = await supabase.from("bands").select("id, name");
 
     if (bandsError) throw bandsError;
 
@@ -65,8 +63,7 @@ export async function POST() {
     });
   } catch (error) {
     console.error("Error matching episodes:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to match episodes";
+    const message = error instanceof Error ? error.message : "Failed to match episodes";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

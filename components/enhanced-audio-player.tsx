@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
 import { useHardwareAudio } from "@/hooks/use-hardware-audio";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface EnhancedAudioPlayerProps {
   src: string;
@@ -10,11 +10,7 @@ interface EnhancedAudioPlayerProps {
   className?: string;
 }
 
-export function EnhancedAudioPlayer({
-  src,
-  title,
-  className = "",
-}: EnhancedAudioPlayerProps) {
+export function EnhancedAudioPlayer({ src, title, className = "" }: EnhancedAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
@@ -125,18 +121,11 @@ export function EnhancedAudioPlayer({
     <div
       className={`bg-gradient-to-br from-purple-900/20 via-black/40 to-blue-900/20 backdrop-blur-sm border border-white/10 rounded-lg p-4 ${className}`}
     >
-      {title && (
-        <h3 className="text-white font-semibold mb-3 text-sm">{title}</h3>
-      )}
+      {title && <h3 className="text-white font-semibold mb-3 text-sm">{title}</h3>}
 
       <audio ref={audioRef} src={src} preload="auto" crossOrigin="anonymous" />
 
-      <canvas
-        ref={canvasRef}
-        width={300}
-        height={60}
-        className="w-full h-15 mb-3 rounded"
-      />
+      <canvas ref={canvasRef} width={300} height={60} className="w-full h-15 mb-3 rounded" />
 
       <div className="flex items-center gap-3">
         <button
@@ -161,16 +150,14 @@ export function EnhancedAudioPlayer({
           max="1"
           step="0.01"
           value={isMuted ? 0 : volume}
-          onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+          onChange={(e) => handleVolumeChange(Number.parseFloat(e.target.value))}
           className="flex-1 accent-purple-500"
           aria-label="Volume"
         />
       </div>
 
       {isInitialized && (
-        <p className="text-xs text-white/50 mt-2">
-          Hardware-accelerated audio enabled
-        </p>
+        <p className="text-xs text-white/50 mt-2">Hardware-accelerated audio enabled</p>
       )}
     </div>
   );

@@ -1,20 +1,17 @@
 "use client";
 
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useRef, useState } from "react";
 
 interface ArtistNavProps {
   activeArtist?: string;
   className?: string;
 }
 
-export function ArtistNav({
-  activeArtist = "Hybrid",
-  className,
-}: ArtistNavProps) {
+export function ArtistNav({ activeArtist = "Hybrid", className }: ArtistNavProps) {
   const router = useRouter();
   const [artists, setArtists] = useState<string[]>([]);
   const supabase = createClient();
@@ -23,10 +20,7 @@ export function ArtistNav({
 
   useEffect(() => {
     async function fetchArtists() {
-      const { data } = await supabase
-        .from("bands")
-        .select("name")
-        .order("name");
+      const { data } = await supabase.from("bands").select("name").order("name");
 
       if (data) {
         setArtists(data.map((band) => band.name).filter(Boolean));
@@ -58,10 +52,7 @@ export function ArtistNav({
     );
   };
 
-  const handleClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    artist: string,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, artist: string) => {
     if (activeArtist === artist) {
       e.preventDefault();
       return;

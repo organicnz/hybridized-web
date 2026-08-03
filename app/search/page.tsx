@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { SearchResults } from "./search-results";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { SearchResults } from "./search-results";
 
 export default async function SearchPage({
   searchParams,
@@ -34,24 +34,29 @@ export default async function SearchPage({
     // Filter results to match query in episode title, description, creator, or band name
     // Also filter out episodes from bands with firstory_user_id starting with 'reco'
     const searchLower = query.toLowerCase();
-    results = (data || []).filter((episode: any) => {
-      // Skip if band has firstory_user_id starting with 'reco'
-      if (episode.bands?.firstory_user_id?.startsWith("reco")) {
-        return false;
-      }
+    results = (data || []).filter(
+      (episode: {
+        title?: string;
+        description?: string;
+        creator?: string;
+        bands?: { name?: string; firstory_user_id?: string };
+      }) => {
+        // Skip if band has firstory_user_id starting with 'reco'
+        if (episode.bands?.firstory_user_id?.startsWith("reco")) {
+          return false;
+        }
 
-      // Check if query matches episode fields or band name
-      const matchesEpisode =
-        episode.title?.toLowerCase().includes(searchLower) ||
-        episode.description?.toLowerCase().includes(searchLower) ||
-        episode.creator?.toLowerCase().includes(searchLower);
+        // Check if query matches episode fields or band name
+        const matchesEpisode =
+          episode.title?.toLowerCase().includes(searchLower) ||
+          episode.description?.toLowerCase().includes(searchLower) ||
+          episode.creator?.toLowerCase().includes(searchLower);
 
-      const matchesBand = episode.bands?.name
-        ?.toLowerCase()
-        .includes(searchLower);
+        const matchesBand = episode.bands?.name?.toLowerCase().includes(searchLower);
 
-      return matchesEpisode || matchesBand;
-    });
+        return matchesEpisode || matchesBand;
+      },
+    );
     error = fetchError;
   }
 
@@ -82,17 +87,13 @@ export default async function SearchPage({
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-8">
-              <p className="text-red-400">
-                Error loading search results. Please try again.
-              </p>
+              <p className="text-red-400">Error loading search results. Please try again.</p>
             </div>
           )}
 
           {!query.trim() ? (
             <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 text-center hover:bg-white/10 transition-colors">
-              <p className="text-white/70">
-                Enter a search query to find mixes
-              </p>
+              <p className="text-white/70">Enter a search query to find mixes</p>
             </div>
           ) : (
             <SearchResults results={results} query={query} />
