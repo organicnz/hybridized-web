@@ -6,11 +6,11 @@
  */
 
 export interface AudioEnhancementSettings {
-  bassBoost: number;      // 0-100
-  trebleBoost: number;    // 0-100
-  compression: boolean;   // Dynamic range compression
-  spatialAudio: boolean;  // 3D audio effect
-  normalize: boolean;     // Volume normalization
+  bassBoost: number; // 0-100
+  trebleBoost: number; // 0-100
+  compression: boolean; // Dynamic range compression
+  spatialAudio: boolean; // 3D audio effect
+  normalize: boolean; // Volume normalization
 }
 
 export class AudioEnhancer {
@@ -25,7 +25,7 @@ export class AudioEnhancer {
   private connectedElement: HTMLMediaElement | null = null;
 
   constructor() {
-    if (typeof window !== 'undefined' && 'AudioContext' in window) {
+    if (typeof window !== "undefined" && "AudioContext" in window) {
       this.audioContext = new AudioContext();
     }
   }
@@ -53,12 +53,12 @@ export class AudioEnhancer {
       this.analyser = this.audioContext.createAnalyser();
 
       // Configure bass filter (low-shelf)
-      this.bassFilter.type = 'lowshelf';
+      this.bassFilter.type = "lowshelf";
       this.bassFilter.frequency.value = 200;
       this.bassFilter.gain.value = 0;
 
       // Configure treble filter (high-shelf)
-      this.trebleFilter.type = 'highshelf';
+      this.trebleFilter.type = "highshelf";
       this.trebleFilter.frequency.value = 3000;
       this.trebleFilter.gain.value = 0;
 
@@ -86,11 +86,11 @@ export class AudioEnhancer {
       this.connectedElement = audioElement;
 
       // Resume audio context on user interaction
-      if (this.audioContext.state === 'suspended') {
+      if (this.audioContext.state === "suspended") {
         this.audioContext.resume();
       }
     } catch (error) {
-      console.error('Error connecting audio:', error);
+      console.error("Error connecting audio:", error);
     }
   }
 
@@ -145,8 +145,8 @@ export class AudioEnhancer {
     console.log(`Audio hardware sample rate: ${sampleRate}Hz`);
 
     // Enable low-latency mode
-    if ('audioWorklet' in this.audioContext) {
-      console.log('AudioWorklet available - hardware acceleration enabled');
+    if ("audioWorklet" in this.audioContext) {
+      console.log("AudioWorklet available - hardware acceleration enabled");
     }
   }
 
@@ -167,14 +167,14 @@ export class AudioEnhancer {
    * Get audio context state
    */
   getState(): string {
-    return this.audioContext?.state || 'closed';
+    return this.audioContext?.state || "closed";
   }
 
   /**
    * Resume audio context (needed after user interaction)
    */
   async resume(): Promise<void> {
-    if (this.audioContext && this.audioContext.state === 'suspended') {
+    if (this.audioContext && this.audioContext.state === "suspended") {
       await this.audioContext.resume();
     }
   }

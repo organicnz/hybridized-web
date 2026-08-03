@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { ArtistProfile } from "@/components/artist-profile";
 import { IframePlayer } from "@/components/iframe-player";
 import { useAudioPlayer } from "@/lib/audio-player-context";
 import { soundCloudManager } from "@/lib/soundcloud-widget-manager";
 import type { Database } from "@/lib/types/database.types";
+import { useEffect, useRef } from "react";
 
 type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"] & {
   episodes?: Database["public"]["Tables"]["episodes"]["Row"][];
@@ -23,11 +23,9 @@ interface HomeClientProps {
 declare global {
   interface Window {
     SC: {
-      Widget: {
-        (iframe: HTMLIFrameElement): {
-          bind: (event: string, callback: () => void) => void;
-          pause: () => void;
-        };
+      Widget: (iframe: HTMLIFrameElement) => {
+        bind: (event: string, callback: () => void) => void;
+        pause: () => void;
       };
     };
   }
@@ -131,18 +129,12 @@ export function HomeClient({
         ) : (
           <div className="space-y-6 overflow-y-auto pr-2">
             {allEpisodes.map((episode) => (
-              <IframePlayer
-                key={episode.id}
-                episode={episode}
-                artist={currentArtist || "Hybrid"}
-              />
+              <IframePlayer key={episode.id} episode={episode} artist={currentArtist || "Hybrid"} />
             ))}
 
             {allEpisodes.length === 0 && !soundcloudUrl && (
               <div className="bg-[#181818] rounded-lg p-12 text-center border border-white/5">
-                <p className="text-white/50">
-                  No episodes available for this artist
-                </p>
+                <p className="text-white/50">No episodes available for this artist</p>
               </div>
             )}
           </div>

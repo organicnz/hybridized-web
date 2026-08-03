@@ -7,9 +7,7 @@ interface SocialAuthButtonsProps {
   redirectTo?: string;
 }
 
-export function SocialAuthButtons({
-  redirectTo = "/home",
-}: SocialAuthButtonsProps) {
+export function SocialAuthButtons({ redirectTo = "/home" }: SocialAuthButtonsProps) {
   const supabase = createClient();
 
   const handleGithubLogin = async () => {

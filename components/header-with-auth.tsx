@@ -1,16 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { User, Menu } from "lucide-react";
-import { useState, useCallback, Suspense } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { HEADER_STYLES, NAV_LINKS } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
-import { SearchBar } from "./search-bar";
+import { Menu, User } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense, useCallback, useState } from "react";
+import { UserMenu } from "./auth/user-menu";
 import { MobileMenu } from "./mobile-menu";
 import { NavLink } from "./nav-link";
-import { NAV_LINKS, HEADER_STYLES } from "@/lib/constants/navigation";
-import { UserMenu } from "./auth/user-menu";
-import { useAuth } from "@/hooks/use-auth";
+import { SearchBar } from "./search-bar";
 
 export function HeaderWithAuth() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -44,10 +44,7 @@ export function HeaderWithAuth() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav
-          className="hidden md:flex items-center gap-6"
-          aria-label="Main navigation"
-        >
+        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
           {NAV_LINKS.map((link) => (
             <NavLink key={link.href} {...link} variant="desktop" />
           ))}
@@ -65,11 +62,7 @@ export function HeaderWithAuth() {
           ) : isAuthenticated ? (
             <UserMenu />
           ) : (
-            <Link
-              href="/auth/login"
-              className={HEADER_STYLES.button}
-              aria-label="User account"
-            >
+            <Link href="/auth/login" className={HEADER_STYLES.button} aria-label="User account">
               <User className={HEADER_STYLES.icon} />
             </Link>
           )}
@@ -85,11 +78,7 @@ export function HeaderWithAuth() {
         </div>
       </div>
 
-      <MobileMenu
-        isOpen={mobileMenuOpen}
-        onClose={closeMobileMenu}
-        navLinks={NAV_LINKS}
-      />
+      <MobileMenu isOpen={mobileMenuOpen} onClose={closeMobileMenu} navLinks={NAV_LINKS} />
     </header>
   );
 }

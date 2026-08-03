@@ -1,14 +1,7 @@
 "use client";
 
+import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
 
 interface CustomAudioPlayerProps {
   src: string;
@@ -159,7 +152,7 @@ export function CustomAudioPlayer({
     const audio = internalAudioRef.current;
     if (!audio) return;
 
-    const time = parseFloat(e.target.value);
+    const time = Number.parseFloat(e.target.value);
     audio.currentTime = time;
     setCurrentTime(time);
   };
@@ -168,10 +161,7 @@ export function CustomAudioPlayer({
     const audio = internalAudioRef.current;
     if (!audio) return;
 
-    audio.currentTime = Math.max(
-      0,
-      Math.min(audio.duration, audio.currentTime + seconds),
-    );
+    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
   };
 
   const toggleMute = () => {
@@ -192,13 +182,7 @@ export function CustomAudioPlayer({
 
   return (
     <div className="flex items-center gap-3 w-full">
-      <audio
-        ref={internalAudioRef}
-        src={src}
-        preload="auto"
-        crossOrigin="anonymous"
-        playsInline
-      />
+      <audio ref={internalAudioRef} src={src} preload="auto" crossOrigin="anonymous" playsInline />
 
       {/* Controls */}
       <div className="flex items-center gap-2">
@@ -252,9 +236,7 @@ export function CustomAudioPlayer({
       </div>
 
       {/* Time */}
-      <span className="text-xs text-white/50 tabular-nums">
-        {formatTime(currentTime)}
-      </span>
+      <span className="text-xs text-white/50 tabular-nums">{formatTime(currentTime)}</span>
 
       {/* Progress Bar */}
       <div className="flex-1 min-w-0">
@@ -274,9 +256,7 @@ export function CustomAudioPlayer({
       </div>
 
       {/* Duration */}
-      <span className="text-xs text-white/50 tabular-nums">
-        {formatTime(duration)}
-      </span>
+      <span className="text-xs text-white/50 tabular-nums">{formatTime(duration)}</span>
     </div>
   );
 }

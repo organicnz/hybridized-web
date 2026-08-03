@@ -1,6 +1,6 @@
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { Music, Sparkles, Users, Heart, Download } from "lucide-react";
+import { Header } from "@/components/header";
+import { Download, Heart, Music, Sparkles, Users } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -12,9 +12,7 @@ export default function AboutPage() {
             <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-6">
               About Hybridized
             </h1>
-            <p className="text-xl text-white/70">
-              Pioneering the future of musical innovation
-            </p>
+            <p className="text-xl text-white/70">Pioneering the future of musical innovation</p>
           </div>
 
           <div className="space-y-12">
@@ -22,18 +20,15 @@ export default function AboutPage() {
               <div className="flex items-start gap-4 mb-4">
                 <Music className="w-8 h-8 text-green-400 flex-shrink-0" />
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    About Hybridized
-                  </h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">About Hybridized</h2>
                   <p className="text-white/70 leading-relaxed mb-4">
-                    Hybridized features live and DJ mixes from a select group of
-                    electronic artists. With nearly all mixes provided by the
-                    artists themselves, this is your best source for the highest
-                    quality breaks and progressive music.
+                    Hybridized features live and DJ mixes from a select group of electronic artists.
+                    With nearly all mixes provided by the artists themselves, this is your best
+                    source for the highest quality breaks and progressive music.
                   </p>
                   <p className="text-white/70 leading-relaxed">
-                    New mixes are posted several times a week, bringing you the
-                    freshest sounds from the electronic music scene.
+                    New mixes are posted several times a week, bringing you the freshest sounds from
+                    the electronic music scene.
                   </p>
                 </div>
               </div>
@@ -43,13 +38,10 @@ export default function AboutPage() {
               <div className="flex items-start gap-4 mb-4">
                 <Download className="w-8 h-8 text-green-400 flex-shrink-0" />
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    Download All Sets
-                  </h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">Download All Sets</h2>
                   <p className="text-white/70 leading-relaxed mb-6">
-                    Access the complete collection of Hybridized sets. Download
-                    all mixes from our cloud storage and enjoy the full archive
-                    of electronic music excellence.
+                    Access the complete collection of Hybridized sets. Download all mixes from our
+                    cloud storage and enjoy the full archive of electronic music excellence.
                   </p>
                   <a
                     href="https://cloud.mail.ru/public/Beaq/6WtmkWwTe"
@@ -68,12 +60,9 @@ export default function AboutPage() {
               <div className="flex items-start gap-4 mb-4">
                 <Sparkles className="w-8 h-8 text-green-400 flex-shrink-0" />
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    Featured Artists
-                  </h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">Featured Artists</h2>
                   <p className="text-white/70 leading-relaxed mb-4">
-                    Featuring mixes from some of the most talented artists in
-                    electronic music:
+                    Featuring mixes from some of the most talented artists in electronic music:
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-white/70">
                     <div className="flex items-center gap-2">
@@ -169,13 +158,10 @@ export default function AboutPage() {
               <div className="flex items-start gap-4 mb-4">
                 <Users className="w-8 h-8 text-green-400 flex-shrink-0" />
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    Our Legacy
-                  </h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">Our Legacy</h2>
                   <p className="text-white/70 leading-relaxed">
-                    Continuing the amazing work of Andy Grundman, Hybridized
-                    remains committed to bringing you the finest electronic
-                    music from around the world.
+                    Continuing the amazing work of Andy Grundman, Hybridized remains committed to
+                    bringing you the finest electronic music from around the world.
                   </p>
                 </div>
               </div>

@@ -1,18 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
+import { AlertCircle, ArrowLeft, CheckCircle, Lock, Mail, Sparkles } from "lucide-react";
 import Image from "next/image";
-import {
-  Lock,
-  Mail,
-  AlertCircle,
-  ArrowLeft,
-  Sparkles,
-  CheckCircle,
-} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const REDIRECT_AFTER_LOGIN = "/home";
 
@@ -96,9 +89,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <h1 className="text-4xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-white/70">
-            Sign in to access your musical journey
-          </p>
+          <p className="text-white/70">Sign in to access your musical journey</p>
         </div>
 
         <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
@@ -152,35 +143,23 @@ export default function LoginPage() {
           )}
 
           {magicLinkSent && (
-            <div
-              className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-start gap-3"
-              role="status"
-            >
+            <output className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-start gap-3">
               <CheckCircle
                 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5"
                 aria-hidden="true"
               />
               <div>
-                <p className="text-green-200 text-sm font-medium mb-1">
-                  Magic link sent!
-                </p>
+                <p className="text-green-200 text-sm font-medium mb-1">Magic link sent!</p>
                 <p className="text-green-200/70 text-xs">
-                  Check your email and click the link to sign in. You can close
-                  this page.
+                  Check your email and click the link to sign in. You can close this page.
                 </p>
               </div>
-            </div>
+            </output>
           )}
 
-          <form
-            onSubmit={useMagicLink ? handleMagicLink : handleLogin}
-            className="space-y-6"
-          >
+          <form onSubmit={useMagicLink ? handleMagicLink : handleLogin} className="space-y-6">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="email" className="block text-white font-medium mb-2">
                 Email
               </label>
               <div className="relative">
@@ -204,10 +183,7 @@ export default function LoginPage() {
 
             {!useMagicLink && (
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-white font-medium mb-2"
-                >
+                <label htmlFor="password" className="block text-white font-medium mb-2">
                   Password
                 </label>
                 <div className="relative">

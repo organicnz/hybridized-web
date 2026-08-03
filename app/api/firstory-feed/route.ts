@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface Episode {
   title: string;
@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
   const userId = searchParams.get("userId");
 
   if (!userId || !isValidUserId(userId)) {
-    return NextResponse.json(
-      { error: "Invalid or missing userId" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Invalid or missing userId" }, { status: 400 });
   }
 
   try {
@@ -35,10 +32,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       if (response.status === 404) {
-        return NextResponse.json(
-          { error: "User feed not found" },
-          { status: 404 },
-        );
+        return NextResponse.json({ error: "User feed not found" }, { status: 404 });
       }
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
@@ -49,8 +43,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ episodes });
   } catch (error) {
     console.error("Error fetching Firstory feed:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to fetch feed";
+    const message = error instanceof Error ? error.message : "Failed to fetch feed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -58,30 +51,18 @@ export async function GET(request: NextRequest) {
 function parseRSSFeed(xmlText: string): Episode[] {
   const episodes: Episode[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
+  let match: RegExpExecArray | null = itemRegex.exec(xmlText);
 
-  while ((match = itemRegex.exec(xmlText)) !== null) {
+  while (match !== null) {
     const itemContent = match[1];
+    const title = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] ?? "";
+    const audioUrl = itemContent.match(/<enclosure url="(.*?)"/)?.[1] ?? "";
+    const description =
+      itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] ?? "";
+    const pubDate = itemContent.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
 
-    const titleMatch = itemContent.match(
-      /<title><!\[CDATA\[(.*?)\]\]><\/title>/,
-    );
-    const title = titleMatch?.[1] || "";
-
-    const enclosureMatch = itemContent.match(/<enclosure url="(.*?)"/);
-    const audioUrl = enclosureMatch?.[1] || "";
-
-    const descMatch = itemContent.match(
-      /<description><!\[CDATA\[(.*?)\]\]><\/description>/,
-    );
-    const description = descMatch?.[1] || "";
-
-    const dateMatch = itemContent.match(/<pubDate>(.*?)<\/pubDate>/);
-    const pubDate = dateMatch?.[1] || "";
-
-    if (audioUrl) {
-      episodes.push({ title, audioUrl, description, pubDate });
-    }
+    if (audioUrl) episodes.push({ title, audioUrl, description, pubDate });
+    match = itemRegex.exec(xmlText);
   }
 
   return episodes;

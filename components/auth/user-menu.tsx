@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
-import { User, LogOut, Settings, ChevronDown } from "lucide-react";
+import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function UserMenu() {
   const { user } = useAuth();
@@ -54,18 +54,11 @@ export function UserMenu() {
 
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 mt-2 w-56 bg-black/90 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-20 overflow-hidden">
             <div className="p-4 border-b border-white/10">
-              <p className="text-white font-medium truncate">
-                {profile?.full_name || "User"}
-              </p>
-              <p className="text-purple-200/70 text-sm truncate">
-                {user.email}
-              </p>
+              <p className="text-white font-medium truncate">{profile?.full_name || "User"}</p>
+              <p className="text-purple-200/70 text-sm truncate">{user.email}</p>
             </div>
 
             <div className="p-2">

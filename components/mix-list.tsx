@@ -1,8 +1,8 @@
 "use client";
 
 import type { Database } from "@/lib/types/database.types";
-import { Calendar, Clock, MoreVertical, Play, Music } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Calendar, MoreVertical, Music, Play } from "lucide-react";
 
 type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"];
 
@@ -13,12 +13,7 @@ interface MixListProps {
   className?: string;
 }
 
-export function MixList({
-  items,
-  onPlay,
-  onMenuClick,
-  className,
-}: MixListProps) {
+export function MixList({ items, onPlay, onMenuClick, className }: MixListProps) {
   if (items.length === 0) {
     return (
       <div className="bg-zinc-900/50 rounded-xl p-8 text-center border border-white/5">
@@ -58,9 +53,7 @@ export function MixList({
 
               {/* Description */}
               {item.description && (
-                <p className="text-xs text-white/50 truncate mb-2">
-                  {item.description}
-                </p>
+                <p className="text-xs text-white/50 truncate mb-2">{item.description}</p>
               )}
 
               {/* Metadata */}
@@ -73,13 +66,8 @@ export function MixList({
                 </div>
                 {item.formula && (
                   <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-500/20 rounded border border-purple-400/30">
-                    <Music
-                      className="w-3 h-3 text-purple-300"
-                      aria-hidden="true"
-                    />
-                    <span className="text-purple-300 font-mono">
-                      {item.formula}
-                    </span>
+                    <Music className="w-3 h-3 text-purple-300" aria-hidden="true" />
+                    <span className="text-purple-300 font-mono">{item.formula}</span>
                   </div>
                 )}
               </div>
@@ -113,10 +101,7 @@ export function MixListSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="space-y-2">
       {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="bg-zinc-900/50 rounded-lg p-4 animate-pulse border border-white/5"
-        >
+        <div key={i} className="bg-zinc-900/50 rounded-lg p-4 animate-pulse border border-white/5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 space-y-2">
               <div className="h-5 bg-white/10 rounded w-3/4" />

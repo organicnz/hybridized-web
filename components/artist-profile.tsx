@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 // Predefined gradient presets that work with Tailwind's JIT compiler
 const GRADIENT_PRESETS = {
@@ -41,8 +41,7 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
     ...DEFAULT_ARTIST,
     ...artist,
   };
-  const gradientClass =
-    GRADIENT_PRESETS[currentArtist.gradientPreset || "purple-pink"];
+  const gradientClass = GRADIENT_PRESETS[currentArtist.gradientPreset || "purple-pink"];
 
   return (
     <div
@@ -70,10 +69,7 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
               gradientClass,
             )}
           >
-            <div
-              className="text-black text-6xl font-bold drop-shadow-lg"
-              aria-hidden="true"
-            >
+            <div className="text-black text-6xl font-bold drop-shadow-lg" aria-hidden="true">
               {currentArtist.name.toLowerCase()}.
             </div>
           </div>

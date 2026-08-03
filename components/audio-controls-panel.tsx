@@ -1,14 +1,7 @@
 "use client";
 
+import { Repeat, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { useState } from "react";
-import {
-  Volume2,
-  VolumeX,
-  Shuffle,
-  Repeat,
-  SkipBack,
-  SkipForward,
-} from "lucide-react";
 
 interface AudioControlsPanelProps {
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -49,10 +42,7 @@ export function AudioControlsPanel({
 
   const skip = (seconds: number) => {
     if (!audioRef.current) return;
-    audioRef.current.currentTime = Math.max(
-      0,
-      audioRef.current.currentTime + seconds,
-    );
+    audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime + seconds);
   };
 
   return (
@@ -73,11 +63,7 @@ export function AudioControlsPanel({
           className="text-white/70 hover:text-white transition-colors"
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted || volume === 0 ? (
-            <VolumeX size={20} />
-          ) : (
-            <Volume2 size={20} />
-          )}
+          {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
         </button>
 
         <input
@@ -87,7 +73,7 @@ export function AudioControlsPanel({
           step="0.01"
           value={isMuted ? 0 : volume}
           onChange={(e) => {
-            const newVolume = parseFloat(e.target.value);
+            const newVolume = Number.parseFloat(e.target.value);
             onVolumeChange(newVolume);
             if (newVolume > 0 && isMuted) setIsMuted(false);
           }}

@@ -1,26 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useProfile } from "@/hooks/use-profile";
-import { useAuth } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import {
-  User,
-  Mail,
-  Save,
-  AlertCircle,
-  CheckCircle,
-  Camera,
-  LogOut,
-} from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import { createClient } from "@/lib/supabase/client";
+import { compressImage, validateImageFile } from "@/lib/utils/image-compression";
+import { AlertCircle, Camera, CheckCircle, LogOut, Mail, Save, User } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  compressImage,
-  validateImageFile,
-} from "@/lib/utils/image-compression";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function ProfileContent() {
   const { user } = useAuth();
@@ -173,9 +162,7 @@ function ProfileContent() {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to resend verification",
-      );
+      setError(err instanceof Error ? err.message : "Failed to resend verification");
     } finally {
       setResendingVerification(false);
     }
@@ -185,18 +172,13 @@ function ProfileContent() {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <Link
-            href="/home"
-            className="text-purple-200/70 hover:text-white transition-colors"
-          >
+          <Link href="/home" className="text-purple-200/70 hover:text-white transition-colors">
             ← Back to Home
           </Link>
         </div>
 
         <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8">
-          <h1 className="text-3xl font-bold text-white mb-6">
-            Profile Settings
-          </h1>
+          <h1 className="text-3xl font-bold text-white mb-6">Profile Settings</h1>
 
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
@@ -208,9 +190,7 @@ function ProfileContent() {
           {success && (
             <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-              <p className="text-green-200 text-sm">
-                Profile updated successfully!
-              </p>
+              <p className="text-green-200 text-sm">Profile updated successfully!</p>
             </div>
           )}
 
@@ -263,10 +243,7 @@ function ProfileContent() {
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="email" className="block text-white font-medium mb-2">
                 Email
               </label>
               <div className="relative">
@@ -298,19 +275,14 @@ function ProfileContent() {
                     disabled={resendingVerification}
                     className="text-xs text-purple-400 hover:text-pink-400 hover:underline transition-colors disabled:opacity-50"
                   >
-                    {resendingVerification
-                      ? "Sending..."
-                      : "Resend verification email"}
+                    {resendingVerification ? "Sending..." : "Resend verification email"}
                   </button>
                 </div>
               )}
             </div>
 
             <div>
-              <label
-                htmlFor="fullName"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="fullName" className="block text-white font-medium mb-2">
                 Full Name
               </label>
               <div className="relative">

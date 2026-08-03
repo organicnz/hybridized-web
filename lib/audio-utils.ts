@@ -16,8 +16,7 @@ export function isWebAudioSupported(): boolean {
 export function getOptimalSampleRate(): number {
   if (!isWebAudioSupported()) return 44100;
 
-  const tempContext = new (window.AudioContext ||
-    (window as any).webkitAudioContext)();
+  const tempContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   const sampleRate = tempContext.sampleRate;
   tempContext.close();
 
@@ -52,8 +51,7 @@ export function supportsHRTF(): boolean {
   if (!isWebAudioSupported()) return false;
 
   try {
-    const tempContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
+    const tempContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const panner = tempContext.createPanner();
     const supported = "HRTF" in panner;
     tempContext.close();

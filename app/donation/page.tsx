@@ -1,7 +1,7 @@
 "use client";
 
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 import { Heart } from "lucide-react";
 
 export default function DonationPage() {
@@ -17,8 +17,8 @@ export default function DonationPage() {
               Support Hybridized
             </h1>
             <p className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-              Help us continue creating innovative musical experiences and
-              discovering unique hybrid sounds
+              Help us continue creating innovative musical experiences and discovering unique hybrid
+              sounds
             </p>
           </div>
 

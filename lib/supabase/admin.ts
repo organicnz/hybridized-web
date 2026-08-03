@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/lib/types/database.types';
+import type { Database } from "@/lib/types/database.types";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Admin Supabase client for build-time operations
@@ -8,6 +8,6 @@ import type { Database } from '@/lib/types/database.types';
 export function createAdminClient() {
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 }

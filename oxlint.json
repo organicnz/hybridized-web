@@ -1,0 +1,13 @@
+{
+  "plugins": ["react", "react-hooks", "next", "unicorn"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "react/react-in-jsx-scope": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "unicorn/prefer-module": "off",
+    "unicorn/no-process-exit": "off"
+  },
+  "ignore_patterns": ["node_modules", ".next", "dist", "*.config.ts", "*.config.js"]
+}

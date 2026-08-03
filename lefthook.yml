@@ -1,19 +1,26 @@
-# Lefthook Configuration
-# Fast and powerful Git hooks manager
+# Lefthook Configuration — bun + biome + oxlint
 
 pre-commit:
   parallel: true
   commands:
     format:
       glob: "*.{js,ts,jsx,tsx,json,css,md}"
-      run: npx prettier --write {staged_files}
-    
+      run: bun x biome format --write {staged_files}
+
+    lint-biome:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: bun x biome lint {staged_files}
+
+    lint-oxlint:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: bun x oxlint --config oxlint.json {staged_files}
+
     type-check:
       glob: "*.{ts,tsx}"
-      run: npx tsc --noEmit
+      run: bun x tsc --noEmit
 
 pre-push:
   parallel: false
   commands:
     build:
-      run: npm run build
+      run: bun run build

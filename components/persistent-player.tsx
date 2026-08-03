@@ -9,10 +9,7 @@ interface PersistentPlayerProps {
   onClose: () => void;
 }
 
-export function PersistentPlayer({
-  currentTrack,
-  onClose,
-}: PersistentPlayerProps) {
+export function PersistentPlayer({ currentTrack, onClose }: PersistentPlayerProps) {
   if (!currentTrack) return null;
 
   return (
@@ -24,10 +21,7 @@ export function PersistentPlayer({
             <p className="text-white/60 text-sm">{currentTrack.description}</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="text-white/60 hover:text-white transition-colors"
-        >
+        <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
           Close
         </button>
       </div>

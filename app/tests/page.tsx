@@ -1,6 +1,6 @@
-import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { Music2, Headphones, Radio, Mic } from "lucide-react";
+import { Header } from "@/components/header";
+import { Headphones, Mic, Music2, Radio } from "lucide-react";
 
 export default function TestsPage() {
   const tests = [
@@ -11,7 +11,7 @@ export default function TestsPage() {
       difficulty: "Beginner",
       color: "from-purple-500/10 to-pink-500/10",
       borderColor: "border-purple-500/20",
-      iconColor: "text-purple-400"
+      iconColor: "text-purple-400",
     },
     {
       icon: Headphones,
@@ -20,7 +20,7 @@ export default function TestsPage() {
       difficulty: "Intermediate",
       color: "from-blue-500/10 to-cyan-500/10",
       borderColor: "border-blue-500/20",
-      iconColor: "text-blue-400"
+      iconColor: "text-blue-400",
     },
     {
       icon: Radio,
@@ -29,7 +29,7 @@ export default function TestsPage() {
       difficulty: "Advanced",
       color: "from-pink-500/10 to-purple-500/10",
       borderColor: "border-pink-500/20",
-      iconColor: "text-pink-400"
+      iconColor: "text-pink-400",
     },
     {
       icon: Mic,
@@ -38,8 +38,8 @@ export default function TestsPage() {
       difficulty: "Expert",
       color: "from-yellow-500/10 to-orange-500/10",
       borderColor: "border-yellow-500/20",
-      iconColor: "text-yellow-400"
-    }
+      iconColor: "text-yellow-400",
+    },
   ];
 
   return (
@@ -71,14 +71,19 @@ export default function TestsPage() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-2xl font-bold text-white">{test.title}</h3>
-                        <span className={`text-xs px-3 py-1 rounded-full ${test.iconColor} bg-black/30`}>
+                        <span
+                          className={`text-xs px-3 py-1 rounded-full ${test.iconColor} bg-black/30`}
+                        >
                           {test.difficulty}
                         </span>
                       </div>
                       <p className="text-purple-200/70">{test.description}</p>
                     </div>
                   </div>
-                  <button className="w-full mt-4 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-colors border border-white/20">
+                  <button
+                    type="button"
+                    className="w-full mt-4 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-colors border border-white/20"
+                  >
                     Start Test
                   </button>
                 </div>
@@ -89,9 +94,13 @@ export default function TestsPage() {
           <div className="mt-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 md:p-12 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">Coming Soon</h2>
             <p className="text-purple-200/80 max-w-2xl mx-auto">
-              More interactive tests and challenges are on the way. Sign up to be notified when new tests become available!
+              More interactive tests and challenges are on the way. Sign up to be notified when new
+              tests become available!
             </p>
-            <button className="mt-6 px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple-500/50">
+            <button
+              type="button"
+              className="mt-6 px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple-500/50"
+            >
               Notify Me
             </button>
           </div>

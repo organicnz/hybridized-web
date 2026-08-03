@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 type NavLinkProps = {
   href: string;
@@ -12,17 +12,10 @@ type NavLinkProps = {
   onClick?: () => void;
 };
 
-export function NavLink({
-  href,
-  label,
-  highlight,
-  variant = "desktop",
-  onClick,
-}: NavLinkProps) {
+export function NavLink({ href, label, highlight, variant = "desktop", onClick }: NavLinkProps) {
   const pathname = usePathname();
   // Check if we're on the exact page or within the section (e.g., /home or /home/*)
-  const isActive =
-    pathname === href || (href === "/home" && pathname.startsWith("/home"));
+  const isActive = pathname === href || (href === "/home" && pathname.startsWith("/home"));
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // Prevent navigation if already on this page
@@ -60,9 +53,7 @@ export function NavLink({
       className={cn(
         "font-semibold text-sm transition-colors relative group",
         isActive && "text-white cursor-default",
-        highlight
-          ? "text-green-400 hover:text-green-300"
-          : "text-white/70 hover:text-white",
+        highlight ? "text-green-400 hover:text-green-300" : "text-white/70 hover:text-white",
       )}
       aria-current={isActive ? "page" : undefined}
       aria-disabled={isActive}

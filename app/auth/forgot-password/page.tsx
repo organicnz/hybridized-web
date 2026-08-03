@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
+import { AlertCircle, ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import Image from "next/image";
-import { Mail, AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -37,12 +37,10 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-md">
           <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm rounded-2xl border border-green-500/20 p-8 text-center">
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Check Your Email
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Check Your Email</h2>
             <p className="text-purple-200/70 mb-6">
-              We've sent you a password reset link. Please check your inbox and
-              follow the instructions.
+              We've sent you a password reset link. Please check your inbox and follow the
+              instructions.
             </p>
             <Link
               href="/auth/login"
@@ -81,9 +79,7 @@ export default function ForgotPasswordPage() {
             </span>
           </Link>
           <h1 className="text-4xl font-bold text-white mb-2">Reset Password</h1>
-          <p className="text-purple-200/70">
-            Enter your email to receive a reset link
-          </p>
+          <p className="text-purple-200/70">Enter your email to receive a reset link</p>
         </div>
 
         <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8">
@@ -102,10 +98,7 @@ export default function ForgotPasswordPage() {
 
           <form onSubmit={handleResetPassword} className="space-y-6">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="email" className="block text-white font-medium mb-2">
                 Email
               </label>
               <div className="relative">

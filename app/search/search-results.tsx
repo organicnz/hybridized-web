@@ -1,29 +1,19 @@
 "use client";
 
-import { Music, Play } from "lucide-react";
-import Image from "next/image";
 import { IframePlayer } from "@/components/iframe-player";
+import type { Database } from "@/lib/types/database.types";
+import { Music } from "lucide-react";
+import Image from "next/image";
 
-type Episode = {
-  id: number;
-  title: string;
-  description?: string;
-  audio_url: string;
-  cover_url?: string;
-  creator?: string;
-  pub_date?: string;
-  bands?: {
-    id: number;
-    name: string;
-    cover_url?: string;
-  };
+type EpisodeRow = Database["public"]["Tables"]["episodes"]["Row"] & {
+  bands?: { id: number; name: string; cover_url?: string; firstory_user_id?: string } | null;
 };
 
 export function SearchResults({
   results,
   query,
 }: {
-  results: Episode[];
+  results: EpisodeRow[];
   query: string;
 }) {
   if (results.length === 0) {
@@ -31,9 +21,7 @@ export function SearchResults({
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 text-center">
         <Music className="w-16 h-16 text-purple-400/30 mx-auto mb-4" />
         <p className="text-white/70 text-lg">No results found for "{query}"</p>
-        <p className="text-white/50 text-sm mt-2">
-          Try a different search term
-        </p>
+        <p className="text-white/50 text-sm mt-2">Try a different search term</p>
       </div>
     );
   }
@@ -47,8 +35,7 @@ export function SearchResults({
       <div className="grid gap-4">
         {results.map((episode) => {
           const coverUrl = episode.cover_url || episode.bands?.cover_url;
-          const artistName =
-            episode.bands?.name || episode.creator || "Unknown Artist";
+          const artistName = episode.bands?.name || episode.creator || "Unknown Artist";
 
           return (
             <div
@@ -72,18 +59,14 @@ export function SearchResults({
                   <h3 className="text-lg font-semibold text-white mb-1 truncate group-hover:text-purple-300 transition-colors">
                     {episode.title}
                   </h3>
-                  <p className="text-sm text-purple-300/70 mb-2">
-                    {artistName}
-                  </p>
+                  <p className="text-sm text-purple-300/70 mb-2">{artistName}</p>
                   {episode.description && (
-                    <p className="text-sm text-white/60 line-clamp-2">
-                      {episode.description}
-                    </p>
+                    <p className="text-sm text-white/60 line-clamp-2">{episode.description}</p>
                   )}
                 </div>
 
                 <div className="flex-shrink-0">
-                  <IframePlayer episode={episode as any} artist={artistName} />
+                  <IframePlayer episode={episode} artist={artistName} />
                 </div>
               </div>
             </div>

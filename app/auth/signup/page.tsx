@@ -1,18 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
+import { AlertCircle, ArrowLeft, CheckCircle, Lock, Mail, User } from "lucide-react";
 import Image from "next/image";
-import {
-  Lock,
-  Mail,
-  AlertCircle,
-  ArrowLeft,
-  User,
-  CheckCircle,
-} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -29,7 +22,7 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -55,12 +48,10 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm rounded-2xl border border-green-500/20 p-8 text-center">
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Check Your Email
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Check Your Email</h2>
             <p className="text-purple-200/70 mb-6">
-              We've sent you a confirmation email. Please check your inbox and
-              click the link to verify your account.
+              We've sent you a confirmation email. Please check your inbox and click the link to
+              verify your account.
             </p>
             <Link
               href="/auth/login"
@@ -118,10 +109,7 @@ export default function SignupPage() {
 
           <form onSubmit={handleSignup} className="space-y-6">
             <div>
-              <label
-                htmlFor="fullName"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="fullName" className="block text-white font-medium mb-2">
                 Full Name
               </label>
               <div className="relative">
@@ -144,10 +132,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="email" className="block text-white font-medium mb-2">
                 Email
               </label>
               <div className="relative">
@@ -170,10 +155,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-white font-medium mb-2"
-              >
+              <label htmlFor="password" className="block text-white font-medium mb-2">
                 Password
               </label>
               <div className="relative">
@@ -194,9 +176,7 @@ export default function SignupPage() {
                   minLength={6}
                 />
               </div>
-              <p className="text-xs text-purple-200/50 mt-1">
-                Minimum 6 characters
-              </p>
+              <p className="text-xs text-purple-200/50 mt-1">Minimum 6 characters</p>
             </div>
 
             <button

@@ -1,8 +1,8 @@
 "use client";
 
 import { useAudioPlayer } from "@/lib/audio-player-context";
+import { Volume2, VolumeX, X } from "lucide-react";
 import Image from "next/image";
-import { X, Volume2, VolumeX } from "lucide-react";
 import { useState } from "react";
 import { AudioEqualizer } from "./audio-equalizer";
 import { CustomAudioPlayer } from "./custom-audio-player";
@@ -133,11 +133,7 @@ export function AudioPlayerBar() {
                 style={{ transform: "translateZ(0)" }}
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
-                {isMuted || volume === 0 ? (
-                  <VolumeX size={18} />
-                ) : (
-                  <Volume2 size={18} />
-                )}
+                {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
               </button>
 
               <input
@@ -146,7 +142,7 @@ export function AudioPlayerBar() {
                 max="1"
                 step="0.01"
                 value={isMuted ? 0 : volume}
-                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                onChange={(e) => handleVolumeChange(Number.parseFloat(e.target.value))}
                 className="w-24 accent-purple-500 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer transition-all"
                 style={{
                   background: `linear-gradient(to right, rgb(168 85 247) 0%, rgb(168 85 247) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.1) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.1) 100%)`,

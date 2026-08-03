@@ -1,16 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { User, Menu } from "lucide-react";
-import { useState, useCallback, Suspense } from "react";
-import { cn } from "@/lib/utils";
-import { SearchBar } from "./search-bar";
-import { MobileMenu } from "./mobile-menu";
-import { NavLink } from "./nav-link";
-import { NAV_LINKS, HEADER_STYLES } from "@/lib/constants/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { HEADER_STYLES, NAV_LINKS } from "@/lib/constants/navigation";
+import { cn } from "@/lib/utils";
+import { Menu, User } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense, useCallback, useState } from "react";
+import { MobileMenu } from "./mobile-menu";
+import { NavLink } from "./nav-link";
+import { SearchBar } from "./search-bar";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,10 +45,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav
-          className="hidden md:flex items-center gap-6"
-          aria-label="Main navigation"
-        >
+        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
           {NAV_LINKS.map((link) => (
             <NavLink key={link.href} {...link} variant="desktop" />
           ))}
@@ -94,11 +91,7 @@ export function Header() {
         </div>
       </div>
 
-      <MobileMenu
-        isOpen={mobileMenuOpen}
-        onClose={closeMobileMenu}
-        navLinks={NAV_LINKS}
-      />
+      <MobileMenu isOpen={mobileMenuOpen} onClose={closeMobileMenu} navLinks={NAV_LINKS} />
     </header>
   );
 }

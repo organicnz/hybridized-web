@@ -32,3 +32,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env*
+
+# Bun
+.env.local
+bun.lock
+
+# Supabase temp
+supabase/.temp/
+
+# Accidental tilde directory
+~/

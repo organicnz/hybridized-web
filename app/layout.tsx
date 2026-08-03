@@ -6,8 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Hybridized - Music Archive & Streaming Platform",
-  description:
-    "Discover and stream DJ mixes, radio shows, and electronic music from top artists",
+  description: "Discover and stream DJ mixes, radio shows, and electronic music from top artists",
   icons: {
     icon: [
       { url: "/favicon.png", sizes: "any" },
@@ -17,11 +16,11 @@ export const metadata: Metadata = {
   },
 };
 
-import { RegisterServiceWorker } from "./register-sw";
-import { AudioPlayerProvider } from "@/lib/audio-player-context";
 import { AudioPlayerBar } from "@/components/audio-player-bar";
 import { RecoveryHandler } from "@/components/auth/recovery-handler";
+import { AudioPlayerProvider } from "@/lib/audio-player-context";
 import { Toaster } from "sonner";
+import { RegisterServiceWorker } from "./register-sw";
 
 export default function RootLayout({
   children,

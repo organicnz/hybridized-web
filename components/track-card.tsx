@@ -1,8 +1,8 @@
 "use client";
 
+import { type Track, useAudioPlayer } from "@/lib/audio-player-context";
 import { Play } from "lucide-react";
 import Image from "next/image";
-import { useAudioPlayer, type Track } from "@/lib/audio-player-context";
 
 interface TrackCardProps {
   track: Track;
@@ -16,12 +16,7 @@ export function TrackCard({ track }: TrackCardProps) {
     <div className="bg-[#181818] rounded-lg p-4 hover:bg-[#282828] transition-colors group">
       <div className="relative aspect-square mb-4">
         {track.coverUrl && (
-          <Image
-            src={track.coverUrl}
-            alt={track.title}
-            fill
-            className="object-cover rounded"
-          />
+          <Image src={track.coverUrl} alt={track.title} fill className="object-cover rounded" />
         )}
         <button
           onClick={() => setCurrentTrack(track)}
