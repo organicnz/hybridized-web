@@ -1,13 +1,20 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { RefreshCw } from "lucide-react";
+import { useEffect } from "react";
 
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-black to-blue-900 px-4">

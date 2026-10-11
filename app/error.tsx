@@ -1,8 +1,10 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { Home, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -12,6 +14,10 @@ interface ErrorProps {
 export default function ErrorPage({ error, reset }: ErrorProps) {
   const router = useRouter();
   const isDev = process.env.NODE_ENV === "development";
+
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-black to-blue-900 px-4">
