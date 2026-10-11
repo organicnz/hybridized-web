@@ -32,8 +32,8 @@ export function NavLink({ href, label, highlight, variant = "desktop", onClick }
         href={href}
         onClick={handleClick}
         className={cn(
-          "block px-4 py-2 rounded-lg font-medium transition-colors",
-          isActive && "bg-white/5 text-white cursor-default",
+          "block px-4 py-2.5 rounded-xl font-medium transition-all duration-300 border border-transparent",
+          isActive && "bg-white/5 text-white border-white/5 cursor-default shadow-[inset_0_0_20px_rgba(255,255,255,0.03)]",
           highlight
             ? "text-green-400 hover:bg-green-400/10"
             : "text-white/70 hover:bg-white/10 hover:text-white",

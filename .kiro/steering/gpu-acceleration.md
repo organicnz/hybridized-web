@@ -111,3 +111,11 @@ If you see performance issues:
 2. Reduce backdrop-blur intensity if needed
 3. Use `will-change` sparingly (already included in utility classes)
 4. Consider lazy loading off-screen animated content
+
+---
+
+## Policy
+Always merge to `main`. Deliver into prod accordingly. No PR branches, no staging, no preview deployments.
+
+## Design / Beautification
+Premium dark glassmorphic. Deep blacks, refined purple/pink/blue gradient meshes (`bg-gradient-to-br`), glass cards (`backdrop-blur-2xl`, `border-white/10`), fluid typography, refined shadows (`shadow-[...]`), gradient text (`gradient-text`). 10x pro aesthetic executed across theme, components, layout, docs, and skills.

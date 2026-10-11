@@ -84,6 +84,12 @@ bun test           # unit tests
 - **bands** - artists/bands (public read, authenticated write)
 - **profiles** - user profiles linked to Supabase Auth (owner-only access)
 
+## Design / Beautification
+
+Premium dark glassmorphic. Deep blacks (`--background: 240 10% 3%`), refined purple/pink/blue gradient meshes, glass cards, fluid typography, refined shadows/brightness. Always merge to `main`; deliver to prod accordingly.
+
 ## Deployment
 
-Push to `main` branch → Auto-deploys to Vercel
+Always merge to `main`. Deliver into prod accordingly.
+
+Push to `main` branch → Auto-deploys to Vercel (production)

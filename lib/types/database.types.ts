@@ -156,6 +156,8 @@ export type Database = {
           created_at: string | null;
           gains: Json;
           id: string;
+          last_artist: string | null;
+          last_track: Json | null;
           updated_at: string | null;
           user_id: string;
           volume_settings: Json | null;
@@ -164,6 +166,8 @@ export type Database = {
           created_at?: string | null;
           gains?: Json;
           id?: string;
+          last_artist?: string | null;
+          last_track?: Json | null;
           updated_at?: string | null;
           user_id: string;
           volume_settings?: Json | null;
@@ -172,6 +176,8 @@ export type Database = {
           created_at?: string | null;
           gains?: Json;
           id?: string;
+          last_artist?: string | null;
+          last_track?: Json | null;
           updated_at?: string | null;
           user_id?: string;
           volume_settings?: Json | null;

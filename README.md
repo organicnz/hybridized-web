@@ -77,12 +77,11 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Deployment
 
-This project is optimized for Vercel deployment:
+Always merge to `main`. Deliver to production accordingly.
 
-1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
+1. Merge/push to `main`
+2. GitHub Actions runs CI
+3. Vercel auto-deploys to production (`hybridized.online`)
 
 ## Features
 

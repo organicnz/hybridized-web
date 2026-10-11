@@ -13,8 +13,8 @@ const SUPPORT_LINKS = [{ href: "/support", label: "Support & Resources" }] as co
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background/95 backdrop-blur-sm">
-      <div className="px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+    <footer className="border-t border-white/10 bg-gradient-to-t from-black/80 to-background/60 backdrop-blur-xl">
+      <div className="px-4 md:px-10 py-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground">
         {/* Left Side */}
         <div className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
           <span>© {new Date().getFullYear()} Hybridized</span>

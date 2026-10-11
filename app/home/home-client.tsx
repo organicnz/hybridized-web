@@ -53,8 +53,15 @@ export function HomeClient({
   artistCoverUrl,
   soundcloudUrl,
 }: HomeClientProps) {
-  const { isPlaying, pauseAudio } = useAudioPlayer();
+  const { isPlaying, pauseAudio, saveInteraction } = useAudioPlayer();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Save artist selection to Supabase whenever it changes
+  useEffect(() => {
+    if (currentArtist) {
+      saveInteraction({ last_artist: currentArtist });
+    }
+  }, [currentArtist, saveInteraction]);
 
   // Flatten all episodes from all bands
   const allEpisodes = items.flatMap((band) =>
@@ -151,7 +158,7 @@ export function HomeClient({
                     whileHover={{ y: -2 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
-                    <IframePlayer episode={episode} artist={currentArtist || "Hybrid"} />
+                    <IframePlayer episode={episode} artist={currentArtist ?? ""} />
                   </motion.div>
                 </StaggerItem>
               ))}
@@ -176,10 +183,10 @@ export function HomeClient({
       <aside className="w-full lg:w-[35%] overflow-y-auto" tabIndex={0}>
         <ArtistProfile
           artist={{
-            name: currentArtist || "Hybrid",
+            name: currentArtist ?? "",
             bio:
               artistBio ||
-              `${currentArtist || "Hybrid"} brings you cutting-edge electronic music with hardware-accelerated audio processing for the ultimate listening experience.`,
+              `${currentArtist ?? "This artist"} brings you cutting-edge electronic music with hardware-accelerated audio processing for the ultimate listening experience.`,
             coverUrl: artistCoverUrl || items[0]?.cover_url || undefined,
           }}
         />

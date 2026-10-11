@@ -5,8 +5,8 @@ import { getSupabase } from "@/lib/supabase/client";
 import { AlertCircle, ArrowLeft, CheckCircle, Lock, Mail, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export const metadata: Metadata = {
   title: "Sign In",
@@ -25,6 +25,14 @@ export function LoginPage() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [useMagicLink, setUseMagicLink] = useState(false);
   const _router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Surface auth callback errors (e.g. expired confirmation links)
+  useEffect(() => {
+    if (searchParams.get("error") === "auth_callback_failed") {
+      setError("Your sign-in link is invalid or has expired. Please try again.");
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

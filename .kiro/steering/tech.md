@@ -81,4 +81,13 @@ FUNCTION_SECRET=...
 - **Domain**: `hybridized.online` (Cloudflare DNS, SSL: Full)
 - **Images**: Configured for Supabase storage domain
 - **Edge Runtime**: Hono API routes run at the edge
-- **CI/CD**: GitHub Actions on push to `main`
+- **UI/Visual**: Premium glassmorphic dark theme, gradient meshes, refined typography (`clamp()` fluid scales), glass cards with subtle glow/shadow, refined borders (`border-white/10`), backdrop-blur-2xl
+- **CI/CD**: GitHub Actions on push to `main` → Vercel deploys to prod (no PR branches, no staging)
+
+---
+
+## Policy
+Always merge to `main`. Deliver into prod accordingly. No PR branches, no staging, no preview deployments.
+
+## Design / Beautification
+Premium dark glassmorphic. Deep blacks, refined purple/pink/blue gradient meshes (`bg-gradient-to-br`), glass cards (`backdrop-blur-2xl`, `border-white/10`), fluid typography, refined shadows (`shadow-[...]`), gradient text (`gradient-text`). 10x pro aesthetic executed across theme, components, layout, docs, and skills.

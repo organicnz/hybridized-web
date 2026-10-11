@@ -5,6 +5,8 @@ import { toast } from "sonner";
 export type SettingsUpdate = {
   gains?: number[];
   volume_settings?: { master: number };
+  last_artist?: string;
+  last_track?: Json | null;
 };
 
 export type SyncStatus = "idle" | "pending" | "saving" | "saved" | "error";
@@ -117,6 +119,12 @@ export function createSettingsSaver() {
     }
     if (updates.volume_settings !== undefined) {
       payload.volume_settings = updates.volume_settings;
+    }
+    if (updates.last_artist !== undefined) {
+      payload.last_artist = updates.last_artist;
+    }
+    if (updates.last_track !== undefined) {
+      payload.last_track = updates.last_track;
     }
 
     if (existing) {
@@ -370,6 +378,8 @@ export function createSettingsSaver() {
 export async function loadUserSettings(): Promise<{
   gains: number[];
   volume_settings: { master: number } | null;
+  last_artist: string | null;
+  last_track: Json | null;
 } | null> {
   const supabase = await getSupabase();
 
@@ -381,7 +391,7 @@ export async function loadUserSettings(): Promise<{
 
   const { data, error } = await supabase
     .from("settings")
-    .select("gains, volume_settings")
+    .select("gains, volume_settings, last_artist, last_track")
     .eq("user_id", user.id)
     .single();
 
@@ -390,5 +400,7 @@ export async function loadUserSettings(): Promise<{
   return {
     gains: Array.isArray(data.gains) ? (data.gains as number[]) : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     volume_settings: data.volume_settings as { master: number } | null,
+    last_artist: data.last_artist ?? null,
+    last_track: data.last_track ?? null,
   };
 }

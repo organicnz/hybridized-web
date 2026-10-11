@@ -1,6 +1,7 @@
 import { AudioEngineDemo } from "@/components/audio-engine-demo";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 export const metadata: Metadata = {
   title: "Audio Engine Demo",
@@ -12,7 +13,7 @@ export default function AudioDemoPage() {
   return (
     <div className={cn("min-h-screen p-8 bg-gradient-hero")}>
       <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center mb-12">
+        <ScrollReveal variant="fade-up" delay={100} className="text-center mb-12">
           <h1 className="text-fluid-xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent mb-4">
             Hardware-Accelerated Audio Engine
           </h1>
@@ -20,17 +21,17 @@ export default function AudioDemoPage() {
             Professional-grade audio processing with 10-band EQ, 3D spatial audio, and dynamic
             compression
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="max-w-2xl mx-auto">
+        <ScrollReveal variant="scale-up" delay={200} className="max-w-2xl mx-auto">
           <AudioEngineDemo />
           <p className="text-muted-foreground/60 text-xs text-center mt-2">
             Frequency visualisation renders on the GPU via WebGPU, with an automatic Canvas 2D
             fallback.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <ScrollReveal variant="fade-up" delay={300} className="grid md:grid-cols-2 gap-6">
           <section className={cn("card-raised p-6")}>
             <h2 className="text-xl font-semibold text-foreground mb-4">Features</h2>
             <ul className="space-y-2 text-muted-foreground text-sm">
@@ -56,7 +57,7 @@ export default function AudioDemoPage() {
               <li>• Cross-browser compatible</li>
             </ul>
           </section>
-        </div>
+        </ScrollReveal>
       </div>
     </div>
   );

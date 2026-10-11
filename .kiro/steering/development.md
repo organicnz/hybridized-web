@@ -118,11 +118,16 @@ bun run build    # Build for production
 bun run start    # Test production build locally
 ```
 
+### Visual Design Policy
+Premium dark glassmorphic. Deep blacks, refined purple/pink/blue gradient meshes (`bg-gradient-to-br`), glass borders (`border-white/10`, `backdrop-blur-2xl`), refined shadows, fluid typography, gradient text (`gradient-text`). Always merge to `main`. Deliver to prod accordingly.
+
 ### Vercel Deployment
 
-- Push to `main` → GitHub Actions runs CI → Vercel auto-deploys
+**Always merge to `main`. Deliver to prod accordingly.**
+- Merge directly to `main` — no PR branches, no preview deployments, no staging
+- Push to `main` → GitHub Actions runs CI → Vercel auto-deploys to production
+- Production domain: `hybridized.online`
 - Environment variables managed in Vercel dashboard
-- Preview deployments for PRs
 
 ## Troubleshooting
 

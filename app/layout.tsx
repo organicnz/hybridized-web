@@ -81,8 +81,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0f0a18] text-foreground`}>
         <ThemeProvider>
+          <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_30%_20%,rgba(124,58,237,0.08)_0%,transparent_60%),radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.08)_0%,transparent_60%)] z-[-1]" />
           <RegisterServiceWorker />
           <RecoveryHandler />
           <Toaster position="top-center" richColors />
