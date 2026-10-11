@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { SEARCH_RESULT_LIMIT, normalizeSearchQuery } from "@/lib/search";
+import type { Database } from "@/lib/types/database.types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SearchResults } from "./search-results";
@@ -9,6 +11,21 @@ export const metadata: Metadata = {
   title: "Search",
   description: "Search the Hybridized archive for DJ mixes, radio shows, artists and episodes.",
 };
+
+type EpisodeRow = Database["public"]["Tables"]["episodes"]["Row"] & {
+  bands?: {
+    id: number;
+    name: string;
+    cover_url?: string;
+    firstory_user_id?: string;
+  } | null;
+};
+
+// Row shape returned by the search_episodes RPC (see
+// supabase/migrations/20261011000001_search_episodes.sql). The cookie-based
+// server client is untyped, so the mapping is annotated explicitly.
+type SearchEpisodeRow =
+  Database["public"]["Functions"]["search_episodes"]["Returns"][number];
 
 async function SearchContent({
   searchParams,
@@ -23,42 +40,41 @@ async function SearchContent({
   let error = null;
 
   if (query.trim()) {
-    const { data, error: fetchError } = await supabase
-      .from("episodes")
-      .select(
-        `
-        *,
-        bands:band_id (
-          id,
-          name,
-          cover_url,
-          firstory_user_id
-        )
-      `,
-      )
-      .order("pub_date", { ascending: false });
+    // Filtering runs in Postgres (search_episodes RPC): only the matching
+    // page of rows crosses the wire instead of the whole table.
+    const { data, error: fetchError } = await supabase.rpc("search_episodes", {
+      search_query: normalizeSearchQuery(query),
+      result_limit: SEARCH_RESULT_LIMIT,
+    });
 
-    const searchLower = query.toLowerCase();
-    results = (data || []).filter(
-      (episode: {
-        title?: string;
-        description?: string;
-        creator?: string;
-        bands?: { name?: string; firstory_user_id?: string };
-      }) => {
-        if (episode.bands?.firstory_user_id?.startsWith("reco")) {
-          return false;
-        }
-
-        const matchesEpisode =
-          episode.title?.toLowerCase().includes(searchLower) ||
-          episode.description?.toLowerCase().includes(searchLower) ||
-          episode.creator?.toLowerCase().includes(searchLower);
-
-        const matchesBand = episode.bands?.name?.toLowerCase().includes(searchLower);
-
-        return matchesEpisode || matchesBand;
-      },
+    results = (data ?? []).map(
+      (row: SearchEpisodeRow): EpisodeRow => ({
+        id: row.id,
+        episode_id: row.episode_id,
+        title: row.title,
+        description: row.description,
+        audio_url: row.audio_url,
+        cover_url: row.cover_url,
+        duration: row.duration,
+        pub_date: row.pub_date,
+        band_id: row.band_id,
+        link: row.link,
+        audio_length: row.audio_length,
+        creator: row.creator,
+        explicit: row.explicit,
+        guid: row.guid,
+        enclosure_type: row.enclosure_type,
+        created_at: row.created_at,
+        bands:
+          row.band_id === null
+            ? null
+            : {
+                id: row.band_id,
+                name: row.band_name ?? "",
+                cover_url: row.band_cover_url ?? undefined,
+                firstory_user_id: row.band_firstory_user_id ?? undefined,
+              },
+      }),
     );
     error = fetchError;
   }
