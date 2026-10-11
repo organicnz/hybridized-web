@@ -76,7 +76,8 @@ async function ArtistContent({ params }: PageProps) {
     .from("episodes")
     .select("*")
     .in("band_id", bandIds)
-    .order("pub_date", { ascending: false });
+    .order("pub_date", { ascending: false })
+    .limit(100);
 
   const episodesByBand = new Map<number, NonNullable<typeof allEpisodes>>();
   for (const episode of allEpisodes ?? []) {

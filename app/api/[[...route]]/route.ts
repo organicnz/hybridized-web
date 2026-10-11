@@ -80,11 +80,9 @@ app.get("/v1/episodes", async (c) => {
   const { data, error, count } = await query;
   if (error) throw error;
 
-  return c.json(
-    { episodes: data ?? [], pagination: { limit, offset, total: count ?? 0 } },
-    200,
-    { "Cache-Control": CACHE_SHORT },
-  );
+  return c.json({ episodes: data ?? [], pagination: { limit, offset, total: count ?? 0 } }, 200, {
+    "Cache-Control": CACHE_SHORT,
+  });
 });
 
 // ─── Single Episode ──────────────────────────────────────────────────────────
