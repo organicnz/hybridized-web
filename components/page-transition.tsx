@@ -100,11 +100,7 @@ export function StaggerItem({
   variants?: typeof staggerItemVariants;
 }) {
   return (
-    <motion.div
-      className={className}
-      variants={variants}
-      custom={custom}
-    >
+    <motion.div className={className} variants={variants} custom={custom}>
       {children}
     </motion.div>
   );
