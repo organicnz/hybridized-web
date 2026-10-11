@@ -1,16 +1,9 @@
 "use client";
 
-import type { Metadata } from "next";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { Heart } from "lucide-react";
+import { Coffee, Heart } from "lucide-react";
 import { Suspense } from "react";
-
-export const metadata: Metadata = {
-  title: "Support Hybridized",
-  description:
-    "Hybridized is free and listener-supported. Donate to help keep the music archive online and ad-free.",
-};
 
 export function DonationPage() {
   return (
@@ -30,22 +23,21 @@ export function DonationPage() {
             </p>
           </div>
 
-          {/* Ko-fi Embed */}
-          <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8 md:p-12 gpu-filter">
-            <div className="max-w-2xl mx-auto">
-              <iframe
-                id="kofiframe"
-                src="https://ko-fi.com/organicnz/?hidefeed=true&widget=true&embed=true&preview=true"
-                style={{
-                  border: "none",
-                  width: "100%",
-                  padding: "4px",
-                  background: "transparent",
-                }}
-                height="712"
-                title="organicnz"
-              />
-            </div>
+          {/* Support CTA */}
+          <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-8 md:p-12 gpu-filter text-center">
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Hybridized is free to use and ad-free. If you enjoy the music, consider buying us a
+              coffee to help keep the archive online.
+            </p>
+            <a
+              href="https://ko-fi.com/organicnz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 px-8 py-4 text-lg font-bold text-black shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <Coffee className="w-6 h-6" aria-hidden="true" />
+              Support on Ko-fi
+            </a>
           </div>
         </div>
       </main>
