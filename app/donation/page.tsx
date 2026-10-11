@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Hybridized is free and listener-supported. Donate to help keep the music archive online and ad-free.",
 };
 
-export const cacheLife = 'days';
+export const cacheLife = "days";
 
 export default function Page() {
   return <DonationPage />;

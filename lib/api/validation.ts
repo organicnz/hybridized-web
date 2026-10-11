@@ -17,11 +17,7 @@ export interface QueryResult {
 }
 
 /** Read a required, slug-shaped query parameter. */
-export function requiredSlug(
-  params: URLSearchParams,
-  key: string,
-  label = key,
-): QueryResult {
+export function requiredSlug(params: URLSearchParams, key: string, label = key): QueryResult {
   const raw = params.get(key);
   if (!raw) return { ok: false, value: "", error: `Missing ${label}` };
   if (!isValidSlug(raw)) return { ok: false, value: "", error: `Invalid ${label}` };

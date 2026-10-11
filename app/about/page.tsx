@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "Learn about Hybridized — the music archive and streaming platform for electronic music, DJ mixes and radio shows.",
 };
 
-export const cacheLife = 'days';
+export const cacheLife = "days";
 
 export default function AboutPage() {
   return (

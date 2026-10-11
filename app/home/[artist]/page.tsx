@@ -22,7 +22,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export const cacheLife = 'hours';
+export const cacheLife = "hours";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { artist } = await params;
@@ -111,7 +111,13 @@ async function ArtistContent({ params }: PageProps) {
 
 export default async function ArtistPage({ params }: PageProps) {
   return (
-    <Suspense fallback={<div className="flex flex-col h-full overflow-hidden"><ArtistNav activeArtist="" /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex flex-col h-full overflow-hidden">
+          <ArtistNav activeArtist="" />
+        </div>
+      }
+    >
       <ArtistContent params={params} />
     </Suspense>
   );

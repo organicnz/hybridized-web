@@ -121,7 +121,10 @@ export function createSettingsSaver() {
 
     if (existing) {
       // UPDATE only the changed fields (doesn't overwrite other fields)
-      const { error } = await (await supabase()).from("settings").update(payload).eq("user_id", userId);
+      const { error } = await (await supabase())
+        .from("settings")
+        .update(payload)
+        .eq("user_id", userId);
 
       if (error) throw error;
     } else {

@@ -86,7 +86,8 @@ export function EnhancedAudioPlayer({
       />
 
       <div className="flex items-center gap-3">
-        <button type="button"
+        <button
+          type="button"
           onClick={togglePlay}
           className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-2 rounded-full transition-all hover:scale-105"
           aria-label={isPlaying ? "Pause" : "Play"}
@@ -94,7 +95,8 @@ export function EnhancedAudioPlayer({
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
         </button>
 
-        <button type="button"
+        <button
+          type="button"
           onClick={toggleMute}
           className="text-white/70 hover:text-white transition-colors"
           aria-label={isMuted ? "Unmute" : "Mute"}

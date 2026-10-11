@@ -79,7 +79,8 @@ export function AuthRequiredModal({
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 rounded-2xl pointer-events-none" />
 
         {/* Close button */}
-        <button type="button"
+        <button
+          type="button"
           onClick={requestClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors border border-white/10"
           aria-label="Close"
@@ -109,7 +110,8 @@ export function AuthRequiredModal({
               Sign In
             </Link>
 
-            <button type="button"
+            <button
+              type="button"
               onClick={requestClose}
               className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-medium transition-all duration-200 border border-white/10"
             >

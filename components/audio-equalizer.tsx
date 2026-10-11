@@ -229,7 +229,8 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
   return (
     <div className={`relative ${className}`}>
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 backdrop-blur-md border shadow-lg group ${
           isOpen
@@ -294,7 +295,8 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                     <h3 className="text-white font-semibold text-sm drop-shadow-lg">Equalizer</h3>
                     <SyncIndicator status={syncStatus} />
                   </div>
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={resetEqualizer}
                     className="text-xs text-purple-400 hover:text-purple-300 transition-all duration-200 px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/30"
                   >
@@ -307,7 +309,8 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                   <legend className="text-xs text-white/50 mb-2 block font-medium">Presets</legend>
                   <div className="grid grid-cols-4 gap-2">
                     {Object.keys(EQ_PRESETS).map((presetName) => (
-                      <button type="button"
+                      <button
+                        type="button"
                         key={presetName}
                         onClick={() => applyPreset(presetName)}
                         className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 backdrop-blur-sm ${

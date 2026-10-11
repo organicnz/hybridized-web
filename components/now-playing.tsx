@@ -145,7 +145,8 @@ export function NowPlaying({
         </div>
 
         {/* Close Button */}
-        <button type="button"
+        <button
+          type="button"
           onClick={onClose}
           className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0"
           aria-label="Close now playing"
@@ -183,7 +184,8 @@ export function NowPlaying({
         </div>
 
         {/* Play/Pause Button */}
-        <button type="button"
+        <button
+          type="button"
           onClick={onPlayPause}
           className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center hover:from-purple-300 hover:to-pink-300 hover:scale-105 transition-all shadow-lg flex-shrink-0"
           aria-label={isPlaying ? "Pause" : "Play"}

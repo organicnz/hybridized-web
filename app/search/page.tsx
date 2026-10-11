@@ -113,7 +113,13 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 flex items-center justify-center"><p className="text-white/70">Loading...</p></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 flex items-center justify-center">
+          <p className="text-white/70">Loading...</p>
+        </div>
+      }
+    >
       <SearchContent searchParams={searchParams} />
     </Suspense>
   );

@@ -45,14 +45,18 @@ export default function TestsPage() {
           <EarTraining />
 
           <section className="mt-16">
-            <h2 className="mb-6 text-center text-2xl font-bold text-white">More tests coming soon</h2>
+            <h2 className="mb-6 text-center text-2xl font-bold text-white">
+              More tests coming soon
+            </h2>
             <div className="grid gap-6 md:grid-cols-2">
               {UPCOMING.map(({ icon: Icon, title, description, accent }) => (
                 <div
                   key={title}
                   className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm"
                 >
-                  <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-black/30 ${accent}`}>
+                  <div
+                    className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-black/30 ${accent}`}
+                  >
                     <Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <h3 className="text-xl font-bold text-white/80">{title}</h3>

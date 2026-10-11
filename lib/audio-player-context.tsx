@@ -87,64 +87,64 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
 
       const loadState = async () => {
-      try {
-        // Get current user and update cache
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        setCurrentUserId(user?.id ?? null);
+        try {
+          // Get current user and update cache
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          setCurrentUserId(user?.id ?? null);
 
-        // Migrate old non-scoped storage to user-scoped (one-time)
-        if (user) {
-          await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
-        }
-
-        // Load from user-scoped localStorage
-        const saved = getUserStorageItemSync(STORAGE_KEY);
-        if (saved) {
-          const state = JSON.parse(saved);
-          if (state.currentTrack) {
-            setCurrentTrackState(state.currentTrack);
-            setPlaylistState(state.playlist || []);
-            setCurrentIndex(state.currentIndex || 0);
-            setCurrentTime(state.currentTime || 0);
-            setVolumeState(state.volume ?? 0.7);
-            // Don't autoplay on page load
-            setShouldAutoPlay(false);
+          // Migrate old non-scoped storage to user-scoped (one-time)
+          if (user) {
+            await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
           }
-        }
 
-        // Load volume from database if user is authenticated
-        if (user) {
-          await loadVolumeFromDb();
+          // Load from user-scoped localStorage
+          const saved = getUserStorageItemSync(STORAGE_KEY);
+          if (saved) {
+            const state = JSON.parse(saved);
+            if (state.currentTrack) {
+              setCurrentTrackState(state.currentTrack);
+              setPlaylistState(state.playlist || []);
+              setCurrentIndex(state.currentIndex || 0);
+              setCurrentTime(state.currentTime || 0);
+              setVolumeState(state.volume ?? 0.7);
+              // Don't autoplay on page load
+              setShouldAutoPlay(false);
+            }
+          }
+
+          // Load volume from database if user is authenticated
+          if (user) {
+            await loadVolumeFromDb();
+          }
+        } catch (error) {
+          console.error("Failed to load audio state:", error);
         }
-      } catch (error) {
-        console.error("Failed to load audio state:", error);
-      }
-      setIsHydrated(true);
-    };
+        setIsHydrated(true);
+      };
 
       await loadState();
       if (cancelled) return;
 
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Update cached user ID
-      setCurrentUserId(session?.user?.id ?? null);
+      // Listen for auth state changes
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        // Update cached user ID
+        setCurrentUserId(session?.user?.id ?? null);
 
-      if (event === "SIGNED_IN" && session?.user) {
-        // Migrate storage and reload settings
-        await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
-        loadVolumeFromDb();
-      } else if (event === "SIGNED_OUT") {
-        // Clear user-specific storage on sign out
-        clearCurrentUserStorage();
-      }
-    });
+        if (event === "SIGNED_IN" && session?.user) {
+          // Migrate storage and reload settings
+          await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
+          loadVolumeFromDb();
+        } else if (event === "SIGNED_OUT") {
+          // Clear user-specific storage on sign out
+          clearCurrentUserStorage();
+        }
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
     })();
 
     return () => {
