@@ -18,34 +18,36 @@
 app/          → Next.js App Router pages
 components/   → Reusable UI components
 lib/          → Utilities, Supabase client, types
-public/       → Static assets (favicon, images, robots.txt)
-supabase/     → Supabase migrations and config
+public/       → Static assets (favicon, images)
+supabase/     → Supabase migrations, edge functions and config
 ```
 
 ## Environment Variables
 
-Required in `.env`:
+See `.env.example` for the full list. Minimum required in `.env`:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-Optional (`SYNC_SECRET` authorises the mutating API endpoints
-`/api/sync-episodes`, `/api/sync-playlists`, `/api/match-episodes` via
-`Authorization: Bearer <SYNC_SECRET>`; without it those routes fall back to an
-authenticated admin profile):
-
-```
-SYNC_SECRET=
-```
+Optional:
+- `SUPABASE_SECRET_KEY` - service-role key. Required by the mutating sync
+  endpoints (`/api/v1/sync-*`, `/api/v1/match-*`) so their writes bypass RLS.
+  Without it those routes fall back to a cookie session and are denied by RLS
+  unless called by an authenticated admin.
+- `SYNC_SECRET` - shared bearer secret for those endpoints, as an alternative to
+  an admin profile (`Authorization: Bearer <SYNC_SECRET>`).
+- `NEXT_PUBLIC_SENTRY_DSN` - enables Sentry; leave blank to disable.
 
 ## Commands
 
 ```bash
-npm run dev      # Start dev server
-npm run build    # Production build
-npm run lint     # Run linter
+bun run dev        # Start dev server
+bun run build      # Production build
+bun run lint       # oxlint + biome
+bun run typecheck  # tsc --noEmit
+bun test           # unit tests
 ```
 
 ## Infrastructure
@@ -66,11 +68,9 @@ npm run lint     # Run linter
 
 ### Security Configurations
 
-- `robots.txt` blocks 17+ AI crawlers (GPTBot, ClaudeBot, CCBot, etc.)
-- Allows legitimate search engines (Googlebot, Bingbot, DuckDuckBot)
+- `app/robots.ts` blocks AI crawlers (GPTBot, ClaudeBot, CCBot, etc.) and allows legitimate search engines (Googlebot, Bingbot, DuckDuckBot)
+- Security headers set in `next.config.ts` (X-Frame-Options, X-Content-Type-Options, HSTS, Permissions-Policy, COOP, CSP report-only)
 - Vercel Security Checkpoint enabled
-- X-Frame-Options: SAMEORIGIN
-- X-Content-Type-Options: nosniff
 
 ### Cloudflare Security
 
@@ -80,8 +80,9 @@ npm run lint     # Run linter
 
 ## Database Schema
 
-**hybridized** - Main content table
-**profiles** - User profiles (linked to Supabase Auth)
+- **episodes** - podcast episode content (public read, authenticated write)
+- **bands** - artists/bands (public read, authenticated write)
+- **profiles** - user profiles linked to Supabase Auth (owner-only access)
 
 ## Deployment
 
