@@ -24,8 +24,7 @@ type EpisodeRow = Database["public"]["Tables"]["episodes"]["Row"] & {
 // Row shape returned by the search_episodes RPC (see
 // supabase/migrations/20261011000001_search_episodes.sql). The cookie-based
 // server client is untyped, so the mapping is annotated explicitly.
-type SearchEpisodeRow =
-  Database["public"]["Functions"]["search_episodes"]["Returns"][number];
+type SearchEpisodeRow = Database["public"]["Functions"]["search_episodes"]["Returns"][number];
 
 async function SearchContent({
   searchParams,

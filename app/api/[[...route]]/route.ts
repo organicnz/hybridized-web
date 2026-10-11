@@ -61,20 +61,30 @@ app.onError((err, c) => {
 
 app.get("/v1/episodes", async (c) => {
   const bandId = c.req.query("bandId");
+  const limit = Math.min(Math.max(Number.parseInt(c.req.query("limit") || "50", 10), 1), 100);
+  const offset = Math.max(Number.parseInt(c.req.query("offset") || "0", 10), 0);
 
   if (bandId !== undefined && !/^\d+$/.test(bandId)) {
     return c.json({ error: "Invalid bandId" }, 400);
   }
 
   const supabase = await createClient();
-  let query = supabase.from("episodes").select("*").order("pub_date", { ascending: false });
+  let query = supabase
+    .from("episodes")
+    .select("*", { count: "exact" })
+    .order("pub_date", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (bandId) query = query.eq("band_id", Number(bandId));
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
   if (error) throw error;
 
-  return c.json({ episodes: data ?? [] }, 200, { "Cache-Control": CACHE_SHORT });
+  return c.json(
+    { episodes: data ?? [], pagination: { limit, offset, total: count ?? 0 } },
+    200,
+    { "Cache-Control": CACHE_SHORT },
+  );
 });
 
 // ─── Single Episode ──────────────────────────────────────────────────────────
