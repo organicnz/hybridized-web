@@ -130,7 +130,7 @@ describe("computeBars", () => {
 
   it("is all zeros for silence", () => {
     const out = new Float32Array(BAR_COUNT);
-    computeBars(fakeAnalyser(new Array(1024).fill(0)), out);
+    computeBars(fakeAnalyser(Array.from({ length: 1024 }, () => 0)), out);
     expect(Array.from(out).every((v) => v === 0)).toBe(true);
   });
 
@@ -146,8 +146,8 @@ describe("computeBars", () => {
     const peak = Math.max(...out);
 
     // Two silent frames later the bars should have decayed, not snapped to zero.
-    computeBars(fakeAnalyser(new Array(1024).fill(0)), out);
-    computeBars(fakeAnalyser(new Array(1024).fill(0)), out);
+    computeBars(fakeAnalyser(Array.from({ length: 1024 }, () => 0)), out);
+    computeBars(fakeAnalyser(Array.from({ length: 1024 }, () => 0)), out);
     const after = Math.max(...out);
 
     expect(after).toBeLessThan(peak);
