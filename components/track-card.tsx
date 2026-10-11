@@ -18,7 +18,8 @@ export function TrackCard({ track }: TrackCardProps) {
         {track.coverUrl && (
           <Image src={track.coverUrl} alt={track.title} fill className="object-cover rounded" />
         )}
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setCurrentTrack(track)}
           className={`absolute bottom-2 right-2 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
             isPlaying

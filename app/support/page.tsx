@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Help center and FAQs for Hybridized — streaming, audio quality, accounts and more.",
 };
 
-export const cacheLife = 'days';
+export const cacheLife = "days";
 
 export default function SupportPage() {
   return (

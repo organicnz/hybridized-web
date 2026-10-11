@@ -16,9 +16,7 @@ export default function GlobalError({
             Oops
           </div>
           <h1 className="text-2xl font-bold text-white mb-3">Something went wrong</h1>
-          <p className="text-purple-200/70 mb-8">
-            A critical error occurred. Please try again.
-          </p>
+          <p className="text-purple-200/70 mb-8">A critical error occurred. Please try again.</p>
           <button
             type="button"
             onClick={reset}

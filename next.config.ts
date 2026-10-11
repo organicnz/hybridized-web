@@ -99,14 +99,14 @@ const nextConfig: NextConfig = {
               "frame-src 'self' https://open.firstory.me",
               "media-src 'self' https://d3mww1g1pfq2pt.cloudfront.net https://i1.sndcdn.com",
               "report-uri /api/csp-report",
-            ].join('; '),
+            ].join("; "),
           },
         ],
       },
     ];
   },
 };
- 
+
 export default withSentryConfig(nextConfig, {
   org: "organicnz",
   project: "hybridized",

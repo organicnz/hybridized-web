@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Get in touch with the Hybridized team — feedback, artist submissions and support.",
 };
 
-export const cacheLife = 'days';
+export const cacheLife = "days";
 
 export default function ContactPage() {
   return (

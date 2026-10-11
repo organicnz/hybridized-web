@@ -126,7 +126,8 @@ export function AudioPlayerBar() {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 shadow-lg hover:shadow-purple-500/20 transition-all duration-300"
               style={{ transform: "translateZ(0)", willChange: "transform" }}
             >
-              <button type="button"
+              <button
+                type="button"
                 onClick={toggleMute}
                 className="text-white/70 hover:text-white transition-all duration-200 flex-shrink-0 hover:scale-110"
                 style={{ transform: "translateZ(0)" }}
@@ -162,7 +163,8 @@ export function AudioPlayerBar() {
             <div className="h-10 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent flex-shrink-0" />
 
             {/* Close button with glassmorphism */}
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setCurrentTrack(null)}
               className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-md border border-white/20 hover:border-red-400/50 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/30 flex-shrink-0 group"
               style={{ transform: "translateZ(0)", willChange: "transform" }}

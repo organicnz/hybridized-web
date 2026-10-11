@@ -78,14 +78,16 @@ export function MixList({ items, onPlay, onMenuClick, className }: MixListProps)
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => onMenuClick?.(item)}
                 className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 gpu-opacity"
                 aria-label={`More options for ${item.name || "mix"}`}
               >
                 <MoreVertical className="w-4 h-4 text-white/70" />
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => onPlay?.(item)}
                 className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-green-500 hover:from-green-300 hover:to-green-400 hover:scale-110 flex items-center justify-center transition-all shadow-lg group-hover:shadow-green-500/50 gpu"
                 aria-label={`Play ${item.name || "mix"}`}

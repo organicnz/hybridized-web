@@ -80,9 +80,7 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
 
   return (
     <>
-      {showAuthModal && (
-        <AuthRequiredModal isOpen onClose={() => setShowAuthModal(false)} />
-      )}
+      {showAuthModal && <AuthRequiredModal isOpen onClose={() => setShowAuthModal(false)} />}
       <div className="relative w-full rounded-lg border border-white/10 overflow-hidden bg-[#181818] hover:bg-[#282828] transition-colors group">
         <div className="flex items-center gap-3 p-3">
           {/* Episode Info */}
@@ -93,7 +91,8 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
           </div>
 
           {/* Play Button */}
-          <button type="button"
+          <button
+            type="button"
             onClick={handlePlayClick}
             className="w-10 h-10 rounded-full bg-[#1DB954] hover:bg-[#1ed760] hover:scale-105 flex items-center justify-center transition-all shadow-lg flex-shrink-0"
             aria-label={`Play ${episode.title || "episode"}`}

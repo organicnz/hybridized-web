@@ -173,7 +173,8 @@ export function CustomAudioPlayer({
       {/* Controls */}
       <div className="flex items-center gap-2">
         {showSkipControls && (
-          <button type="button"
+          <button
+            type="button"
             onClick={onPrevious}
             className="text-white/70 hover:text-white transition-colors"
             aria-label="Previous"
@@ -182,7 +183,8 @@ export function CustomAudioPlayer({
           </button>
         )}
 
-        <button type="button"
+        <button
+          type="button"
           onClick={() => skip(-10)}
           className="text-white/70 hover:text-white transition-colors text-xs"
           aria-label="Rewind 10 seconds"
@@ -190,7 +192,8 @@ export function CustomAudioPlayer({
           -10s
         </button>
 
-        <button type="button"
+        <button
+          type="button"
           onClick={togglePlay}
           className="w-8 h-8 rounded-full bg-white hover:bg-white/90 flex items-center justify-center transition-colors"
           aria-label={isPlaying ? "Pause" : "Play"}
@@ -202,7 +205,8 @@ export function CustomAudioPlayer({
           )}
         </button>
 
-        <button type="button"
+        <button
+          type="button"
           onClick={() => skip(10)}
           className="text-white/70 hover:text-white transition-colors text-xs"
           aria-label="Forward 10 seconds"
@@ -211,7 +215,8 @@ export function CustomAudioPlayer({
         </button>
 
         {showSkipControls && (
-          <button type="button"
+          <button
+            type="button"
             onClick={onNext}
             className="text-white/70 hover:text-white transition-colors"
             aria-label="Next"

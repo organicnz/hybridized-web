@@ -78,7 +78,8 @@ export function Header() {
             )}
           </Link>
 
-          <button type="button"
+          <button
+            type="button"
             onClick={toggleMobileMenu}
             className={cn("md:hidden", HEADER_STYLES.button)}
             aria-label="Toggle menu"

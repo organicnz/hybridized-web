@@ -35,7 +35,8 @@ export function AudioVisualizer({ analyser, isPlaying, className = "" }: AudioVi
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold text-white/90">Audio Visualizer</h4>
         <div className="flex gap-1">
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setVisualizerType("bars")}
             className={`p-2 rounded transition-colors ${
               visualizerType === "bars"
@@ -46,7 +47,8 @@ export function AudioVisualizer({ analyser, isPlaying, className = "" }: AudioVi
           >
             <BarChart3 size={16} />
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setVisualizerType("waveform")}
             className={`p-2 rounded transition-colors ${
               visualizerType === "waveform"
@@ -57,7 +59,8 @@ export function AudioVisualizer({ analyser, isPlaying, className = "" }: AudioVi
           >
             <Activity size={16} />
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setVisualizerType("circular")}
             className={`p-2 rounded transition-colors ${
               visualizerType === "circular"

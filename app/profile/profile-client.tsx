@@ -319,7 +319,8 @@ function ProfileContent() {
           </form>
 
           <div className="mt-8 pt-8 border-t border-purple-500/20">
-            <button type="button"
+            <button
+              type="button"
               onClick={handleLogout}
               disabled={loggingOut}
               className="w-full px-6 py-3 bg-red-500/10 border border-red-500/30 text-red-300 rounded-full font-semibold hover:bg-red-500/20 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"

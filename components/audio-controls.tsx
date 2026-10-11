@@ -93,7 +93,8 @@ export function AudioControls({
 
       {/* Control Buttons */}
       <div className="flex gap-2">
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setShowSettings(!showSettings)}
           className="w-12 h-12 rounded-full bg-[#1DB954] hover:bg-[#1ed760] flex items-center justify-center transition-colors shadow-lg"
           aria-label="Audio settings"
@@ -101,7 +102,8 @@ export function AudioControls({
           <Settings className="w-5 h-5 text-black" />
         </button>
 
-        <button type="button"
+        <button
+          type="button"
           onClick={onToggle}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-lg ${
             isEnabled ? "bg-[#1DB954] hover:bg-[#1ed760]" : "bg-white/10 hover:bg-white/20"
