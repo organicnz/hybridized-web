@@ -95,16 +95,41 @@ async function ArtistContent({ params }: PageProps) {
   const artistProfile = artistBands[0];
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <ArtistNav activeArtist={artistName} />
-      <div className="flex-1 min-h-0">
-        <HomeClient
-          items={bandsWithEpisodes}
-          currentArtist={artistName}
-          artistBio={artistProfile.description || undefined}
-          artistCoverUrl={artistProfile.cover_url || undefined}
-          soundcloudUrl={artistProfile.soundcloud_url || undefined}
-        />
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0220] via-[#0f0a18] to-[#0a0a0f] text-foreground">
+      {/* Ambient gradient mesh — glassmorphic spec */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_20%_30%,rgba(124,58,237,0.12)_0%,transparent_50%),radial-gradient(circle_at_80%_70%,rgba(236,72,153,0.12)_0%,transparent_50%),radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08)_0%,transparent_60%)]" />
+
+      <div className="relative z-10 flex flex-col min-h-screen overflow-hidden">
+        <ArtistNav activeArtist={artistName} />
+        <main className="flex-1 overflow-y-auto px-4 py-10 md:px-8 lg:px-12">
+          <div className="max-w-6xl mx-auto space-y-12">
+            {/* Hero header — glass card with gradient text */}
+            <section className="relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-2xl shadow-[0_20px_60px_-20px_rgba(124,58,237,0.25)] p-8 md:p-12">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-purple-400/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-72 h-72 bg-pink-400/20 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+
+              <h1 className="text-fluid-2xl md:text-fluid-3xl font-black gradient-text tracking-tight mb-4">
+                {artistName}
+              </h1>
+              {artistProfile.description && (
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed font-light">
+                  {artistProfile.description}
+                </p>
+              )}
+            </section>
+
+            {/* Main content from home-client inside glass card */}
+            <section className="rounded-3xl border border-white/10 bg-card/60 backdrop-blur-xl shadow-[0_12px_40px_-12px_rgba(0,0,0,0.5)] p-6 md:p-8">
+              <HomeClient
+                items={bandsWithEpisodes}
+                currentArtist={artistName}
+                artistBio={artistProfile.description || undefined}
+                artistCoverUrl={artistProfile.cover_url || undefined}
+                soundcloudUrl={artistProfile.soundcloud_url || undefined}
+              />
+            </section>
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -90,7 +90,7 @@ export function AudioPlayerBar() {
   const _progress = audioRef?.current?.duration ? currentTime / audioRef.current.duration : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50">
+    <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-gradient-to-t from-[#0a0215]/95 via-[#0d0015]/90 to-[#0a0215]/80 border-t border-white/10 shadow-[0_-20px_60px_-15px_rgba(124,58,237,0.15),0_0_0_1px_rgba(255,255,255,0.05)]">
       {/* Glassmorphism background with gradient */}
       <motion.div
         initial={{ opacity: 0, y: 100 }}
