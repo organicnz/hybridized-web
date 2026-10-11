@@ -30,8 +30,8 @@ export default function AudioDemoPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10">
-            <h3 className="text-white font-semibold mb-3">Features</h3>
+          <section className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+            <h2 className="text-xl font-semibold text-white mb-4">Features</h2>
             <ul className="space-y-2 text-white/70 text-sm">
               <li>✓ 48kHz sample rate for studio quality</li>
               <li>✓ 10-band parametric equalizer</li>
@@ -41,10 +41,10 @@ export default function AudioDemoPage() {
               <li>✓ 10 EQ presets (Bass, Treble, Vocal, etc.)</li>
               <li>✓ 6 spatial presets (Concert Hall, Wide, etc.)</li>
             </ul>
-          </div>
+          </section>
 
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10">
-            <h3 className="text-white font-semibold mb-3">Technical Details</h3>
+          <section className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+            <h2 className="text-xl font-semibold text-white mb-4">Technical Details</h2>
             <ul className="space-y-2 text-white/70 text-sm">
               <li>• Web Audio API with AudioContext</li>
               <li>• BiquadFilter nodes for EQ bands</li>
@@ -54,7 +54,7 @@ export default function AudioDemoPage() {
               <li>• Real-time parameter adjustments</li>
               <li>• Cross-browser compatible</li>
             </ul>
-          </div>
+          </section>
         </div>
       </div>
     </div>

@@ -114,7 +114,10 @@ async function SearchContent({
               <p className="text-white/70">Enter a search query to find mixes</p>
             </div>
           ) : (
-            <SearchResults results={results} query={query} />
+            <>
+              <h2 className="text-2xl font-semibold text-white/80 mb-6">Episodes</h2>
+              <SearchResults results={results} query={query} />
+            </>
           )}
         </div>
       </div>
