@@ -90,7 +90,9 @@ export function SearchResults({
                       </h3>
                       <p className="text-sm text-primary/70 mb-2">{artistName}</p>
                       {episode.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">{episode.description}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {episode.description}
+                        </p>
                       )}
                     </div>
 
