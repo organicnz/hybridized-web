@@ -183,6 +183,30 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      search_episodes: {
+        Args: { search_query: string; result_limit: number };
+        Returns: {
+          audio_length: number | null;
+          audio_url: string;
+          band_cover_url: string | null;
+          band_firstory_user_id: string | null;
+          band_id: number | null;
+          band_name: string | null;
+          cover_url: string | null;
+          created_at: string | null;
+          creator: string | null;
+          description: string | null;
+          duration: number | null;
+          enclosure_type: string | null;
+          episode_id: string;
+          explicit: boolean | null;
+          guid: string | null;
+          id: number;
+          link: string | null;
+          pub_date: string | null;
+          title: string;
+        }[];
+      };
       search_bands: {
         Args: { search_query: string };
         Returns: {
