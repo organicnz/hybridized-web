@@ -1,6 +1,7 @@
 "use client";
 
 import { BAR_COUNT, computeBars } from "@/lib/vgpu/spectrum";
+import { isWebGpuSupportedSync } from "@/lib/webgpu";
 import { useEffect, useRef, useState } from "react";
 
 interface GpuAudioVisualizerProps {
@@ -27,14 +28,21 @@ export function GpuAudioVisualizer({
 }: GpuAudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const barsRef = useRef<Float32Array>(new Float32Array(barCount));
-  const handleRef = useRef<{ dispose: () => void; pause: () => void; resume: () => void } | null>(
-    null,
-  );
+  const handleRef = useRef<{
+    dispose: () => void;
+    pause: () => void;
+    resume: () => void;
+    setBars: (bars: Float32Array) => void;
+  } | null>(null);
   const [renderer, setRenderer] = useState<Renderer | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+  // Early WebGPU detection — avoids the dynamic import on unsupported browsers
+  const webgpuSupported = isWebGpuSupportedSync().available;
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !analyser) return;
+    if (!canvas || !analyser || !webgpuSupported) return;
 
     let cancelled = false;
     let frame = 0;
@@ -44,8 +52,6 @@ export function GpuAudioVisualizer({
         const { startGpuVisualizer } = await import("@/lib/vgpu/audio-visualizer");
         const { handle } = await startGpuVisualizer(canvas, {
           onError: () => {
-            // Device lost or a frame failed validation: fall back rather than
-            // leaving a frozen canvas behind.
             if (cancelled) return;
             cancelled = true;
             handleRef.current?.dispose();
@@ -81,7 +87,29 @@ export function GpuAudioVisualizer({
       handleRef.current?.dispose();
       handleRef.current = null;
     };
-  }, [analyser]);
+  }, [analyser, webgpuSupported]);
+
+  // Responsive canvas sizing
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+    };
+
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+    resizeObserverRef.current = ro;
+
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const handle = handleRef.current;
@@ -131,12 +159,9 @@ export function GpuAudioVisualizer({
   }, [renderer, analyser, isPlaying, barCount]);
 
   return (
-    // Decorative: the audio element carries the semantics, not the rendering.
     <div aria-hidden="true" className="contents">
       <canvas
         ref={canvasRef}
-        width={800}
-        height={200}
         className={className}
         data-renderer={renderer ?? "pending"}
       />
