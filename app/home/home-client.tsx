@@ -128,7 +128,7 @@ export function HomeClient({
       {/* Main Content Panel - 65% */}
       <div className="w-full lg:w-[65%] flex flex-col min-h-0">
         {showSoundCloudOnly ? (
-          <div className="relative flex-1 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20 rounded-lg overflow-hidden border border-white/10 shadow-2xl">
+          <div className="relative flex-1 rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-purple-900/30 via-black/80 to-blue-900/20 shadow-[0_20px_60px_-15px_rgba(124,58,237,0.2)] backdrop-blur-2xl">
             {/* Decorative gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-blue-500/5 pointer-events-none" />
 
