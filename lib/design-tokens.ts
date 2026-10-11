@@ -38,14 +38,11 @@ export const tokens = {
     /** Raised — subtle depth */
     raised: "0 4px 12px -4px hsl(0 0% 0% / 0.3), 0 0 0 1px hsl(var(--border))",
     /** Floating — pronounced depth for modals, dropdowns, player bar */
-    floating:
-      "0 12px 28px -8px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--border))",
+    floating: "0 12px 28px -8px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--border))",
     /** Overlay — maximum depth for dialogs, sheets */
-    overlay:
-      "0 20px 40px -12px hsl(0 0% 0% / 0.5), 0 0 0 1px hsl(var(--border))",
+    overlay: "0 20px 40px -12px hsl(0 0% 0% / 0.5), 0 0 0 1px hsl(var(--border))",
     /** Glow — colored glow for primary actions, audio player */
-    glow: (color = "var(--primary)") =>
-      `0 0 24px ${color}66, 0 0 0 1px hsl(var(--border))`,
+    glow: (color = "var(--primary)") => `0 0 24px ${color}66, 0 0 0 1px hsl(var(--border))`,
     /** Inner — inset shadow for inputs, pressed states */
     inner: "inset 0 2px 4px -2px hsl(0 0% 0% / 0.2)",
   },
@@ -120,13 +117,15 @@ export const tokens = {
     },
     /** Brand gradients */
     gradient: {
-      brand: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(280 80% 60%) 50%, hsl(220 80% 60%) 100%)",
+      brand:
+        "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(280 80% 60%) 50%, hsl(220 80% 60%) 100%)",
       brandReverse:
         "linear-gradient(135deg, hsl(220 80% 60%) 0%, hsl(280 80% 60%) 50%, hsl(var(--primary)) 100%)",
       hero: "linear-gradient(to bottom right, hsl(270 50% 15%), hsl(0 0% 0%), hsl(240 50% 10%))",
       card: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%)",
       border: "linear-gradient(135deg, hsl(var(--border)) 0%, hsl(var(--ring)) 100%)",
-      purplePinkBlue: "linear-gradient(to right, hsl(270 80% 60%), hsl(330 80% 60%), hsl(220 80% 60%))",
+      purplePinkBlue:
+        "linear-gradient(to right, hsl(270 80% 60%), hsl(330 80% 60%), hsl(220 80% 60%))",
       greenEmerald: "linear-gradient(to right, hsl(140 60% 45%), hsl(160 60% 45%))",
       goldOrange: "linear-gradient(to right, hsl(45 100% 55%), hsl(30 100% 55%))",
     },

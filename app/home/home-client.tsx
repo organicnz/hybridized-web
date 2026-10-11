@@ -6,6 +6,20 @@ import { useAudioPlayer } from "@/lib/audio-player-context";
 import { soundCloudManager } from "@/lib/soundcloud-widget-manager";
 import type { Database } from "@/lib/types/database.types";
 import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/page-transition";
+
+// Extend Window interface for SoundCloud Widget API
+declare global {
+  interface Window {
+    SC: {
+      Widget: (iframe: HTMLIFrameElement) => {
+        bind: (event: string, callback: () => void) => void;
+        pause: () => void;
+      };
+    };
+  }
+}
 
 type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"] & {
   episodes?: Database["public"]["Tables"]["episodes"]["Row"][];
@@ -19,17 +33,18 @@ interface HomeClientProps {
   soundcloudUrl?: string;
 }
 
-// Extend Window interface for SoundCloud Widget API
-declare global {
-  interface Window {
-    SC: {
-      Widget: (iframe: HTMLIFrameElement) => {
-        bind: (event: string, callback: () => void) => void;
-        pause: () => void;
-      };
-    };
-  }
-}
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 20,
+    },
+  },
+};
 
 export function HomeClient({
   items,
@@ -127,15 +142,30 @@ export function HomeClient({
             <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-20" />
           </div>
         ) : (
-          <div className="space-y-6 overflow-y-auto pr-2">
-            {allEpisodes.map((episode) => (
-              <IframePlayer key={episode.id} episode={episode} artist={currentArtist || "Hybrid"} />
-            ))}
+          <div className="space-y-4 overflow-y-auto pr-2">
+            <StaggerContainer stagger={0.04} delayChildren={0.05}>
+              {allEpisodes.map((episode, index) => (
+                <StaggerItem key={episode.id} custom={index}>
+                  <motion.div
+                    variants={itemVariants}
+                    whileHover={{ y: -2 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <IframePlayer episode={episode} artist={currentArtist || "Hybrid"} />
+                  </motion.div>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
 
             {allEpisodes.length === 0 && !soundcloudUrl && (
-              <div className="bg-[#181818] rounded-lg p-12 text-center border border-white/5">
-                <p className="text-white/50">No episodes available for this artist</p>
-              </div>
+              <motion.div
+                className="card-flat p-12 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <p className="text-muted-foreground">No episodes available for this artist</p>
+              </motion.div>
             )}
           </div>
         )}
@@ -156,4 +186,16 @@ export function HomeClient({
       </aside>
     </main>
   );
+}
+
+// Extend Window interface for SoundCloud Widget API
+declare global {
+  interface Window {
+    SC: {
+      Widget: (iframe: HTMLIFrameElement) => {
+        bind: (event: string, callback: () => void) => void;
+        pause: () => void;
+      };
+    };
+  }
 }

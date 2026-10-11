@@ -32,23 +32,13 @@ export default function ContactPage() {
                 <label htmlFor="name" className="label">
                   Name
                 </label>
-                <input
-                  id="name"
-                  type="text"
-                  className="input"
-                  placeholder="Your name"
-                />
+                <input id="name" type="text" className="input" placeholder="Your name" />
               </div>
               <div>
                 <label htmlFor="email" className="label">
                   Email
                 </label>
-                <input
-                  id="email"
-                  type="email"
-                  className="input"
-                  placeholder="your@email.com"
-                />
+                <input id="email" type="email" className="input" placeholder="your@email.com" />
               </div>
               <div>
                 <label htmlFor="message" className="label">
@@ -61,10 +51,7 @@ export default function ContactPage() {
                   placeholder="Tell us what's on your mind..."
                 />
               </div>
-              <button
-                type="submit"
-                className="btn btn-primary btn-lg w-full justify-center gap-2"
-              >
+              <button type="submit" className="btn btn-primary btn-lg w-full justify-center gap-2">
                 <Send className="w-4 h-4" />
                 Send Message
               </button>

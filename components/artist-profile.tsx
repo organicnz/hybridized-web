@@ -44,10 +44,7 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
   const gradientClass = GRADIENT_PRESETS[currentArtist.gradientPreset || "purple-pink"];
 
   return (
-    <article
-      className={cn("card-floating", className)}
-      aria-labelledby="artist-name"
-    >
+    <article className={cn("card-floating", className)} aria-labelledby="artist-name">
       {/* Hero Image */}
       <div className="relative h-[322px] flex items-center justify-center overflow-hidden rounded-t-xl">
         {currentArtist.coverUrl ? (
