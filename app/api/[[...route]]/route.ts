@@ -11,6 +11,7 @@ import { generateRequestId, logger } from "@/lib/api/errors";
 import { findEpisodeById, parseFeed, parseFeedFull } from "@/lib/api/rss";
 import { isValidSlug } from "@/lib/api/validation";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 
@@ -161,7 +162,7 @@ app.post("/v1/sync-episodes", async (c) => {
   if (!response.ok) throw new Error(`Failed to fetch RSS feed: ${response.status}`);
 
   const episodes = parseFeedFull(await response.text());
-  const supabase = await createClient();
+  const supabase = createServiceClient() ?? (await createClient());
 
   let synced = 0;
   for (const episode of episodes) {
@@ -204,7 +205,7 @@ app.post("/v1/sync-playlists", async (c) => {
   if (!(await isSyncAuthorized(c.req.raw))) return c.json({ error: "Unauthorized" }, 401);
 
   const requestId = c.get("requestId");
-  const supabase = await createClient();
+  const supabase = createServiceClient() ?? (await createClient());
   const { data: bands, error } = await supabase
     .from("bands")
     .select("id, name, iframe_url")
@@ -281,7 +282,7 @@ function matchesBand(title: string, bandName: string): boolean {
 app.post("/v1/match-episodes", async (c) => {
   if (!(await isSyncAuthorized(c.req.raw))) return c.json({ error: "Unauthorized" }, 401);
 
-  const supabase = await createClient();
+  const supabase = createServiceClient() ?? (await createClient());
 
   const { data: bands, error: bandsError } = await supabase.from("bands").select("id, name");
   if (bandsError) throw bandsError;
