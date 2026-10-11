@@ -57,8 +57,8 @@ export function Header() {
   };
 
   return (
-    <header className="bg-black/95 border-b border-white/5 sticky top-0 z-50 backdrop-blur-md gpu-filter">
-      <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+    <header className="bg-black/70 border-b border-white/10 sticky top-0 z-50 backdrop-blur-2xl gpu-filter shadow-[0_1px_0_0_rgba(255,255,255,0.05),0_8px_32px_-8px_rgba(124,58,237,0.15)]">
+      <div className="px-4 md:px-10 py-3.5 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
           <Image
@@ -70,9 +70,7 @@ export function Header() {
             className="w-10 h-10 md:w-12 md:h-12 rounded-full group-hover:scale-105 transition-transform gpu"
             priority
           />
-          <span className="text-xl md:text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
-            Hybridized
-          </span>
+          <span className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">Hybridized</span>
         </Link>
 
         {/* Desktop Navigation */}

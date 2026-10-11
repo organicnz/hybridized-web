@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SearchResults } from "./search-results";
 import { Suspense } from "react";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -90,33 +91,45 @@ async function SearchContent({
 
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
-            Search Results
-          </h1>
+          <ScrollReveal variant="fade-up" delay={100} className="mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
+              Search Results
+            </h1>
+          </ScrollReveal>
 
           {query && (
-            <p className="text-white/70 mb-8">
-              Showing results for:{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">
-                {query}
-              </span>
-            </p>
+            <ScrollReveal variant="fade-up" delay={200} className="mb-8">
+              <p className="text-white/70">
+                Showing results for:{" "}
+                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">
+                  {query}
+                </span>
+              </p>
+            </ScrollReveal>
           )}
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-8">
-              <p className="text-red-400">Error loading search results. Please try again.</p>
-            </div>
+            <ScrollReveal variant="fade-up" delay={300} className="mb-8">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                <p className="text-red-400">Error loading search results. Please try again.</p>
+              </div>
+            </ScrollReveal>
           )}
 
           {!query.trim() ? (
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 text-center hover:bg-white/10 transition-colors">
-              <p className="text-white/70">Enter a search query to find mixes</p>
-            </div>
+            <ScrollReveal variant="scale-up" delay={200} className="max-w-xl mx-auto">
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 text-center hover:bg-white/10 transition-colors">
+                <p className="text-white/70">Enter a search query to find mixes</p>
+              </div>
+            </ScrollReveal>
           ) : (
             <>
-              <h2 className="text-2xl font-semibold text-white/80 mb-6">Episodes</h2>
-              <SearchResults results={results} query={query} />
+              <ScrollReveal variant="fade-up" delay={200} className="mb-6">
+                <h2 className="text-2xl font-semibold text-white/80">Episodes</h2>
+              </ScrollReveal>
+              <ScrollReveal variant="fade-up" delay={300}>
+                <SearchResults results={results} query={query} />
+              </ScrollReveal>
             </>
           )}
         </div>

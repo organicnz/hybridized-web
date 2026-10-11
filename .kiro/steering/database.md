@@ -131,3 +131,11 @@ import Image from 'next/image'
 - Define policies for read/write access
 - Use auth.uid() in policies for user-specific data
 - Test policies thoroughly before deploying
+
+---
+
+## Policy
+Always merge to `main`. Deliver into prod accordingly. No PR branches, no staging, no preview deployments.
+
+## Design / Beautification
+Premium dark glassmorphic. Deep blacks, refined purple/pink/blue gradient meshes (`bg-gradient-to-br`), glass cards (`backdrop-blur-2xl`, `border-white/10`), fluid typography, refined shadows (`shadow-[...]`), gradient text (`gradient-text`). 10x pro aesthetic executed across theme, components, layout, docs, and skills.

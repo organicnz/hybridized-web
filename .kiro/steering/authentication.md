@@ -73,3 +73,11 @@ export default async function ProtectedPage() {
 Never commit `.env` file - use `.env.example` as template:
 - `NEXT_PUBLIC_SUPABASE_URL`: Public Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Public anon key (safe for client)
+
+---
+
+## Policy
+Always merge to `main`. Deliver into prod accordingly. No PR branches, no staging, no preview deployments.
+
+## Design / Beautification
+Premium dark glassmorphic. Deep blacks, refined purple/pink/blue gradient meshes (`bg-gradient-to-br`), glass cards (`backdrop-blur-2xl`, `border-white/10`), fluid typography, refined shadows (`shadow-[...]`), gradient text (`gradient-text`). 10x pro aesthetic executed across theme, components, layout, docs, and skills.

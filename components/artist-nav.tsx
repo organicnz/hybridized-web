@@ -12,7 +12,7 @@ interface ArtistNavProps {
   className?: string;
 }
 
-export function ArtistNav({ activeArtist = "Hybrid", className }: ArtistNavProps) {
+export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
   const _router = useRouter();
   const [artists, setArtists] = useState<string[]>([]);
   const navRef = useRef<HTMLDivElement>(null);

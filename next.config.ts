@@ -2,10 +2,9 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    cacheComponents: true,
-  },
+  cacheComponents: true,
   turbopack: {
+    root: import.meta.dirname,
     rules: {
       "*.wgsl": {
         loaders: ["@vgpu/wgsl/loader-webpack"],

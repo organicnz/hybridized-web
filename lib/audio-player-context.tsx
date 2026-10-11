@@ -46,6 +46,7 @@ interface AudioPlayerContextType {
   setCurrentTime: (time: number) => void;
   setVolume: (volume: number) => void;
   pauseAudio: () => void;
+  saveInteraction: (data: { last_artist?: string; last_track?: import("@/lib/types/database.types").Json | null }) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
@@ -268,6 +269,31 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setIsPlaying(false);
   };
 
+  // Save interaction data (artist selection, track playing) to Supabase
+  const saveInteraction = useCallback(
+    (data: { last_artist?: string; last_track?: import("@/lib/types/database.types").Json | null }) => {
+      settingsSaverRef.current?.save(data);
+    },
+    [],
+  );
+
+  // Save current track to Supabase whenever it changes
+  useEffect(() => {
+    if (!isHydrated || !currentTrack) return;
+
+    saveInteraction({
+      last_track: currentTrack
+        ? {
+            id: currentTrack.id,
+            title: currentTrack.title,
+            artist: currentTrack.artist,
+            audioUrl: currentTrack.audioUrl,
+            coverUrl: currentTrack.coverUrl ?? undefined,
+          }
+        : null,
+    });
+  }, [currentTrack, isHydrated, saveInteraction]);
+
   return (
     <AudioPlayerContext.Provider
       value={{
@@ -289,6 +315,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         setCurrentTime,
         setVolume,
         pauseAudio,
+        saveInteraction,
       }}
     >
       {children}

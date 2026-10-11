@@ -125,8 +125,7 @@
    - [ ] Enable MFA options
 
 4. **Redirect URLs**
-   - [ ] Add production domain
-   - [ ] Add staging domain (if applicable)
+   - [ ] Add production domain (`hybridized.online`)
    - [ ] Add localhost for development
 
 ## Implementation Guide

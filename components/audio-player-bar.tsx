@@ -15,12 +15,12 @@ function generateWaveformBars(seed: string): number[] {
   // Deterministic pseudo-random based on track ID
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
-    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
     hash |= 0;
   }
   const bars: number[] = [];
   for (let i = 0; i < WAVEFORM_BARS; i++) {
-    hash = ((hash * 1664525) + 1013904223) >>> 0;
+    hash = (hash * 1664525 + 1013904223) >>> 0;
     bars.push(0.15 + (hash / 0xffffffff) * 0.85);
   }
   return bars;
@@ -66,18 +66,21 @@ export function AudioPlayerBar() {
     audioRef.current.muted = newMuted;
   }, [isMuted, audioRef]);
 
-  const handleVolumeChange = useCallback((newVolume: number) => {
-    setVolume(newVolume);
-    if (audioRef?.current) {
-      audioRef.current.volume = newVolume;
-    }
-    if (newVolume > 0 && isMuted) {
-      setIsMuted(false);
+  const handleVolumeChange = useCallback(
+    (newVolume: number) => {
+      setVolume(newVolume);
       if (audioRef?.current) {
-        audioRef.current.muted = false;
+        audioRef.current.volume = newVolume;
       }
-    }
-  }, [setVolume, isMuted, audioRef]);
+      if (newVolume > 0 && isMuted) {
+        setIsMuted(false);
+        if (audioRef?.current) {
+          audioRef.current.muted = false;
+        }
+      }
+    },
+    [setVolume, isMuted, audioRef],
+  );
 
   if (!currentTrack) {
     return null;
@@ -298,7 +301,9 @@ export function AudioPlayerBar() {
                 <h3 className="text-white font-semibold text-sm flex items-center gap-2">
                   <ListMusic className="w-4 h-4 text-primary" />
                   Up Next
-                  <span className="text-xs text-white/40 bg-white/10 px-2 py-0.5 rounded-full">{playlist.length}</span>
+                  <span className="text-xs text-white/40 bg-white/10 px-2 py-0.5 rounded-full">
+                    {playlist.length}
+                  </span>
                 </h3>
                 <motion.button
                   type="button"
@@ -337,7 +342,7 @@ export function AudioPlayerBar() {
                           "relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
                           index === currentIndex
                             ? "bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30"
-                            : "bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10"
+                            : "bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10",
                         )}
                       >
                         {/* Drag handle */}
@@ -356,16 +361,20 @@ export function AudioPlayerBar() {
                           />
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className={cn(
-                            "text-sm font-medium truncate",
-                            index === currentIndex ? "text-primary" : "text-white"
-                          )}>
+                          <p
+                            className={cn(
+                              "text-sm font-medium truncate",
+                              index === currentIndex ? "text-primary" : "text-white",
+                            )}
+                          >
                             {track.title}
                           </p>
-                          <p className={cn(
-                            "text-xs truncate",
-                            index === currentIndex ? "text-primary/70" : "text-white/50"
-                          )}>
+                          <p
+                            className={cn(
+                              "text-xs truncate",
+                              index === currentIndex ? "text-primary/70" : "text-white/50",
+                            )}
+                          >
                             {track.artist}
                           </p>
                         </div>

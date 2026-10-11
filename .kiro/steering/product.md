@@ -29,3 +29,11 @@ Hybridized is a modern music discovery and exploration platform that combines un
 - Music-focused iconography (Music, Headphones, Sparkles)
 - Modern, glassmorphic UI with backdrop blur effects
 - Animated, interactive elements using Framer Motion
+
+---
+
+## Policy
+Always merge to `main`. Deliver into prod accordingly. No PR branches, no staging, no preview deployments.
+
+## Design / Beautification
+Premium dark glassmorphic. Deep blacks, refined purple/pink/blue gradient meshes (`bg-gradient-to-br`), glass cards (`backdrop-blur-2xl`, `border-white/10`), fluid typography, refined shadows (`shadow-[...]`), gradient text (`gradient-text`). 10x pro aesthetic executed across theme, components, layout, docs, and skills.

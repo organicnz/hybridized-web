@@ -25,21 +25,12 @@ interface ArtistProfileProps {
   className?: string;
 }
 
-// Default artist data
-const DEFAULT_ARTIST: Artist = {
-  name: "Hybrid",
-  bio: `Hybrid is a British electronic music duo consisting of Mike and Charlotte Truman. The group was formed in 1995 by Mike Truman, Chris Healings, and Lee Mullin.
-
-At the time they were primarily known as a breakbeat collective, although they overlapped considerably with progressive house and trance.
-
-The band are known for their cinematic approach to electronic music, with orchestral flourishes and dramatic builds that have made them a favorite for film and game soundtracks.`,
-  gradientPreset: "green-emerald",
-};
-
 export function ArtistProfile({ artist, className }: ArtistProfileProps) {
-  const currentArtist = {
-    ...DEFAULT_ARTIST,
-    ...artist,
+  const currentArtist: Artist = {
+    name: artist?.name ?? "",
+    bio: artist?.bio ?? "",
+    coverUrl: artist?.coverUrl,
+    gradientPreset: artist?.gradientPreset,
   };
   const gradientClass = GRADIENT_PRESETS[currentArtist.gradientPreset || "purple-pink"];
 
