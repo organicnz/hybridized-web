@@ -160,11 +160,7 @@ export function GpuAudioVisualizer({
 
   return (
     <div aria-hidden="true" className="contents">
-      <canvas
-        ref={canvasRef}
-        className={className}
-        data-renderer={renderer ?? "pending"}
-      />
+      <canvas ref={canvasRef} className={className} data-renderer={renderer ?? "pending"} />
     </div>
   );
 }

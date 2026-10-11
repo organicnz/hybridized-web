@@ -2,9 +2,10 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useTheme } from "@/components/theme-provider";
 import { HEADER_STYLES, NAV_LINKS } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
-import { Menu, User } from "lucide-react";
+import { Menu, User, Sun, Moon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
@@ -16,6 +17,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   const toggleMobileMenu = useCallback(() => {
     setMobileMenuOpen((prev) => !prev);
@@ -25,8 +27,37 @@ export function Header() {
     setMobileMenuOpen(false);
   }, []);
 
+  const cycleTheme = () => {
+    const themes: ("light" | "dark" | "system")[] = ["light", "dark", "system"];
+    const currentIndex = themes.indexOf(theme);
+    const nextTheme = themes[(currentIndex + 1) % themes.length];
+    setTheme(nextTheme);
+  };
+
+  const getThemeIcon = () => {
+    switch (resolvedTheme) {
+      case "light":
+        return <Sun className={HEADER_STYLES.icon} />;
+      case "dark":
+        return <Moon className={HEADER_STYLES.icon} />;
+      default:
+        return <Moon className={HEADER_STYLES.icon} />;
+    }
+  };
+
+  const getThemeLabel = () => {
+    switch (theme) {
+      case "light":
+        return "Switch to dark mode";
+      case "dark":
+        return "Switch to system theme";
+      case "system":
+        return "Switch to light mode";
+    }
+  };
+
   return (
-    <header className="bg-[#000000] border-b border-white/5 sticky top-0 z-50 backdrop-blur-md bg-black/95 gpu-filter">
+    <header className="bg-black/95 border-b border-white/5 sticky top-0 z-50 backdrop-blur-md gpu-filter">
       <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
@@ -39,7 +70,7 @@ export function Header() {
             className="w-10 h-10 md:w-12 md:h-12 rounded-full group-hover:scale-105 transition-transform gpu"
             priority
           />
-          <span className="text-xl md:text-2xl font-bold text-white group-hover:text-[#1DB954] transition-colors">
+          <span className="text-xl md:text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
             Hybridized
           </span>
         </Link>
@@ -51,9 +82,26 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Search & User */}
+        {/* Search, Theme Toggle & User */}
         <div className="flex items-center gap-2 md:gap-3">
           <SearchBar />
+
+          {/* Theme Toggle */}
+          <button
+            type="button"
+            onClick={cycleTheme}
+            className={cn(
+              HEADER_STYLES.button,
+              "relative overflow-visible",
+            )}
+            aria-label={getThemeLabel()}
+            title={getThemeLabel()}
+          >
+            <span className="transition-transform duration-fast ease-out">
+              {getThemeIcon()}
+            </span>
+          </button>
+
           <Link
             href={user ? "/profile" : "/auth/login"}
             className={cn(

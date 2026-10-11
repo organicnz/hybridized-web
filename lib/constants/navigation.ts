@@ -29,10 +29,10 @@ export type NavLinkItem = (typeof NAV_LINKS)[number];
 
 /**
  * Reusable style classes for header components
- * Using Spotify color palette
+ * Using design token button variants
  */
 export const HEADER_STYLES = {
   button:
-    "w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors",
-  icon: "w-5 h-5 text-white/70",
+    "btn btn-ghost btn-sm h-10 w-10 p-0 rounded-full hover:bg-accent active:bg-accent transition-colors",
+  icon: "w-5 h-5 text-muted-foreground",
 } as const;

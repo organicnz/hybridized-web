@@ -45,14 +45,11 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
 
   return (
     <article
-      className={cn(
-        "bg-zinc-900/50 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10",
-        className,
-      )}
+      className={cn("card-floating", className)}
       aria-labelledby="artist-name"
     >
       {/* Hero Image */}
-      <div className="relative h-[322px] flex items-center justify-center overflow-hidden">
+      <div className="relative h-[322px] flex items-center justify-center overflow-hidden rounded-t-xl">
         {currentArtist.coverUrl ? (
           <Image
             src={currentArtist.coverUrl}
@@ -60,6 +57,7 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 35vw"
+            priority
           />
         ) : (
           <div
@@ -73,14 +71,16 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
             </div>
           </div>
         )}
+        {/* Subtle gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
       </div>
 
       {/* Bio Content */}
       <div className="p-6">
-        <h2 id="artist-name" className="text-2xl font-bold text-white mb-4">
+        <h2 id="artist-name" className="text-fluid-lg font-bold text-foreground mb-4">
           {currentArtist.name}
         </h2>
-        <div className="text-white/70 space-y-3 leading-relaxed text-sm">
+        <div className="text-muted-foreground space-y-3 leading-relaxed text-fluid-body-sm">
           {currentArtist.bio.split("\n\n").map((paragraph) => (
             <p key={paragraph} className="text-balance">
               {paragraph}
@@ -94,19 +94,14 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
 
 export function ArtistProfileSkeleton({ className }: { className?: string }) {
   return (
-    <div
-      className={cn(
-        "bg-zinc-900/50 rounded-xl overflow-hidden animate-pulse border border-white/10",
-        className,
-      )}
-    >
-      <div className="h-[322px] bg-white/5" />
+    <div className={cn("card-floating animate-pulse", className)}>
+      <div className="h-[322px] bg-muted" />
       <div className="p-6 space-y-4">
-        <div className="h-8 bg-white/10 rounded w-1/3" />
+        <div className="h-8 bg-muted rounded w-1/3" />
         <div className="space-y-2">
-          <div className="h-4 bg-white/10 rounded" />
-          <div className="h-4 bg-white/10 rounded" />
-          <div className="h-4 bg-white/10 rounded w-5/6" />
+          <div className="h-4 bg-muted rounded" />
+          <div className="h-4 bg-muted rounded" />
+          <div className="h-4 bg-muted rounded w-5/6" />
         </div>
       </div>
     </div>
