@@ -1,9 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import {
-  MAX_SEARCH_QUERY_LENGTH,
-  SEARCH_RESULT_LIMIT,
-  normalizeSearchQuery,
-} from "@/lib/search";
+import { MAX_SEARCH_QUERY_LENGTH, SEARCH_RESULT_LIMIT, normalizeSearchQuery } from "@/lib/search";
 
 describe("normalizeSearchQuery", () => {
   it("trims surrounding whitespace", () => {
