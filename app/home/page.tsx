@@ -5,11 +5,7 @@ import { slugifyEncoded } from "@/lib/utils/slug";
 
 async function ArtistRedirect() {
   const supabase = createStaticClient();
-  const { data: bands } = await supabase
-    .from("bands")
-    .select("name")
-    .order("name")
-    .limit(1);
+  const { data: bands } = await supabase.from("bands").select("name").order("name").limit(1);
 
   const firstArtist = bands?.[0]?.name;
   if (!firstArtist) {

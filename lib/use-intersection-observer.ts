@@ -11,15 +11,9 @@ interface UseIntersectionObserverOptions {
 }
 
 export function useIntersectionObserver(
-  options: UseIntersectionObserverOptions = {}
+  options: UseIntersectionObserverOptions = {},
 ): [RefObject<HTMLElement | null>, boolean] {
-  const {
-    threshold = 0.1,
-    rootMargin = "0px",
-    triggerOnce = true,
-    onEnter,
-    onExit,
-  } = options;
+  const { threshold = 0.1, rootMargin = "0px", triggerOnce = true, onEnter, onExit } = options;
 
   const ref = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -43,7 +37,7 @@ export function useIntersectionObserver(
           onExit?.();
         }
       },
-      { threshold, rootMargin }
+      { threshold, rootMargin },
     );
 
     observerRef.current.observe(element);

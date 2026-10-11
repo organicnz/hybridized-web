@@ -70,7 +70,9 @@ export function Header() {
             className="w-10 h-10 md:w-12 md:h-12 rounded-full group-hover:scale-105 transition-transform gpu"
             priority
           />
-          <span className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">Hybridized</span>
+          <span className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
+            Hybridized
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
