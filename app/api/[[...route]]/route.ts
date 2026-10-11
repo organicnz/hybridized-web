@@ -133,6 +133,7 @@ app.get("/v1/playlist-episodes", async (c) => {
 
   const response = await fetch(`https://open.firstory.me/embed/playlists/${playlistId}`, {
     headers: { "User-Agent": FIRSTORY_USER_AGENT },
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
   });
 
   if (!response.ok) throw new Error(`Failed to fetch playlist: ${response.status}`);
@@ -227,6 +228,7 @@ app.post("/v1/sync-playlists", async (c) => {
 
       const response = await fetch(`https://open.firstory.me/api/playlists/${playlistId}`, {
         headers: { "User-Agent": FIRSTORY_USER_AGENT, Accept: "application/json" },
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
       });
 
       if (!response.ok) {
@@ -292,20 +294,22 @@ app.post("/v1/match-episodes", async (c) => {
     .select("id, title, band_id");
   if (episodesError) throw episodesError;
 
-  let matched = 0;
-
+  const idsByBand = new Map<number, number[]>();
   for (const episode of episodes ?? []) {
     const title = episode.title.toLowerCase();
     for (const band of bands ?? []) {
       if (!band.name || !matchesBand(title, band.name.toLowerCase())) continue;
-
-      const { error } = await supabase
-        .from("episodes")
-        .update({ band_id: band.id })
-        .eq("id", episode.id);
-      if (!error) matched++;
+      const ids = idsByBand.get(band.id) ?? [];
+      ids.push(episode.id);
+      idsByBand.set(band.id, ids);
       break;
     }
+  }
+
+  let matched = 0;
+  for (const [bandId, ids] of idsByBand) {
+    const { error } = await supabase.from("episodes").update({ band_id: bandId }).in("id", ids);
+    if (!error) matched += ids.length;
   }
 
   return c.json({ success: true, matched, total: episodes?.length ?? 0 });
