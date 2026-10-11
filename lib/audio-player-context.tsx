@@ -46,7 +46,10 @@ interface AudioPlayerContextType {
   setCurrentTime: (time: number) => void;
   setVolume: (volume: number) => void;
   pauseAudio: () => void;
-  saveInteraction: (data: { last_artist?: string; last_track?: import("@/lib/types/database.types").Json | null }) => void;
+  saveInteraction: (data: {
+    last_artist?: string;
+    last_track?: import("@/lib/types/database.types").Json | null;
+  }) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
@@ -271,7 +274,10 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
   // Save interaction data (artist selection, track playing) to Supabase
   const saveInteraction = useCallback(
-    (data: { last_artist?: string; last_track?: import("@/lib/types/database.types").Json | null }) => {
+    (data: {
+      last_artist?: string;
+      last_track?: import("@/lib/types/database.types").Json | null;
+    }) => {
       settingsSaverRef.current?.save(data);
     },
     [],

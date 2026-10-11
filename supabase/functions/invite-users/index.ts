@@ -36,11 +36,11 @@ const emails = [
 
 serve(async (req) => {
   try {
-    // Authorization check using custom secret
+    // Authorization check (fail-closed: missing secret config rejects all requests)
     const authHeader = req.headers.get("Authorization");
     const functionSecret = Deno.env.get("FUNCTION_SECRET");
 
-    if (functionSecret && authHeader !== `Bearer ${functionSecret}`) {
+    if (!functionSecret || authHeader !== `Bearer ${functionSecret}`) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
