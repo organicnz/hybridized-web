@@ -37,7 +37,6 @@ function ProfileContent() {
     if (profile?.full_name) {
       setFullName(profile.full_name);
     }
-    console.log("Profile loaded:", profile);
 
     // Check if email is verified
     if (user?.email_confirmed_at) {
@@ -49,7 +48,6 @@ function ProfileContent() {
   const avatarUrl = useMemo(() => {
     if (!profile?.avatar_url) return null;
     const url = `${profile.avatar_url}?t=${Date.now()}`;
-    console.log("Avatar URL:", url);
     return url;
   }, [profile?.avatar_url]);
 
@@ -96,8 +94,6 @@ function ProfileContent() {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-      console.log("Uploading avatar, public URL:", publicUrl);
-
       // Update profile with new avatar URL
       const { error: updateError } = await updateProfile({
         avatar_url: publicUrl,
@@ -108,7 +104,6 @@ function ProfileContent() {
         throw updateError;
       }
 
-      console.log("Avatar uploaded successfully");
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {

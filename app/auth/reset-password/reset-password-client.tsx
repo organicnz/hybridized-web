@@ -1,18 +1,11 @@
 "use client";
 
-import type { Metadata } from "next";
 import { getSupabase } from "@/lib/supabase/client";
 import { AlertCircle, CheckCircle, Loader2, Lock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-export const metadata: Metadata = {
-  title: "Reset Password",
-  description: "Choose a new password for your Hybridized account.",
-  robots: { index: false },
-};
 
 export function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -32,8 +25,6 @@ export function ResetPasswordPage() {
       const refreshToken = hashParams.get("refresh_token");
       const type = hashParams.get("type");
 
-      console.log("Recovery handler - type:", type, "has token:", !!accessToken);
-
       if (type === "recovery" && accessToken && refreshToken) {
         try {
           // Exchange the recovery token for a session
@@ -43,14 +34,11 @@ export function ResetPasswordPage() {
             refresh_token: refreshToken,
           });
 
-          console.log("setSession result:", { data, error });
-
           if (error) {
             console.error("setSession error:", error);
             setError("Invalid or expired reset link. Please request a new one.");
             setVerifying(false);
           } else if (data.session) {
-            console.log("Session established successfully");
             setValidSession(true);
             setVerifying(false);
             // Clean up the URL
@@ -71,10 +59,8 @@ export function ResetPasswordPage() {
           data: { session },
         } = await supabase.auth.getSession();
         if (session) {
-          console.log("Existing session found");
           setValidSession(true);
         } else {
-          console.log("No session or recovery token found");
           setError("No valid reset link found. Please request a new password reset.");
         }
         setVerifying(false);

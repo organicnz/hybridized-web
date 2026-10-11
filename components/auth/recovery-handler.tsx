@@ -18,14 +18,12 @@ export function RecoveryHandler() {
 
     // Check if we're already on an auth page (avoid redirect loops)
     if (pathname.startsWith("/auth/")) {
-      console.log("RecoveryHandler: On auth page, skipping");
       return;
     }
 
     // Check for recovery tokens in URL hash
     const hash = window.location.hash;
     if (!hash) {
-      console.log("RecoveryHandler: No hash in URL");
       return;
     }
 
@@ -33,15 +31,8 @@ export function RecoveryHandler() {
     const type = hashParams.get("type");
     const accessToken = hashParams.get("access_token");
 
-    console.log("RecoveryHandler: Detected hash", {
-      type,
-      hasAccessToken: !!accessToken,
-      pathname,
-    });
-
     // If this is a recovery link, redirect to reset password page
     if (type === "recovery" && accessToken) {
-      console.log("RecoveryHandler: Recovery token detected, redirecting to reset password...");
       router.replace(`/auth/reset-password${hash}`);
     }
   }, [pathname, router]);

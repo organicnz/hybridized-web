@@ -49,7 +49,6 @@ export function useAudioEnhancement() {
       }
     } catch {
       // Cross-origin iframes can't be accessed
-      console.log("Cannot enhance cross-origin iframe audio");
     }
   };
 

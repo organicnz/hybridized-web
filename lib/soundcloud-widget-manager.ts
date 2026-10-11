@@ -20,7 +20,6 @@ class SoundCloudWidgetManager {
     if (this.widget) {
       try {
         this.widget.pause();
-        console.log("SoundCloud widget paused");
       } catch (error) {
         console.error("Failed to pause SoundCloud widget:", error);
       }
