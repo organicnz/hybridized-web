@@ -82,7 +82,7 @@ export function EnhancedAudioPlayer({
       <GpuAudioVisualizer
         analyser={analyserRef.current}
         isPlaying={isPlaying}
-        className="w-full h-15 mb-3 rounded"
+        className="w-full aspect-[4/1] max-h-24 mb-3 rounded"
       />
 
       <div className="flex items-center gap-3">
