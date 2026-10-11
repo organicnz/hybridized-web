@@ -1,7 +1,8 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { slugifyEncoded } from "@/lib/utils/slug";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -12,22 +13,26 @@ interface ArtistNavProps {
 }
 
 export function ArtistNav({ activeArtist = "Hybrid", className }: ArtistNavProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const [artists, setArtists] = useState<string[]>([]);
-  const supabase = createClient();
   const navRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     async function fetchArtists() {
+      const supabase = await getSupabase();
       const { data } = await supabase.from("bands").select("name").order("name");
 
       if (data) {
-        setArtists(data.map((band) => band.name).filter(Boolean));
+        setArtists(
+          data
+            .map((band: { name: string | null }) => band.name)
+            .filter((name): name is string => Boolean(name)),
+        );
       }
     }
     fetchArtists();
-  }, [supabase]);
+  }, []);
 
   // Scroll active artist into view (only when artists list changes or on mount)
   useEffect(() => {
@@ -44,12 +49,7 @@ export function ArtistNav({ activeArtist = "Hybrid", className }: ArtistNavProps
   }, [artists.length]); // Only run when artists are loaded, not on every activeArtist change
 
   const getArtistSlug = (artist: string) => {
-    return encodeURIComponent(
-      artist
-        .toLowerCase()
-        .replace(/[\s\/]+/g, "-")
-        .replace(/-+/g, "-"),
-    );
+    return slugifyEncoded(artist);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, artist: string) => {
@@ -66,7 +66,6 @@ export function ArtistNav({ activeArtist = "Hybrid", className }: ArtistNavProps
         "bg-zinc-900/50 backdrop-blur-sm border-b border-white/5 h-14 px-6 flex items-center gap-8 overflow-x-auto scrollbar-hide",
         className,
       )}
-      role="navigation"
       aria-label="Artist navigation"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >

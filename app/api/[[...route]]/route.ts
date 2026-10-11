@@ -1,382 +1,314 @@
+import { isSyncAuthorized } from "@/lib/api/auth";
+import {
+  CACHE_MEDIUM,
+  CACHE_SHORT,
+  FIRSTORY_FEED_URL,
+  FIRSTORY_USER_AGENT,
+  RSS_ACCEPT,
+  UPSTREAM_TIMEOUT_MS,
+} from "@/lib/api/constants";
+import { generateRequestId, logger } from "@/lib/api/errors";
+import { findEpisodeById, parseFeed, parseFeedFull } from "@/lib/api/rss";
+import { isValidSlug } from "@/lib/api/validation";
 import { createClient } from "@/lib/supabase/server";
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 
-export const runtime = "edge";
+type Variables = {
+  requestId: string;
+  path: string;
+  method: string;
+};
 
-const app = new Hono().basePath("/api");
+const app = new Hono<{ Variables: Variables }>().basePath("/api");
 
-// ─── Episodes ────────────────────────────────────────────────────────────────
+// ─── Middleware ──────────────────────────────────────────────────────────────
 
-app.get("/v2/episodes", async (c) => {
-  const bandId = c.req.query("bandId");
-  try {
-    const supabase = await createClient();
-    let query = supabase.from("episodes").select("*").order("pub_date", { ascending: false });
+app.use("/v1/*", async (c, next) => {
+  const requestId = generateRequestId();
+  const path = c.req.path;
+  const method = c.req.method;
+  c.set("requestId", requestId);
+  c.set("path", path);
+  c.set("method", method);
 
-    if (bandId) query = query.eq("band_id", bandId);
+  const startedAt = Date.now();
+  logger.info(`request.start ${path}`, { requestId, path, method });
 
-    const { data: episodes, error } = await query;
-    if (error) throw error;
-    return c.json({ episodes: episodes ?? [] });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch episodes";
-    return c.json({ error: message }, 500);
-  }
+  await next();
+
+  logger.info(`request.end ${path}`, {
+    requestId,
+    path,
+    method,
+    statusCode: c.res.status,
+    durationMs: Date.now() - startedAt,
+  });
 });
 
-// ─── Single Episode ───────────────────────────────────────────────────────────
+app.onError((err, c) => {
+  logger.error(`request.fail ${c.get("path")}`, {
+    requestId: c.get("requestId"),
+    path: c.get("path"),
+    method: c.get("method"),
+    error: err instanceof Error ? err : new Error(String(err)),
+  });
+  return c.json({ error: "Internal server error" }, 500);
+});
 
-const FIRSTORY_USER_ID = "cl3ps0kge021i01y69qhnf36d";
+// ─── Episodes ───────────────────────────────────────────────────────────────
 
-app.get("/v2/episode/:id", async (c) => {
+app.get("/v1/episodes", async (c) => {
+  const bandId = c.req.query("bandId");
+
+  if (bandId !== undefined && !/^\d+$/.test(bandId)) {
+    return c.json({ error: "Invalid bandId" }, 400);
+  }
+
+  const supabase = await createClient();
+  let query = supabase.from("episodes").select("*").order("pub_date", { ascending: false });
+
+  if (bandId) query = query.eq("band_id", Number(bandId));
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return c.json({ episodes: data ?? [] }, 200, { "Cache-Control": CACHE_SHORT });
+});
+
+// ─── Single Episode ──────────────────────────────────────────────────────────
+
+app.get("/v1/episode/:id", async (c) => {
   const episodeId = c.req.param("id");
   if (!episodeId) return c.json({ error: "Missing episode ID" }, 400);
 
-  try {
-    const feedUrl = `https://feed.firstory.me/rss/user/${FIRSTORY_USER_ID}`;
-    const res = await fetch(feedUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; HybridizedApp/1.0)",
-        Accept: "application/rss+xml, application/xml, text/xml, */*",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
+  const response = await fetch(FIRSTORY_FEED_URL, {
+    headers: { "User-Agent": FIRSTORY_USER_AGENT, Accept: RSS_ACCEPT },
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+  });
 
-    if (!res.ok) {
-      if (res.status === 404) return c.json({ error: "Feed not found" }, 404);
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    }
-
-    const xmlText = await res.text();
-    const episode = findEpisodeById(xmlText, episodeId);
-
-    if (!episode) return c.json({ error: "Episode not found in feed" }, 404);
-    return c.json({ episodes: [episode] });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch episode";
-    return c.json({ error: message }, 500);
+  if (!response.ok) {
+    if (response.status === 404) return c.json({ error: "Feed not found" }, 404);
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
+
+  const episode = findEpisodeById(await response.text(), episodeId);
+  if (!episode) return c.json({ error: "Episode not found in feed" }, 404);
+
+  return c.json({ episodes: [episode] }, 200, { "Cache-Control": CACHE_MEDIUM });
 });
 
 // ─── Firstory Feed ───────────────────────────────────────────────────────────
 
-app.get("/v2/firstory-feed", async (c) => {
+app.get("/v1/firstory-feed", async (c) => {
   const userId = c.req.query("userId");
-  if (!userId || !/^[a-zA-Z0-9_-]+$/.test(userId)) {
+
+  if (!userId || !isValidSlug(userId)) {
     return c.json({ error: "Invalid or missing userId" }, 400);
   }
 
-  try {
-    const feedUrl = `https://feed.firstory.me/rss/user/${userId}`;
-    const res = await fetch(feedUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; HybridizedApp/1.0)",
-        Accept: "application/rss+xml, application/xml, text/xml, */*",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
+  const response = await fetch(`https://feed.firstory.me/rss/user/${userId}`, {
+    headers: { "User-Agent": FIRSTORY_USER_AGENT, Accept: RSS_ACCEPT },
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+  });
 
-    if (!res.ok) {
-      if (res.status === 404) return c.json({ error: "User feed not found" }, 404);
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    }
-
-    const xmlText = await res.text();
-    return c.json({ episodes: parseRSSFeed(xmlText) });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch feed";
-    return c.json({ error: message }, 500);
+  if (!response.ok) {
+    if (response.status === 404) return c.json({ error: "User feed not found" }, 404);
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
+
+  const episodes = parseFeed(await response.text());
+  return c.json({ episodes }, 200, { "Cache-Control": CACHE_MEDIUM });
 });
 
 // ─── Playlist Episodes ───────────────────────────────────────────────────────
 
-app.get("/v2/playlist-episodes", async (c) => {
+app.get("/v1/playlist-episodes", async (c) => {
   const playlistId = c.req.query("playlistId");
-  if (!playlistId) return c.json({ error: "playlistId is required" }, 400);
 
-  try {
-    const res = await fetch(`https://open.firstory.me/embed/playlists/${playlistId}`, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; HybridizedApp/1.0)" },
-    });
-
-    if (!res.ok) throw new Error(`Failed to fetch playlist: ${res.status}`);
-
-    const html = await res.text();
-    const episodeIds: string[] = [];
-    const storyRegex = /story\/(cl[a-z0-9]+)/g;
-    let match: RegExpExecArray | null = storyRegex.exec(html);
-    while (match !== null) {
-      if (!episodeIds.includes(match[1])) episodeIds.push(match[1]);
-      match = storyRegex.exec(html);
-    }
-
-    return c.json({ episodeIds });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch playlist";
-    return c.json({ error: message }, 500);
+  if (!playlistId || !isValidSlug(playlistId)) {
+    return c.json({ error: "playlistId is required" }, 400);
   }
+
+  const response = await fetch(`https://open.firstory.me/embed/playlists/${playlistId}`, {
+    headers: { "User-Agent": FIRSTORY_USER_AGENT },
+  });
+
+  if (!response.ok) throw new Error(`Failed to fetch playlist: ${response.status}`);
+
+  const html = await response.text();
+  const episodeIds: string[] = [];
+  const regex = /story\/(cl[a-z0-9]+)/g;
+  let match = regex.exec(html);
+  while (match !== null) {
+    if (!episodeIds.includes(match[1])) episodeIds.push(match[1]);
+    match = regex.exec(html);
+  }
+
+  return c.json({ episodeIds }, 200, { "Cache-Control": CACHE_MEDIUM });
 });
 
 // ─── Sync Episodes (POST) ────────────────────────────────────────────────────
 
-app.post("/v2/sync-episodes", async (c) => {
-  try {
-    const supabase = await createClient();
-    const feedUrl = `https://feed.firstory.me/rss/user/${FIRSTORY_USER_ID}`;
+app.post("/v1/sync-episodes", async (c) => {
+  if (!(await isSyncAuthorized(c.req.raw))) return c.json({ error: "Unauthorized" }, 401);
 
-    const res = await fetch(feedUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; HybridizedApp/1.0)",
-        Accept: "application/rss+xml, application/xml, text/xml, */*",
+  const response = await fetch(FIRSTORY_FEED_URL, {
+    headers: { "User-Agent": FIRSTORY_USER_AGENT, Accept: RSS_ACCEPT },
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+  });
+
+  if (!response.ok) throw new Error(`Failed to fetch RSS feed: ${response.status}`);
+
+  const episodes = parseFeedFull(await response.text());
+  const supabase = await createClient();
+
+  let synced = 0;
+  for (const episode of episodes) {
+    const { error } = await supabase.from("episodes").upsert(
+      {
+        episode_id: episode.episodeId,
+        title: episode.title,
+        description: episode.description,
+        audio_url: episode.audioUrl,
+        cover_url: episode.coverUrl ?? null,
+        pub_date: episode.pubDate,
       },
-    });
-
-    if (!res.ok) throw new Error(`Failed to fetch RSS feed: ${res.status}`);
-
-    const xmlText = await res.text();
-    const episodes = parseRSSFeedFull(xmlText);
-
-    let insertedCount = 0;
-    for (const episode of episodes) {
-      const { error } = await supabase.from("episodes").upsert(
-        {
-          episode_id: episode.episodeId,
-          title: episode.title,
-          description: episode.description,
-          audio_url: episode.audioUrl,
-          cover_url: episode.coverUrl,
-          pub_date: episode.pubDate,
-        },
-        { onConflict: "episode_id" },
-      );
-      if (!error) insertedCount++;
-    }
-
-    return c.json({ success: true, synced: insertedCount, total: episodes.length });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to sync episodes";
-    return c.json({ error: message }, 500);
+      { onConflict: "episode_id" },
+    );
+    if (!error) synced++;
   }
+
+  return c.json({ success: true, synced, total: episodes.length });
 });
 
 // ─── Sync Playlists (POST) ───────────────────────────────────────────────────
 
-app.post("/v2/sync-playlists", async (c) => {
-  try {
-    const supabase = await createClient();
-    const { data: bands, error: bandsError } = await supabase
-      .from("bands")
-      .select("id, name, iframe_url")
-      .not("iframe_url", "is", null);
+interface PlaylistEntry {
+  id?: string;
+  episode_id?: string;
+}
 
-    if (bandsError) throw bandsError;
+interface PlaylistAPIResponse {
+  episodes?: PlaylistEntry[];
+  items?: PlaylistEntry[];
+  data?: PlaylistEntry[];
+}
 
-    let totalMatched = 0;
-    const results: Array<{ band: string; episodes?: number; error?: string }> = [];
+function extractEpisodeIds(data: PlaylistAPIResponse): string[] {
+  const list = data.episodes ?? data.items ?? data.data ?? [];
+  return list.map((ep) => ep.id ?? ep.episode_id).filter((id): id is string => Boolean(id));
+}
 
-    for (const band of bands ?? []) {
-      try {
-        const playlistMatch = band.iframe_url?.match(/playlists\/([^/?]+)/);
-        if (!playlistMatch) {
-          results.push({ band: band.name, error: "Invalid playlist URL" });
-          continue;
-        }
+app.post("/v1/sync-playlists", async (c) => {
+  if (!(await isSyncAuthorized(c.req.raw))) return c.json({ error: "Unauthorized" }, 401);
 
-        const res = await fetch(`https://open.firstory.me/api/playlists/${playlistMatch[1]}`, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; HybridizedApp/1.0)",
-            Accept: "application/json",
-          },
-        });
+  const requestId = c.get("requestId");
+  const supabase = await createClient();
+  const { data: bands, error } = await supabase
+    .from("bands")
+    .select("id, name, iframe_url")
+    .not("iframe_url", "is", null);
 
-        if (!res.ok) {
-          results.push({ band: band.name, error: `HTTP ${res.status}` });
-          continue;
-        }
+  if (error) throw error;
 
-        const playlistData = await res.json();
-        const episodeIds = extractEpisodeIdsFromAPI(playlistData);
+  let totalMatched = 0;
+  const results: Array<{ band: string; episodes?: number; error?: string }> = [];
 
-        if (episodeIds.length === 0) {
-          results.push({ band: band.name, episodes: 0 });
-          continue;
-        }
-
-        const { error: updateError } = await supabase
-          .from("episodes")
-          .update({ band_id: band.id })
-          .in("episode_id", episodeIds);
-
-        if (updateError) {
-          results.push({ band: band.name, error: updateError.message });
-        } else {
-          totalMatched += episodeIds.length;
-          results.push({ band: band.name, episodes: episodeIds.length });
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Unknown error";
-        results.push({ band: band.name, error: message });
+  for (const band of bands ?? []) {
+    const name = band.name ?? String(band.id);
+    try {
+      const playlistId = band.iframe_url?.match(/playlists\/([^/?]+)/)?.[1];
+      if (!playlistId) {
+        results.push({ band: name, error: "Invalid playlist URL" });
+        continue;
       }
-    }
 
-    return c.json({ success: true, totalMatched, results });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to sync playlists";
-    return c.json({ error: message }, 500);
+      const response = await fetch(`https://open.firstory.me/api/playlists/${playlistId}`, {
+        headers: { "User-Agent": FIRSTORY_USER_AGENT, Accept: "application/json" },
+      });
+
+      if (!response.ok) {
+        results.push({ band: name, error: `HTTP ${response.status}` });
+        continue;
+      }
+
+      const episodeIds = extractEpisodeIds(await response.json());
+      if (episodeIds.length === 0) {
+        results.push({ band: name, episodes: 0 });
+        continue;
+      }
+
+      const { error: updateError } = await supabase
+        .from("episodes")
+        .update({ band_id: band.id })
+        .in("episode_id", episodeIds);
+
+      if (updateError) {
+        logger.warn("sync-playlists.link-failed", {
+          requestId,
+          band: name,
+          error: updateError,
+        });
+        results.push({ band: name, error: "Failed to link episodes" });
+      } else {
+        totalMatched += episodeIds.length;
+        results.push({ band: name, episodes: episodeIds.length });
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (err) {
+      logger.warn("sync-playlists.band-failed", {
+        requestId,
+        band: name,
+        error: err instanceof Error ? err : new Error(String(err)),
+      });
+      results.push({ band: name, error: "Failed to process playlist" });
+    }
   }
+
+  return c.json({ success: true, totalMatched, results });
 });
 
 // ─── Match Episodes (POST) ───────────────────────────────────────────────────
 
-app.post("/v2/match-episodes", async (c) => {
-  try {
-    const supabase = await createClient();
-    const { data: bands, error: bandsError } = await supabase.from("bands").select("id, name");
-    if (bandsError) throw bandsError;
+function matchesBand(title: string, bandName: string): boolean {
+  if (bandName === "wayoutwest") return title.includes("way out west");
+  if (bandName === "benz & md") return title.includes("benz & md") || title.includes("benz and md");
+  return title.includes(bandName);
+}
 
-    const { data: episodes, error: episodesError } = await supabase
-      .from("episodes")
-      .select("id, title, episode_id");
-    if (episodesError) throw episodesError;
+app.post("/v1/match-episodes", async (c) => {
+  if (!(await isSyncAuthorized(c.req.raw))) return c.json({ error: "Unauthorized" }, 401);
 
-    let matchedCount = 0;
+  const supabase = await createClient();
 
-    for (const episode of episodes ?? []) {
-      const title = episode.title.toLowerCase();
-      for (const band of bands ?? []) {
-        const bandName = band.name.toLowerCase();
-        let matched = false;
+  const { data: bands, error: bandsError } = await supabase.from("bands").select("id, name");
+  if (bandsError) throw bandsError;
 
-        if (bandName === "wayoutwest" && title.includes("way out west")) {
-          matched = true;
-        } else if (
-          bandName === "benz & md" &&
-          (title.includes("benz & md") || title.includes("benz and md"))
-        ) {
-          matched = true;
-        } else if (title.includes(bandName)) {
-          matched = true;
-        }
+  const { data: episodes, error: episodesError } = await supabase
+    .from("episodes")
+    .select("id, title, band_id");
+  if (episodesError) throw episodesError;
 
-        if (matched) {
-          const { error } = await supabase
-            .from("episodes")
-            .update({ band_id: band.id })
-            .eq("id", episode.id);
-          if (!error) matchedCount++;
-          break;
-        }
-      }
+  let matched = 0;
+
+  for (const episode of episodes ?? []) {
+    const title = episode.title.toLowerCase();
+    for (const band of bands ?? []) {
+      if (!band.name || !matchesBand(title, band.name.toLowerCase())) continue;
+
+      const { error } = await supabase
+        .from("episodes")
+        .update({ band_id: band.id })
+        .eq("id", episode.id);
+      if (!error) matched++;
+      break;
     }
-
-    return c.json({
-      success: true,
-      matched: matchedCount,
-      total: episodes?.length ?? 0,
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to match episodes";
-    return c.json({ error: message }, 500);
   }
+
+  return c.json({ success: true, matched, total: episodes?.length ?? 0 });
 });
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-interface Episode {
-  title: string;
-  audioUrl: string;
-  description: string;
-  pubDate: string;
-}
-
-function findEpisodeById(xmlText: string, episodeId: string): Episode | null {
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match: RegExpExecArray | null = itemRegex.exec(xmlText);
-
-  while (match !== null) {
-    const item = match[1];
-    const guid = item.match(/<guid[^>]*>(.*?)<\/guid>/)?.[1] ?? "";
-    const link = item.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
-
-    if (guid.includes(episodeId) || link.includes(episodeId)) {
-      const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] ?? "";
-      const audioUrl = item.match(/<enclosure url="(.*?)"/)?.[1] ?? "";
-      const description =
-        item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] ?? "";
-      const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
-      if (audioUrl) return { title, audioUrl, description, pubDate };
-    }
-    match = itemRegex.exec(xmlText);
-  }
-  return null;
-}
-
-function parseRSSFeed(xmlText: string): Episode[] {
-  const episodes: Episode[] = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match: RegExpExecArray | null = itemRegex.exec(xmlText);
-
-  while (match !== null) {
-    const item = match[1];
-    const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] ?? "";
-    const audioUrl = item.match(/<enclosure url="(.*?)"/)?.[1] ?? "";
-    const description = item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] ?? "";
-    const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
-    if (audioUrl) episodes.push({ title, audioUrl, description, pubDate });
-    match = itemRegex.exec(xmlText);
-  }
-  return episodes;
-}
-
-function parseRSSFeedFull(xmlText: string) {
-  const episodes: Array<{
-    episodeId: string;
-    title: string;
-    audioUrl: string;
-    description: string;
-    pubDate: string;
-    coverUrl?: string;
-  }> = [];
-
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match: RegExpExecArray | null = itemRegex.exec(xmlText);
-
-  while (match !== null) {
-    const item = match[1];
-    const episodeId = item.match(/<guid[^>]*>(.*?)<\/guid>/)?.[1] ?? "";
-    const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] ?? "";
-    const audioUrl = item.match(/<enclosure url="(.*?)"/)?.[1] ?? "";
-    const description = item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/)?.[1] ?? "";
-    const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
-    const coverUrl = item.match(/<itunes:image href="(.*?)"/)?.[1];
-    if (audioUrl && episodeId) {
-      episodes.push({ episodeId, title, audioUrl, description, pubDate, coverUrl });
-    }
-    match = itemRegex.exec(xmlText);
-  }
-  return episodes;
-}
-
-function extractEpisodeIdsFromAPI(data: unknown): string[] {
-  const episodeIds: string[] = [];
-  const d = data as Record<string, unknown>;
-
-  const list = (d.episodes as unknown[]) ?? (d.items as unknown[]) ?? (d.data as unknown[]) ?? [];
-
-  if (Array.isArray(list)) {
-    for (const item of list) {
-      const ep = item as Record<string, unknown>;
-      const id = (ep.id ?? ep.episode_id) as string | undefined;
-      if (id) episodeIds.push(id);
-    }
-  }
-
-  return episodeIds;
-}
 
 export const GET = handle(app);
 export const POST = handle(app);

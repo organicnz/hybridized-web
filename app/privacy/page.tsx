@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "How Hybridized collects, uses and protects your personal data.",
+};
 
 export default function PrivacyPage() {
   return (

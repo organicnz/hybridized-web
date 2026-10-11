@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface VisualizerConfig {
   fftSize?: number;
@@ -8,10 +8,7 @@ interface VisualizerConfig {
   barCount?: number;
 }
 
-export function useAudioVisualizer(
-  analyser: AnalyserNode | null,
-  config: VisualizerConfig = {},
-) {
+export function useAudioVisualizer(analyser: AnalyserNode | null, config: VisualizerConfig = {}) {
   const animationRef = useRef<number | undefined>(undefined);
   const { fftSize = 2048, smoothingTimeConstant = 0.8, barCount = 64 } = config;
 
@@ -126,10 +123,7 @@ export function useAudioVisualizer(
   );
 
   const startAnimation = useCallback(
-    (
-      canvas: HTMLCanvasElement,
-      visualizerType: "bars" | "waveform" | "circular" = "bars",
-    ) => {
+    (canvas: HTMLCanvasElement, visualizerType: "bars" | "waveform" | "circular" = "bars") => {
       const ctx = canvas.getContext("2d", { alpha: false });
       if (!ctx || !analyser) return;
 
@@ -141,7 +135,6 @@ export function useAudioVisualizer(
           case "circular":
             drawCircularVisualizer(canvas, ctx);
             break;
-          case "bars":
           default:
             drawFrequencyBars(canvas, ctx);
             break;

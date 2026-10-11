@@ -3,6 +3,7 @@
 import type { Database } from "@/lib/types/database.types";
 import { cn } from "@/lib/utils";
 import { Calendar, MoreVertical, Music, Play } from "lucide-react";
+import Image from "next/image";
 
 type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"];
 
@@ -36,9 +37,11 @@ export function MixList({ items, onPlay, onMenuClick, className }: MixListProps)
             {/* Cover Image */}
             {item.cover_url && (
               <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-lg">
-                <img
+                <Image
                   src={item.cover_url}
                   alt={item.name || "Mix cover"}
+                  width={64}
+                  height={64}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 gpu"
                   loading="lazy"
                 />
@@ -75,14 +78,14 @@ export function MixList({ items, onPlay, onMenuClick, className }: MixListProps)
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button
+              <button type="button"
                 onClick={() => onMenuClick?.(item)}
                 className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 gpu-opacity"
                 aria-label={`More options for ${item.name || "mix"}`}
               >
                 <MoreVertical className="w-4 h-4 text-white/70" />
               </button>
-              <button
+              <button type="button"
                 onClick={() => onPlay?.(item)}
                 className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-green-500 hover:from-green-300 hover:to-green-400 hover:scale-110 flex items-center justify-center transition-all shadow-lg group-hover:shadow-green-500/50 gpu"
                 aria-label={`Play ${item.name || "mix"}`}
@@ -101,6 +104,7 @@ export function MixListSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="space-y-2">
       {Array.from({ length: count }).map((_, i) => (
+        /* biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders are static and never reorder */
         <div key={i} className="bg-zinc-900/50 rounded-lg p-4 animate-pulse border border-white/5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 space-y-2">

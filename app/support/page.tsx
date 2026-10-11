@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { ArrowLeft, Book, Mail, MessageCircle } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Support",
+  description: "Help center and FAQs for Hybridized — streaming, audio quality, accounts and more.",
+};
+
+export const cacheLife = 'days';
 
 export default function SupportPage() {
   return (

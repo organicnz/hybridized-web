@@ -1,8 +1,9 @@
 "use client";
 
 import { useSyncStatus } from "@/hooks/use-sync-status";
+import { createAudioContext } from "@/lib/audio-utils";
 import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import { LogIn, Sliders } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -45,12 +46,13 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
   const [isOpen, setIsOpen] = useState(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [filters, setFilters] = useState<BiquadFilterNode[]>([]);
-  const [gains, setGains] = useState<number[]>(new Array(FREQUENCY_BANDS.length).fill(0));
+  const [gains, setGains] = useState<number[]>(
+    Array.from({ length: FREQUENCY_BANDS.length }, () => 0),
+  );
   const [currentPreset, setCurrentPreset] = useState<string>("Flat");
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const supabase = createClient();
 
   // Create settings saver instance (persists across renders)
   const settingsSaverRef = useRef<ReturnType<typeof createSettingsSaver> | null>(null);
@@ -72,28 +74,39 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
   // Check authentication status and load settings on sign-in
   useEffect(() => {
-    const checkAuth = async () => {
+    let cancelled = false;
+
+    void (async () => {
+      const supabase = await getSupabase();
+      if (cancelled) return;
+
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      if (user) {
-        loadSettings();
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        setIsAuthenticated(!!session?.user);
+        // Reload settings when user signs in
+        if (event === "SIGNED_IN" && session?.user) {
+          loadSettings();
+        }
+      });
+
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (cancelled) return;
+        setIsAuthenticated(!!user);
+        if (user) loadSettings();
+      } catch {
+        if (!cancelled) setIsAuthenticated(false);
       }
+
+      return () => subscription.unsubscribe();
+    })();
+
+    return () => {
+      cancelled = true;
     };
-    checkAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session?.user);
-      // Reload settings when user signs in
-      if (event === "SIGNED_IN" && session?.user) {
-        loadSettings();
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, [loadSettings]);
 
   // Flush pending saves on unmount
@@ -106,7 +119,8 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
   // Resume audio context when play is attempted
   useEffect(() => {
-    if (!audioContext || !audioRef.current) return;
+    const audio = audioRef.current;
+    if (!audioContext || !audio) return;
 
     const handlePlay = () => {
       if (audioContext.state === "suspended") {
@@ -114,26 +128,26 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
       }
     };
 
-    audioRef.current.addEventListener("play", handlePlay);
+    audio.addEventListener("play", handlePlay);
     return () => {
-      audioRef.current?.removeEventListener("play", handlePlay);
+      audio.removeEventListener("play", handlePlay);
     };
   }, [audioContext, audioRef]);
 
   // Initialize Web Audio API
   useEffect(() => {
-    if (!audioRef.current || isInitialized) return;
+    const audio = audioRef.current;
+    if (!audio || isInitialized) return;
 
     // Wait for audio element to be ready
     const timer = setTimeout(() => {
-      if (!audioRef.current) return;
-
       try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const ctx = createAudioContext();
+        if (!ctx) throw new Error("Web Audio API is not supported");
 
-        let source;
+        let source: MediaElementAudioSourceNode;
         try {
-          source = ctx.createMediaElementSource(audioRef.current);
+          source = ctx.createMediaElementSource(audio);
         } catch {
           // Audio element already has a source node - EQ unavailable
           setInitError(true);
@@ -178,7 +192,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [audioRef.current, isInitialized, gains]);
+  }, [audioRef, isInitialized, gains]);
 
   const handleGainChange = (index: number, value: number) => {
     const newGains = [...gains];
@@ -215,7 +229,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
   return (
     <div className={`relative ${className}`}>
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 backdrop-blur-md border shadow-lg group ${
           isOpen
@@ -236,6 +250,9 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
           <div
             className="fixed inset-0 z-40 backdrop-blur-sm bg-black/20"
             onClick={() => setIsOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setIsOpen(false);
+            }}
             style={{ transform: "translateZ(0)" }}
           />
 
@@ -277,7 +294,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                     <h3 className="text-white font-semibold text-sm drop-shadow-lg">Equalizer</h3>
                     <SyncIndicator status={syncStatus} />
                   </div>
-                  <button
+                  <button type="button"
                     onClick={resetEqualizer}
                     className="text-xs text-purple-400 hover:text-purple-300 transition-all duration-200 px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/30"
                   >
@@ -286,11 +303,11 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                 </div>
 
                 {/* Presets */}
-                <div className="relative mb-5">
-                  <label className="text-xs text-white/50 mb-2 block font-medium">Presets</label>
+                <fieldset className="relative mb-5 border-0 p-0 m-0" aria-label="Presets">
+                  <legend className="text-xs text-white/50 mb-2 block font-medium">Presets</legend>
                   <div className="grid grid-cols-4 gap-2">
                     {Object.keys(EQ_PRESETS).map((presetName) => (
-                      <button
+                      <button type="button"
                         key={presetName}
                         onClick={() => applyPreset(presetName)}
                         className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 backdrop-blur-sm ${
@@ -307,7 +324,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                       </button>
                     ))}
                   </div>
-                </div>
+                </fieldset>
 
                 <div className="relative flex items-end gap-3 h-48 px-3 py-4 rounded-xl bg-gradient-to-t from-white/5 to-transparent border border-white/10 overflow-hidden">
                   {FREQUENCY_BANDS.map((band, index) => (
@@ -336,7 +353,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                           }
                           className="absolute inset-0 h-full w-full accent-purple-500 cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
                           style={{
-                            writingMode: "vertical-lr" as any,
+                            writingMode: "vertical-lr",
                             WebkitAppearance: "slider-vertical",
                             transform: "translateZ(0)",
                           }}

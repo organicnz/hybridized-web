@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
 
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("q");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const limit = Number.parseInt(searchParams.get("limit") || "10");
 
     if (!query) {
       return new Response(
@@ -36,9 +36,7 @@ Deno.serve(async (req) => {
       const { data: fallbackData, error: fallbackError } = await supabase
         .from("bands")
         .select("*")
-        .or(
-          `name.ilike.%${query}%,description.ilike.%${query}%,formula.ilike.%${query}%`,
-        )
+        .or(`name.ilike.%${query}%,description.ilike.%${query}%,formula.ilike.%${query}%`)
         .limit(limit);
 
       if (fallbackError) throw fallbackError;

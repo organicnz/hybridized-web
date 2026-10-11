@@ -7,7 +7,6 @@ interface CustomAudioPlayerProps {
   src: string;
   autoPlay?: boolean;
   volume: number;
-  onVolumeChange: (volume: number) => void;
   onPlay?: () => void;
   onPause?: () => void;
   onTimeUpdate?: (time: number) => void;
@@ -19,24 +18,10 @@ interface CustomAudioPlayerProps {
   initialTime?: number;
 }
 
-interface AudioEnhancementNodes {
-  context: AudioContext;
-  source: MediaElementAudioSourceNode;
-  preGain: GainNode;
-  lowShelf: BiquadFilterNode;
-  midPeak: BiquadFilterNode;
-  highShelf: BiquadFilterNode;
-  compressor: DynamicsCompressorNode;
-  stereoEnhancer: StereoPannerNode;
-  limiter: DynamicsCompressorNode;
-  masterGain: GainNode;
-}
-
 export function CustomAudioPlayer({
   src,
   autoPlay = false,
   volume,
-  onVolumeChange,
   onPlay,
   onPause,
   onTimeUpdate,
@@ -58,7 +43,7 @@ export function CustomAudioPlayer({
     if (internalAudioRef.current) {
       audioRef.current = internalAudioRef.current;
     }
-  }, [audioRef, src]);
+  }, [audioRef]);
 
   // Update volume when it changes
   useEffect(() => {
@@ -119,7 +104,7 @@ export function CustomAudioPlayer({
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("error", handleError);
     };
-  }, [src, initialTime, onTimeUpdate, onEnded, onPlay, onPause]);
+  }, [initialTime, onTimeUpdate, onEnded, onPlay, onPause]);
 
   // Separate effect for autoplay - only runs when src changes
   useEffect(() => {
@@ -133,7 +118,7 @@ export function CustomAudioPlayer({
         setIsPlaying(false);
       });
     }
-  }, [src]); // Only depend on src, not autoPlay
+  }, [autoPlay]);
 
   const togglePlay = () => {
     const audio = internalAudioRef.current;
@@ -164,7 +149,7 @@ export function CustomAudioPlayer({
     audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
   };
 
-  const toggleMute = () => {
+  const _toggleMute = () => {
     const audio = internalAudioRef.current;
     if (!audio) return;
 
@@ -174,7 +159,7 @@ export function CustomAudioPlayer({
   };
 
   const formatTime = (time: number) => {
-    if (isNaN(time)) return "0:00";
+    if (Number.isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
@@ -182,12 +167,13 @@ export function CustomAudioPlayer({
 
   return (
     <div className="flex items-center gap-3 w-full">
+      {/* biome-ignore lint/a11y/useMediaCaption: no caption track exists for user-uploaded audio */}
       <audio ref={internalAudioRef} src={src} preload="auto" crossOrigin="anonymous" playsInline />
 
       {/* Controls */}
       <div className="flex items-center gap-2">
         {showSkipControls && (
-          <button
+          <button type="button"
             onClick={onPrevious}
             className="text-white/70 hover:text-white transition-colors"
             aria-label="Previous"
@@ -196,7 +182,7 @@ export function CustomAudioPlayer({
           </button>
         )}
 
-        <button
+        <button type="button"
           onClick={() => skip(-10)}
           className="text-white/70 hover:text-white transition-colors text-xs"
           aria-label="Rewind 10 seconds"
@@ -204,7 +190,7 @@ export function CustomAudioPlayer({
           -10s
         </button>
 
-        <button
+        <button type="button"
           onClick={togglePlay}
           className="w-8 h-8 rounded-full bg-white hover:bg-white/90 flex items-center justify-center transition-colors"
           aria-label={isPlaying ? "Pause" : "Play"}
@@ -216,7 +202,7 @@ export function CustomAudioPlayer({
           )}
         </button>
 
-        <button
+        <button type="button"
           onClick={() => skip(10)}
           className="text-white/70 hover:text-white transition-colors text-xs"
           aria-label="Forward 10 seconds"
@@ -225,7 +211,7 @@ export function CustomAudioPlayer({
         </button>
 
         {showSkipControls && (
-          <button
+          <button type="button"
             onClick={onNext}
             className="text-white/70 hover:text-white transition-colors"
             aria-label="Next"

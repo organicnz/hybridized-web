@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import type { Database } from '@/lib/types/database.types';
-import { getCachedBands, cacheBands, clearExpiredCache } from '@/lib/music-cache';
+import { cacheBands, clearExpiredCache, getCachedBands } from "@/lib/music-cache";
+import type { Database } from "@/lib/types/database.types";
+import { useCallback, useEffect, useState } from "react";
 
-type Band = Database['public']['Tables']['bands']['Row'];
+type Band = Database["public"]["Tables"]["bands"]["Row"];
 
 interface UseCachedBandsResult {
   bands: Band[];
@@ -22,14 +22,14 @@ export function useCachedBands(initialBands: Band[] = []): UseCachedBandsResult 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchBands = async () => {
+  const fetchBands = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
       // Try to get from cache first
       const cachedData = await getCachedBands();
-      
+
       if (cachedData) {
         setBands(cachedData);
         setIsLoading(false);
@@ -42,20 +42,20 @@ export function useCachedBands(initialBands: Band[] = []): UseCachedBandsResult 
         setBands(initialBands);
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch bands'));
+      setError(err instanceof Error ? err : new Error("Failed to fetch bands"));
       setBands(initialBands); // Fallback to initial data
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [initialBands]);
 
   useEffect(() => {
     // Clear expired cache on mount
     clearExpiredCache().catch(console.error);
-    
+
     // Fetch bands
     fetchBands();
-  }, []);
+  }, [fetchBands]);
 
   return {
     bands,

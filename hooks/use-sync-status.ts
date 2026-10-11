@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import type { SyncStatus } from "@/lib/settings-utils";
+import { useEffect, useState } from "react";
 
 type SettingsSaver = {
   onStatusChange: (callback: (status: SyncStatus) => void) => () => void;

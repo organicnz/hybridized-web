@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 
 interface Episode {
   id: number;
@@ -28,42 +28,38 @@ export function useEpisodes(): UseEpisodesReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEpisodes = useCallback(
-    async (bandId?: number): Promise<Episode[]> => {
-      setIsLoading(true);
-      setError(null);
+  const fetchEpisodes = useCallback(async (bandId?: number): Promise<Episode[]> => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const url = bandId ? `/api/episodes?bandId=${bandId}` : "/api/episodes";
-        const response = await fetch(url);
+    try {
+      const url = bandId ? `/api/v1/episodes?bandId=${bandId}` : "/api/v1/episodes";
+      const response = await fetch(url);
 
-        if (!response.ok) {
-          throw new Error("Failed to load episodes");
-        }
-
-        const data: EpisodesResponse = await response.json();
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        if (!data.episodes || data.episodes.length === 0) {
-          throw new Error("No episodes found");
-        }
-
-        setEpisodes(data.episodes);
-        return data.episodes;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to load episodes";
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error("Failed to load episodes");
       }
-    },
-    [],
-  );
+
+      const data: EpisodesResponse = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.episodes || data.episodes.length === 0) {
+        throw new Error("No episodes found");
+      }
+
+      setEpisodes(data.episodes);
+      return data.episodes;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to load episodes";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return { episodes, isLoading, error, fetchEpisodes };
 }

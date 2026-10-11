@@ -1,5 +1,6 @@
 "use client";
 
+import { GpuAudioVisualizer } from "@/components/gpu-audio-visualizer";
 import { useHardwareAudio } from "@/hooks/use-hardware-audio";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -8,12 +9,16 @@ interface EnhancedAudioPlayerProps {
   src: string;
   title?: string;
   className?: string;
+  loop?: boolean;
 }
 
-export function EnhancedAudioPlayer({ src, title, className = "" }: EnhancedAudioPlayerProps) {
+export function EnhancedAudioPlayer({
+  src,
+  title,
+  className = "",
+  loop = false,
+}: EnhancedAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | undefined>(undefined);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -22,7 +27,7 @@ export function EnhancedAudioPlayer({ src, title, className = "" }: EnhancedAudi
   const {
     initializeAudioContext,
     setVolume: setHardwareVolume,
-    getFrequencyData,
+    analyserRef,
     resume,
     isInitialized,
   } = useHardwareAudio({
@@ -36,59 +41,7 @@ export function EnhancedAudioPlayer({ src, title, className = "" }: EnhancedAudi
     if (audioRef.current && !isInitialized) {
       initializeAudioContext(audioRef.current);
     }
-
-    // Cleanup on unmount
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
   }, [initializeAudioContext, isInitialized]);
-
-  // Visualizer animation with performance optimization
-  useEffect(() => {
-    if (!isPlaying || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d", { alpha: false });
-    if (!ctx) return;
-
-    const draw = () => {
-      const frequencyData = getFrequencyData();
-      if (!frequencyData) return;
-
-      const width = canvas.width;
-      const height = canvas.height;
-      const barWidth = (width / frequencyData.length) * 2.5;
-
-      ctx.clearRect(0, 0, width, height);
-
-      frequencyData.forEach((value, index) => {
-        const barHeight = (value / 255) * height * 0.8;
-        const x = index * barWidth;
-        const y = height - barHeight;
-
-        // Gradient for bars
-        const gradient = ctx.createLinearGradient(0, y, 0, height);
-        gradient.addColorStop(0, "rgba(168, 85, 247, 0.8)");
-        gradient.addColorStop(0.5, "rgba(236, 72, 153, 0.6)");
-        gradient.addColorStop(1, "rgba(59, 130, 246, 0.4)");
-
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x, y, barWidth - 1, barHeight);
-      });
-
-      animationRef.current = requestAnimationFrame(draw);
-    };
-
-    draw();
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isPlaying, getFrequencyData]);
 
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -123,12 +76,17 @@ export function EnhancedAudioPlayer({ src, title, className = "" }: EnhancedAudi
     >
       {title && <h3 className="text-white font-semibold mb-3 text-sm">{title}</h3>}
 
-      <audio ref={audioRef} src={src} preload="auto" crossOrigin="anonymous" />
+      {/* biome-ignore lint/a11y/useMediaCaption: no caption track exists for streamed audio */}
+      <audio ref={audioRef} src={src} preload="auto" loop={loop} />
 
-      <canvas ref={canvasRef} width={300} height={60} className="w-full h-15 mb-3 rounded" />
+      <GpuAudioVisualizer
+        analyser={analyserRef.current}
+        isPlaying={isPlaying}
+        className="w-full h-15 mb-3 rounded"
+      />
 
       <div className="flex items-center gap-3">
-        <button
+        <button type="button"
           onClick={togglePlay}
           className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-2 rounded-full transition-all hover:scale-105"
           aria-label={isPlaying ? "Pause" : "Play"}
@@ -136,7 +94,7 @@ export function EnhancedAudioPlayer({ src, title, className = "" }: EnhancedAudi
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
         </button>
 
-        <button
+        <button type="button"
           onClick={toggleMute}
           className="text-white/70 hover:text-white transition-colors"
           aria-label={isMuted ? "Unmute" : "Mute"}

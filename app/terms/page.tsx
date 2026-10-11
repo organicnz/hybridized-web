@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "The terms that govern use of the Hybridized music streaming platform.",
+};
 
 export default function TermsPage() {
   return (

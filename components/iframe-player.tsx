@@ -1,7 +1,7 @@
 "use client";
 
 import { useAudioPlayer } from "@/lib/audio-player-context";
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/types/database.types";
 import { Play } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -21,24 +21,35 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
   const { playPlaylist } = useAudioPlayer();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    let cancelled = false;
+
+    void (async () => {
+      const supabase = await getSupabase();
+      if (cancelled) return;
+
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsAuthenticated(!!session?.user);
+      });
+
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!cancelled) setIsAuthenticated(!!user);
+      } catch {
+        if (!cancelled) setIsAuthenticated(false);
+      }
+
+      return () => subscription.unsubscribe();
+    })();
+
+    return () => {
+      cancelled = true;
     };
-    checkAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session?.user);
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const handlePlayClick = async () => {
@@ -63,17 +74,15 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
       coverUrl: episode.cover_url || episode.bandCoverUrl || undefined,
     };
 
-    console.log("Playing track:", track);
-
     // Play immediately as a single-track playlist
     playPlaylist([track], 0);
   };
 
-  const coverUrl = episode.cover_url || episode.bandCoverUrl;
-
   return (
     <>
-      <AuthRequiredModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      {showAuthModal && (
+        <AuthRequiredModal isOpen onClose={() => setShowAuthModal(false)} />
+      )}
       <div className="relative w-full rounded-lg border border-white/10 overflow-hidden bg-[#181818] hover:bg-[#282828] transition-colors group">
         <div className="flex items-center gap-3 p-3">
           {/* Episode Info */}
@@ -84,7 +93,7 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
           </div>
 
           {/* Play Button */}
-          <button
+          <button type="button"
             onClick={handlePlayClick}
             className="w-10 h-10 rounded-full bg-[#1DB954] hover:bg-[#1ed760] hover:scale-105 flex items-center justify-center transition-all shadow-lg flex-shrink-0"
             aria-label={`Play ${episode.title || "episode"}`}

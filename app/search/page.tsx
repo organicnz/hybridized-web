@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SearchResults } from "./search-results";
+import { Suspense } from "react";
 
-export default async function SearchPage({
+export const metadata: Metadata = {
+  title: "Search",
+  description: "Search the Hybridized archive for DJ mixes, radio shows, artists and episodes.",
+};
+
+async function SearchContent({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
@@ -31,8 +38,6 @@ export default async function SearchPage({
       )
       .order("pub_date", { ascending: false });
 
-    // Filter results to match query in episode title, description, creator, or band name
-    // Also filter out episodes from bands with firstory_user_id starting with 'reco'
     const searchLower = query.toLowerCase();
     results = (data || []).filter(
       (episode: {
@@ -41,12 +46,10 @@ export default async function SearchPage({
         creator?: string;
         bands?: { name?: string; firstory_user_id?: string };
       }) => {
-        // Skip if band has firstory_user_id starting with 'reco'
         if (episode.bands?.firstory_user_id?.startsWith("reco")) {
           return false;
         }
 
-        // Check if query matches episode fields or band name
         const matchesEpisode =
           episode.title?.toLowerCase().includes(searchLower) ||
           episode.description?.toLowerCase().includes(searchLower) ||
@@ -101,5 +104,17 @@ export default async function SearchPage({
         </div>
       </div>
     </div>
+  );
+}
+
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 flex items-center justify-center"><p className="text-white/70">Loading...</p></div>}>
+      <SearchContent searchParams={searchParams} />
+    </Suspense>
   );
 }

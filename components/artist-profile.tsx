@@ -44,12 +44,11 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
   const gradientClass = GRADIENT_PRESETS[currentArtist.gradientPreset || "purple-pink"];
 
   return (
-    <div
+    <article
       className={cn(
         "bg-zinc-900/50 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10",
         className,
       )}
-      role="article"
       aria-labelledby="artist-name"
     >
       {/* Hero Image */}
@@ -82,14 +81,14 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
           {currentArtist.name}
         </h2>
         <div className="text-white/70 space-y-3 leading-relaxed text-sm">
-          {currentArtist.bio.split("\n\n").map((paragraph, index) => (
-            <p key={index} className="text-balance">
+          {currentArtist.bio.split("\n\n").map((paragraph) => (
+            <p key={paragraph} className="text-balance">
               {paragraph}
             </p>
           ))}
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

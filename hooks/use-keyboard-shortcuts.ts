@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 interface KeyboardShortcutsConfig {
   onPlayPause?: () => void;
@@ -18,10 +18,7 @@ export function useKeyboardShortcuts(config: KeyboardShortcutsConfig) {
   const handleKeyPress = useCallback(
     (e: KeyboardEvent) => {
       // Don't trigger shortcuts when typing in inputs
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
 

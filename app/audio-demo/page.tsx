@@ -1,3 +1,12 @@
+import { AudioEngineDemo } from "@/components/audio-engine-demo";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Audio Engine Demo",
+  description:
+    "Demo of the Hybridized hardware-accelerated audio engine with dynamic compression, parametric EQ and 3D spatial audio.",
+};
+
 export default function AudioDemoPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 p-8">
@@ -10,7 +19,14 @@ export default function AudioDemoPage() {
             Professional-grade audio processing with 10-band EQ, 3D spatial audio, and dynamic
             compression
           </p>
-          <p className="text-white/50 mt-4">Audio player component coming soon</p>
+        </div>
+
+        <div className="max-w-2xl mx-auto">
+          <AudioEngineDemo />
+          <p className="text-white/40 text-xs text-center mt-2">
+            Frequency visualisation renders on the GPU via WebGPU, with an automatic Canvas 2D
+            fallback.
+          </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

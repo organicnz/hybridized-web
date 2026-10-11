@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Menu, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { MobileMenu } from "./mobile-menu";
 import { NavLink } from "./nav-link";
 import { SearchBar } from "./search-bar";
@@ -53,9 +53,7 @@ export function Header() {
 
         {/* Search & User */}
         <div className="flex items-center gap-2 md:gap-3">
-          <Suspense fallback={<div className="w-40 md:w-64 h-10" />}>
-            <SearchBar />
-          </Suspense>
+          <SearchBar />
           <Link
             href={user ? "/profile" : "/auth/login"}
             className={cn(
@@ -80,7 +78,7 @@ export function Header() {
             )}
           </Link>
 
-          <button
+          <button type="button"
             onClick={toggleMobileMenu}
             className={cn("md:hidden", HEADER_STYLES.button)}
             aria-label="Toggle menu"

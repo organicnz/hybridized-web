@@ -21,7 +21,7 @@ export function PersistentPlayer({ currentTrack, onClose }: PersistentPlayerProp
             <p className="text-white/60 text-sm">{currentTrack.description}</p>
           </div>
         </div>
-        <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
+        <button type="button" onClick={onClose} className="text-white/60 hover:text-white transition-colors">
           Close
         </button>
       </div>

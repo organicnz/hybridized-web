@@ -32,10 +32,11 @@ export function AudioControls({
           <div className="space-y-4">
             {/* Bass Boost */}
             <div>
-              <label className="text-sm text-white/70 block mb-2">
+              <label htmlFor="bass-boost" className="text-sm text-white/70 block mb-2">
                 Bass Boost: {settings.bassBoost}%
               </label>
               <input
+                id="bass-boost"
                 type="range"
                 min="0"
                 max="100"
@@ -47,10 +48,11 @@ export function AudioControls({
 
             {/* Treble Boost */}
             <div>
-              <label className="text-sm text-white/70 block mb-2">
+              <label htmlFor="treble-boost" className="text-sm text-white/70 block mb-2">
                 Treble Boost: {settings.trebleBoost}%
               </label>
               <input
+                id="treble-boost"
                 type="range"
                 min="0"
                 max="100"
@@ -91,7 +93,7 @@ export function AudioControls({
 
       {/* Control Buttons */}
       <div className="flex gap-2">
-        <button
+        <button type="button"
           onClick={() => setShowSettings(!showSettings)}
           className="w-12 h-12 rounded-full bg-[#1DB954] hover:bg-[#1ed760] flex items-center justify-center transition-colors shadow-lg"
           aria-label="Audio settings"
@@ -99,7 +101,7 @@ export function AudioControls({
           <Settings className="w-5 h-5 text-black" />
         </button>
 
-        <button
+        <button type="button"
           onClick={onToggle}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-lg ${
             isEnabled ? "bg-[#1DB954] hover:bg-[#1ed760]" : "bg-white/10 hover:bg-white/20"

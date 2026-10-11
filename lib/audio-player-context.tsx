@@ -1,7 +1,7 @@
 "use client";
 
 import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import {
   clearCurrentUserStorage,
   getUserStorageItemSync,
@@ -62,7 +62,6 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const supabase = createClient();
 
   // Create settings saver instance (persists across renders)
   const settingsSaverRef = useRef<ReturnType<typeof createSettingsSaver> | null>(null);
@@ -81,7 +80,13 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
   // Load state from localStorage and database on mount
   useEffect(() => {
-    const loadState = async () => {
+    let cancelled = false;
+
+    void (async () => {
+      const supabase = await getSupabase();
+      if (cancelled) return;
+
+      const loadState = async () => {
       try {
         // Get current user and update cache
         const {
@@ -119,7 +124,8 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       setIsHydrated(true);
     };
 
-    loadState();
+      await loadState();
+      if (cancelled) return;
 
     // Listen for auth state changes
     const {
@@ -139,6 +145,11 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [loadVolumeFromDb]);
 
   // Flush pending saves on unmount

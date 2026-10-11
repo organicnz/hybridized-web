@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { ArtistNav } from "@/components/artist-nav";
-import { createClient } from "@/lib/supabase/server";
 import { createStaticClient } from "@/lib/supabase/static";
+import { slugify, slugifyEncoded } from "@/lib/utils/slug";
 import { notFound } from "next/navigation";
 import { HomeClient } from "../home-client";
+import { Suspense } from "react";
 
 interface PageProps {
   params: Promise<{ artist: string }>;
@@ -16,35 +18,38 @@ export async function generateStaticParams() {
   if (!bands) return [];
 
   return bands.map((band) => ({
-    artist: encodeURIComponent(
-      band.name
-        ?.toLowerCase()
-        .replace(/[\s\/]+/g, "-")
-        .replace(/-+/g, "-") || "",
-    ),
+    artist: band.name ? slugifyEncoded(band.name) : "",
   }));
 }
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+export const cacheLife = 'hours';
 
-export default async function ArtistPage({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { artist } = await params;
+  const decodedArtist = decodeURIComponent(artist);
+  const title = decodedArtist;
+
+  return {
+    title,
+    description: `Stream ${decodedArtist} DJ mixes, radio shows and episodes on Hybridized.`,
+    openGraph: {
+      title,
+      description: `Stream ${decodedArtist} DJ mixes, radio shows and episodes on Hybridized.`,
+    },
+  };
+}
+
+async function ArtistContent({ params }: PageProps) {
   const { artist } = await params;
   const decodedArtist = decodeURIComponent(artist);
 
-  const supabase = await createClient();
+  const supabase = createStaticClient();
 
-  // First, try to find the band by matching the slug format
-  // Get all bands and find the one whose slug matches
-  const { data: allBands } = await supabase.from("bands").select("*");
+  const { data: allBands } = await supabase.from("bands").select("id, name");
 
   const matchedBand = allBands?.find((band) => {
-    const bandSlug =
-      band.name
-        ?.toLowerCase()
-        .replace(/[\s\/]+/g, "-")
-        .replace(/-+/g, "-") || "";
-    return bandSlug === decodedArtist;
+    if (!band.name) return false;
+    return slugify(band.name) === decodedArtist;
   });
 
   if (!matchedBand) {
@@ -52,8 +57,10 @@ export default async function ArtistPage({ params }: PageProps) {
   }
 
   const artistName = matchedBand.name;
+  if (!artistName) {
+    notFound();
+  }
 
-  // Fetch specific artist's mixes
   const { data: artistBands, error } = await supabase
     .from("bands")
     .select("*")
@@ -64,23 +71,26 @@ export default async function ArtistPage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch episodes for each band
-  const bandsWithEpisodes = await Promise.all(
-    artistBands.map(async (band) => {
-      const { data: episodes } = await supabase
-        .from("episodes")
-        .select("*")
-        .eq("band_id", band.id)
-        .order("pub_date", { ascending: false });
+  const bandIds = artistBands.map((band) => band.id);
+  const { data: allEpisodes } = await supabase
+    .from("episodes")
+    .select("*")
+    .in("band_id", bandIds)
+    .order("pub_date", { ascending: false });
 
-      return {
-        ...band,
-        episodes: episodes || [],
-      };
-    }),
-  );
+  const episodesByBand = new Map<number, NonNullable<typeof allEpisodes>>();
+  for (const episode of allEpisodes ?? []) {
+    if (episode.band_id === null) continue;
+    const bucket = episodesByBand.get(episode.band_id);
+    if (bucket) bucket.push(episode);
+    else episodesByBand.set(episode.band_id, [episode]);
+  }
 
-  // Get artist profile data from first band entry
+  const bandsWithEpisodes = artistBands.map((band) => ({
+    ...band,
+    episodes: episodesByBand.get(band.id) ?? [],
+  }));
+
   const artistProfile = artistBands[0];
 
   return (
@@ -96,5 +106,13 @@ export default async function ArtistPage({ params }: PageProps) {
         />
       </div>
     </div>
+  );
+}
+
+export default async function ArtistPage({ params }: PageProps) {
+  return (
+    <Suspense fallback={<div className="flex flex-col h-full overflow-hidden"><ArtistNav activeArtist="" /></div>}>
+      <ArtistContent params={params} />
+    </Suspense>
   );
 }
