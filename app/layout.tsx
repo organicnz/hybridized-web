@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hybridized.online";
 const SITE_NAME = "Hybridized";
@@ -79,16 +80,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <RegisterServiceWorker />
-        <RecoveryHandler />
-        <Toaster position="top-center" richColors />
-        <AudioPlayerProvider>
-          {children}
-          <AudioPlayerBar />
-        </AudioPlayerProvider>
-        <SpeedInsights />
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <ThemeProvider>
+          <RegisterServiceWorker />
+          <RecoveryHandler />
+          <Toaster position="top-center" richColors />
+          <AudioPlayerProvider>
+            {children}
+            <AudioPlayerBar />
+          </AudioPlayerProvider>
+          <SpeedInsights />
+        </ThemeProvider>
       </body>
     </html>
   );

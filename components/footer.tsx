@@ -13,19 +13,19 @@ const SUPPORT_LINKS = [{ href: "/support", label: "Support & Resources" }] as co
 
 export function Footer() {
   return (
-    <footer className="bg-black border-t border-white/5 mt-auto">
-      <div className="px-4 md:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/50">
+    <footer className="border-t border-border bg-background/95 backdrop-blur-sm">
+      <div className="px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
         {/* Left Side */}
         <div className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
           <span>© {new Date().getFullYear()} Hybridized</span>
           {FOOTER_LINKS.map((link) => (
             <Fragment key={link.href}>
-              <span className="text-white/20" aria-hidden="true">
+              <span className="text-muted-foreground/50" aria-hidden="true">
                 ·
               </span>
               <Link
                 href={link.href}
-                className="hover:text-white/90 hover:underline transition-colors"
+                className="hover:text-foreground underline-offset-2 hover:underline transition-colors"
               >
                 {link.label}
               </Link>
@@ -38,12 +38,12 @@ export function Footer() {
           <LanguageSelector />
           {SUPPORT_LINKS.map((link) => (
             <Fragment key={link.href}>
-              <span className="text-white/20" aria-hidden="true">
+              <span className="text-muted-foreground/50" aria-hidden="true">
                 ·
               </span>
               <Link
                 href={link.href}
-                className="hover:text-white/90 hover:underline transition-colors"
+                className="hover:text-foreground underline-offset-2 hover:underline transition-colors"
               >
                 {link.label}
               </Link>

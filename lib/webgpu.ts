@@ -5,10 +5,12 @@
 
 declare global {
   interface Navigator {
-    readonly gpu: {
-      requestAdapter?: (options?: unknown) => Promise<unknown>;
-      getPreferredCanvasFormat?: () => string;
-    } | undefined;
+    readonly gpu:
+      | {
+          requestAdapter?: (options?: unknown) => Promise<unknown>;
+          getPreferredCanvasFormat?: () => string;
+        }
+      | undefined;
   }
 }
 
@@ -42,7 +44,10 @@ export async function isWebGpuSupportedAsync(): Promise<WebGpuSupport> {
     if (!adapter) return { available: false, reason: "no adapter returned" };
     return { available: true };
   } catch (error) {
-    return { available: false, reason: error instanceof Error ? error.message : "requestAdapter threw" };
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : "requestAdapter threw",
+    };
   }
 }
 
