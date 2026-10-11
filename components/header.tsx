@@ -90,16 +90,11 @@ export function Header() {
           <button
             type="button"
             onClick={cycleTheme}
-            className={cn(
-              HEADER_STYLES.button,
-              "relative overflow-visible",
-            )}
+            className={cn(HEADER_STYLES.button, "relative overflow-visible")}
             aria-label={getThemeLabel()}
             title={getThemeLabel()}
           >
-            <span className="transition-transform duration-fast ease-out">
-              {getThemeIcon()}
-            </span>
+            <span className="transition-transform duration-fast ease-out">{getThemeIcon()}</span>
           </button>
 
           <Link

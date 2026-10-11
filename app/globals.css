@@ -70,34 +70,78 @@
   }
 
   /* Fluid spacing utilities */
-  .gap-fluid-xs { gap: clamp(4px, 1vw, 8px); }
-  .gap-fluid-sm { gap: clamp(8px, 1.5vw, 16px); }
-  .gap-fluid-md { gap: clamp(16px, 2vw, 24px); }
-  .gap-fluid-lg { gap: clamp(24px, 3vw, 32px); }
-  .gap-fluid-xl { gap: clamp(32px, 4vw, 48px); }
+  .gap-fluid-xs {
+    gap: clamp(4px, 1vw, 8px);
+  }
+  .gap-fluid-sm {
+    gap: clamp(8px, 1.5vw, 16px);
+  }
+  .gap-fluid-md {
+    gap: clamp(16px, 2vw, 24px);
+  }
+  .gap-fluid-lg {
+    gap: clamp(24px, 3vw, 32px);
+  }
+  .gap-fluid-xl {
+    gap: clamp(32px, 4vw, 48px);
+  }
 
   /* Fluid typography utilities */
-  .text-fluid-2xl { font-size: clamp(2.5rem, 5vw, 4.5rem); }
-  .text-fluid-xl { font-size: clamp(2rem, 4vw, 3rem); }
-  .text-fluid-lg { font-size: clamp(1.5rem, 3vw, 2.25rem); }
-  .text-fluid-md { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
-  .text-fluid-sm { font-size: clamp(1.125rem, 2vw, 1.5rem); }
-  .text-fluid-xs { font-size: clamp(1rem, 1.5vw, 1.25rem); }
-  .text-fluid-body-lg { font-size: clamp(1.125rem, 1.5vw, 1.25rem); }
-  .text-fluid-body-md { font-size: clamp(1rem, 1.25vw, 1.125rem); }
-  .text-fluid-body-sm { font-size: clamp(0.875rem, 1vw, 1rem); }
-  .text-fluid-body-xs { font-size: clamp(0.8125rem, 0.875vw, 0.875rem); }
+  .text-fluid-2xl {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+  }
+  .text-fluid-xl {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+  .text-fluid-lg {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .text-fluid-md {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  }
+  .text-fluid-sm {
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+  }
+  .text-fluid-xs {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+  }
+  .text-fluid-body-lg {
+    font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+  }
+  .text-fluid-body-md {
+    font-size: clamp(1rem, 1.25vw, 1.125rem);
+  }
+  .text-fluid-body-sm {
+    font-size: clamp(0.875rem, 1vw, 1rem);
+  }
+  .text-fluid-body-xs {
+    font-size: clamp(0.8125rem, 0.875vw, 0.875rem);
+  }
 
   /* Transition duration utilities */
-  .duration-instant { transition-duration: 50ms; }
-  .duration-fast { transition-duration: 100ms; }
-  .duration-normal { transition-duration: 200ms; }
-  .duration-slow { transition-duration: 300ms; }
-  .duration-slower { transition-duration: 500ms; }
+  .duration-instant {
+    transition-duration: 50ms;
+  }
+  .duration-fast {
+    transition-duration: 100ms;
+  }
+  .duration-normal {
+    transition-duration: 200ms;
+  }
+  .duration-slow {
+    transition-duration: 300ms;
+  }
+  .duration-slower {
+    transition-duration: 500ms;
+  }
 
   /* Easing utilities */
-  .ease-spring { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
-  .ease-bounce { transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+  .ease-spring {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .ease-bounce {
+    transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
 }
 
 @layer base {
@@ -160,7 +204,8 @@
   *,
   *::before,
   *::after {
-    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease, box-shadow
+      200ms ease;
   }
 
   /* Reduce motion for users who prefer it */
@@ -209,16 +254,36 @@
   }
 
   /* Button sizes */
-  .btn-sm { @apply px-3 py-1.5 text-xs gap-1.5; }
-  .btn-lg { @apply px-6 py-3 text-base gap-2; }
-  .btn-icon { @apply p-2; }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs gap-1.5;
+  }
+  .btn-lg {
+    @apply px-6 py-3 text-base gap-2;
+  }
+  .btn-icon {
+    @apply p-2;
+  }
 
   /* Card variants */
-  .card { @apply rounded-xl bg-card text-card-foreground border border-border; }
-  .card-flat { @apply card; box-shadow: 0 0 0 1px hsl(var(--border)); }
-  .card-raised { @apply card; box-shadow: 0 4px 12px -4px hsl(0 0% 0% / 0.3), 0 0 0 1px hsl(var(--border)); }
-  .card-floating { @apply card; box-shadow: 0 12px 28px -8px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--border)); }
-  .card-overlay { @apply rounded-xl bg-popover text-popover-foreground border border-border; box-shadow: 0 20px 40px -12px hsl(0 0% 0% / 0.5), 0 0 0 1px hsl(var(--border)); }
+  .card {
+    @apply rounded-xl bg-card text-card-foreground border border-border;
+  }
+  .card-flat {
+    @apply card;
+    box-shadow: 0 0 0 1px hsl(var(--border));
+  }
+  .card-raised {
+    @apply card;
+    box-shadow: 0 4px 12px -4px hsl(0 0% 0% / 0.3), 0 0 0 1px hsl(var(--border));
+  }
+  .card-floating {
+    @apply card;
+    box-shadow: 0 12px 28px -8px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--border));
+  }
+  .card-overlay {
+    @apply rounded-xl bg-popover text-popover-foreground border border-border;
+    box-shadow: 0 20px 40px -12px hsl(0 0% 0% / 0.5), 0 0 0 1px hsl(var(--border));
+  }
 
   /* Input styles */
   .input {
