@@ -48,7 +48,7 @@ export function AudioControlsPanel({
   return (
     <div className={`flex items-center gap-4 ${className}`}>
       {/* Skip Backward */}
-      <button
+      <button type="button"
         onClick={() => skip(-10)}
         className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white/70 hover:text-white"
         aria-label="Skip backward 10 seconds"
@@ -58,7 +58,7 @@ export function AudioControlsPanel({
 
       {/* Volume Control */}
       <div className="flex items-center gap-2 flex-1 max-w-xs">
-        <button
+        <button type="button"
           onClick={toggleMute}
           className="text-white/70 hover:text-white transition-colors"
           aria-label={isMuted ? "Unmute" : "Mute"}
@@ -90,7 +90,7 @@ export function AudioControlsPanel({
       </div>
 
       {/* Skip Forward */}
-      <button
+      <button type="button"
         onClick={() => skip(10)}
         className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white/70 hover:text-white"
         aria-label="Skip forward 10 seconds"
@@ -99,7 +99,7 @@ export function AudioControlsPanel({
       </button>
 
       {/* Loop Toggle */}
-      <button
+      <button type="button"
         onClick={toggleLoop}
         className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
           isLooping
@@ -113,7 +113,7 @@ export function AudioControlsPanel({
 
       {/* Playback Speed */}
       <div className="relative group">
-        <button
+        <button type="button"
           className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs text-white/70 hover:text-white transition-colors font-mono"
           aria-label="Playback speed"
         >
@@ -123,7 +123,7 @@ export function AudioControlsPanel({
         <div className="absolute bottom-full right-0 mb-2 bg-zinc-900 border border-white/10 rounded-lg p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity shadow-xl gpu-opacity">
           <div className="flex flex-col gap-1 min-w-[80px]">
             {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
-              <button
+              <button type="button"
                 key={rate}
                 onClick={() => handlePlaybackRateChange(rate)}
                 className={`px-3 py-1 rounded text-xs transition-colors text-left ${

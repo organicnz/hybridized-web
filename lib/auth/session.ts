@@ -38,11 +38,11 @@ export async function clearAuthCookies() {
   const allCookies = cookieStore.getAll();
 
   // Clear all Supabase auth cookies
-  allCookies.forEach((cookie) => {
+  for (const cookie of allCookies) {
     if (cookie.name.startsWith("sb-")) {
       cookieStore.delete(cookie.name);
     }
-  });
+  }
 }
 
 /**

@@ -13,7 +13,8 @@
       "build/**",
       "bun.lockb",
       "*.lock",
-      "public/**"
+      "public/**",
+      ".trunk/**"
     ]
   },
   "formatter": {
@@ -30,11 +31,11 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUnusedVariables": "warn",
-        "noUnusedImports": "warn"
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "error"
       },
       "style": {
         "noNonNullAssertion": "off"

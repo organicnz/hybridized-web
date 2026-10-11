@@ -2,7 +2,7 @@
 
 import { LogIn, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface AuthRequiredModalProps {
   isOpen: boolean;
@@ -15,6 +15,33 @@ export function AuthRequiredModal({
   onClose,
   message = "Sign in to play music and save your preferences",
 }: AuthRequiredModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  const requestClose = useCallback(() => {
+    dialogRef.current?.close();
+  }, []);
+
+  // Sync the native dialog element with the isOpen prop
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (isOpen && !dialog.open) {
+      dialog.showModal();
+    } else if (!isOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [isOpen]);
+
+  // Notify the parent when the dialog closes (Escape key or backdrop click)
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const handleClose = () => onClose();
+    dialog.addEventListener("close", handleClose);
+    return () => dialog.removeEventListener("close", handleClose);
+  }, [onClose]);
+
+  // Lock body scroll while open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -26,14 +53,24 @@ export function AuthRequiredModal({
     };
   }, [isOpen]);
 
+  // The dialog element must not be rendered at all while closed. A `display`
+  // utility on <dialog> overrides the UA's `dialog:not([open]) { display: none }`,
+  // which would leave an invisible-but-clickable overlay across the page.
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <dialog
+      ref={dialogRef}
+      className="fixed inset-0 z-[100] m-0 flex h-full w-full items-center justify-center bg-transparent p-0"
+      aria-labelledby="auth-required-title"
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-        onClick={onClose}
+        onClick={requestClose}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") requestClose();
+        }}
       />
 
       {/* Modal */}
@@ -42,8 +79,8 @@ export function AuthRequiredModal({
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 rounded-2xl pointer-events-none" />
 
         {/* Close button */}
-        <button
-          onClick={onClose}
+        <button type="button"
+          onClick={requestClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors border border-white/10"
           aria-label="Close"
         >
@@ -58,7 +95,9 @@ export function AuthRequiredModal({
             </div>
           </div>
 
-          <h2 className="text-white font-bold text-2xl mb-3">Login Required</h2>
+          <h2 id="auth-required-title" className="text-white font-bold text-2xl mb-3">
+            Login Required
+          </h2>
           <p className="text-white/60 text-base mb-8">{message}</p>
 
           <div className="flex flex-col gap-3">
@@ -70,8 +109,8 @@ export function AuthRequiredModal({
               Sign In
             </Link>
 
-            <button
-              onClick={onClose}
+            <button type="button"
+              onClick={requestClose}
               className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-medium transition-all duration-200 border border-white/10"
             >
               Maybe Later
@@ -79,6 +118,6 @@ export function AuthRequiredModal({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

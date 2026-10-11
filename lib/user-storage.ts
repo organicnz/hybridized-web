@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 
 /**
  * User-scoped localStorage utility.
@@ -15,7 +15,7 @@ let cachedUserId: string | null = null;
 async function getUserId(): Promise<string> {
   if (cachedUserId) return cachedUserId;
 
-  const supabase = createClient();
+  const supabase = await getSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -10,7 +10,6 @@ interface AudioProgressBarProps {
 export function AudioProgressBar({ audioRef, className = "" }: AudioProgressBarProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export function AudioProgressBar({ audioRef, className = "" }: AudioProgressBarP
   }, [audioRef]);
 
   const formatTime = (seconds: number) => {
-    if (!isFinite(seconds)) return "0:00";
+    if (!Number.isFinite(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -49,6 +48,19 @@ export function AudioProgressBar({ audioRef, className = "" }: AudioProgressBarP
     setCurrentTime(newTime);
   };
 
+  const handleSeekKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!audioRef.current) return;
+
+    const step = 5;
+    if (e.key === "ArrowRight") {
+      audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + step);
+      setCurrentTime(audioRef.current.currentTime);
+    } else if (e.key === "ArrowLeft") {
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - step);
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
@@ -57,9 +69,14 @@ export function AudioProgressBar({ audioRef, className = "" }: AudioProgressBarP
         ref={progressRef}
         className="relative h-2 bg-white/10 rounded-full cursor-pointer group"
         onClick={handleSeek}
-        onMouseDown={() => setIsDragging(true)}
-        onMouseUp={() => setIsDragging(false)}
-        onMouseLeave={() => setIsDragging(false)}
+        onKeyDown={handleSeekKeyDown}
+        role="slider"
+        tabIndex={0}
+        aria-label="Seek"
+        aria-valuemin={0}
+        aria-valuemax={duration}
+        aria-valuenow={currentTime}
+        aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
       >
         {/* Progress bar */}
         <div

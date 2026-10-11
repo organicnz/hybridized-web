@@ -142,7 +142,8 @@ export function HomeClient({
       </div>
 
       {/* Sidebar Panel - 35% */}
-      <aside className="w-full lg:w-[35%] overflow-y-auto">
+      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: WCAG 2.1.1 requires a scrollable region with no focusable children to be keyboard-reachable (axe: scrollable-region-focusable) */}
+      <aside className="w-full lg:w-[35%] overflow-y-auto" tabIndex={0}>
         <ArtistProfile
           artist={{
             name: currentArtist || "Hybrid",

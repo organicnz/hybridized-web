@@ -85,7 +85,7 @@ export async function getCachedBands(): Promise<Band[] | null> {
         }
 
         // Remove timestamp before returning
-        const cleanBands = bands.map(({ timestamp, ...band }) => band);
+        const cleanBands = bands.map(({ timestamp: _timestamp, ...band }) => band);
         resolve(cleanBands as Band[]);
       };
 

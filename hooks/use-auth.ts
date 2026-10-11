@@ -1,43 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { useEffect, useState } from "react";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = createClient();
+    let cancelled = false;
 
-    // Get initial session
-    const initAuth = async () => {
+    void (async () => {
+      const supabase = await getSupabase();
+      if (cancelled) return;
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+
       try {
         const {
-          data: { user },
+          data: { user: current },
         } = await supabase.auth.getUser();
-        setUser(user);
+        if (!cancelled) setUser(current);
       } catch (error) {
         console.error("Error fetching user:", error);
-        setUser(null);
+        if (!cancelled) setUser(null);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    };
 
-    initAuth();
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+      return () => subscription.unsubscribe();
+    })();
 
     return () => {
-      subscription.unsubscribe();
+      cancelled = true;
     };
   }, []);
 

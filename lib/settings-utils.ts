@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import type { Json } from "@/lib/types/database.types";
 import { toast } from "sonner";
 
@@ -83,11 +83,17 @@ export function createSettingsSaver() {
     currentStatus: "idle",
   };
 
-  const supabase = createClient();
+  let supabasePromise: Promise<Awaited<ReturnType<typeof getSupabase>>> | null = null;
+  const supabase = () => {
+    supabasePromise ??= getSupabase();
+    return supabasePromise;
+  };
 
   function setStatus(status: SyncStatus): void {
     state.currentStatus = status;
-    state.statusCallbacks.forEach((cb) => cb(status));
+    for (const cb of state.statusCallbacks) {
+      cb(status);
+    }
   }
 
   /**
@@ -96,7 +102,7 @@ export function createSettingsSaver() {
    */
   async function performSave(userId: string, updates: SettingsUpdate): Promise<boolean> {
     // Check if row exists
-    const { data: existing } = await supabase
+    const { data: existing } = await (await supabase())
       .from("settings")
       .select("id")
       .eq("user_id", userId)
@@ -115,12 +121,12 @@ export function createSettingsSaver() {
 
     if (existing) {
       // UPDATE only the changed fields (doesn't overwrite other fields)
-      const { error } = await supabase.from("settings").update(payload).eq("user_id", userId);
+      const { error } = await (await supabase()).from("settings").update(payload).eq("user_id", userId);
 
       if (error) throw error;
     } else {
       // INSERT new row with defaults
-      const { error } = await supabase.from("settings").insert({
+      const { error } = await (await supabase()).from("settings").insert({
         user_id: userId,
         gains: updates.gains ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         volume_settings: updates.volume_settings ?? { master: 70 },
@@ -169,7 +175,7 @@ export function createSettingsSaver() {
       } catch {
         if (attempt < MAX_RETRIES) {
           // Wait before retry (exponential backoff)
-          await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
+          await new Promise((resolve) => setTimeout(resolve, 100 * 2 ** attempt));
         }
       }
     }
@@ -262,7 +268,7 @@ export function createSettingsSaver() {
       try {
         const {
           data: { user },
-        } = await supabase.auth.getUser();
+        } = await (await supabase()).auth.getUser();
         if (!user) {
           state.isSaving = false;
           setStatus("idle");
@@ -296,7 +302,7 @@ export function createSettingsSaver() {
       try {
         const {
           data: { user },
-        } = await supabase.auth.getUser();
+        } = await (await supabase()).auth.getUser();
         if (user) {
           await saveWithRetry(user.id, updatesToSave);
         }
@@ -362,7 +368,7 @@ export async function loadUserSettings(): Promise<{
   gains: number[];
   volume_settings: { master: number } | null;
 } | null> {
-  const supabase = createClient();
+  const supabase = await getSupabase();
 
   const {
     data: { user },

@@ -82,12 +82,9 @@ serve(async (req) => {
         continue;
       }
 
-      const { data, error } = await supabase.auth.admin.inviteUserByEmail(
-        email,
-        {
-          redirectTo: "https://yourapp.com/set-password",
-        },
-      );
+      const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
+        redirectTo: "https://yourapp.com/set-password",
+      });
 
       if (error) {
         results.push({

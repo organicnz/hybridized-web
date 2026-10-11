@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Mail, MessageSquare, Send } from "lucide-react";
+import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Get in touch with the Hybridized team — feedback, artist submissions and support.",
+};
+
+export const cacheLife = 'days';
 
 export default function ContactPage() {
   return (
@@ -75,7 +84,9 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
     </div>
   );
 }

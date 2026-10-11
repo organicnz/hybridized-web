@@ -48,9 +48,7 @@ Deno.serve(async (req) => {
       bandsWithFormulas: bandsWithFormulas || 0,
       bandsWithMedia: bandsWithMedia || 0,
       recentBands: recentBands || 0,
-      completionRate: totalBands
-        ? (((bandsWithFormulas || 0) / totalBands) * 100).toFixed(1)
-        : 0,
+      completionRate: totalBands ? (((bandsWithFormulas || 0) / totalBands) * 100).toFixed(1) : 0,
       timestamp: new Date().toISOString(),
     };
 

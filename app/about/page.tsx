@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Download, Heart, Music, Sparkles, Users } from "lucide-react";
+import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Learn about Hybridized — the music archive and streaming platform for electronic music, DJ mixes and radio shows.",
+};
+
+export const cacheLife = 'days';
 
 export default function AboutPage() {
   return (
@@ -66,87 +76,87 @@ export default function AboutPage() {
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-white/70">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Alex Hall
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Andrew Kelly
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Benz & MD
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Burufunk
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Deepsky
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Digital Witchcraft
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Grayarea
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Hybrid
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       James Warren
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Jason Dunne
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       J-Slyde
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       KiloWatts
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Micah
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Nick Lewis
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Noel Sanger
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       NuBreed
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Shiloh
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Stefan Weise
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Trafik
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       V-Sag
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full" />
                       Way Out West
                     </div>
                   </div>
@@ -177,7 +187,9 @@ export default function AboutPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
     </div>
   );
 }

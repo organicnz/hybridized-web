@@ -31,6 +31,15 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
+Optional (`SYNC_SECRET` authorises the mutating API endpoints
+`/api/sync-episodes`, `/api/sync-playlists`, `/api/match-episodes` via
+`Authorization: Bearer <SYNC_SECRET>`; without it those routes fall back to an
+authenticated admin profile):
+
+```
+SYNC_SECRET=
+```
+
 ## Commands
 
 ```bash

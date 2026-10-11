@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { getAudioEnhancer, DEFAULT_AUDIO_SETTINGS, type AudioEnhancementSettings } from '@/lib/audio/enhancer';
+import {
+  type AudioEnhancementSettings,
+  DEFAULT_AUDIO_SETTINGS,
+  getAudioEnhancer,
+} from "@/lib/audio/enhancer";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Hook to enhance audio quality using Web Audio API
@@ -13,7 +17,7 @@ export function useAudioEnhancement() {
 
   useEffect(() => {
     const enhancer = enhancerRef.current;
-    
+
     // Enable hardware acceleration
     enhancer.enableHardwareAcceleration();
 
@@ -37,15 +41,15 @@ export function useAudioEnhancement() {
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (!iframeDoc) return;
 
-      const audioElements = iframeDoc.querySelectorAll('audio, video');
-      audioElements.forEach((element) => {
+      const audioElements = iframeDoc.querySelectorAll("audio, video");
+      for (const element of audioElements) {
         if (element instanceof HTMLMediaElement) {
           enhancerRef.current.connectAudio(element);
         }
-      });
-    } catch (error) {
+      }
+    } catch {
       // Cross-origin iframes can't be accessed
-      console.log('Cannot enhance cross-origin iframe audio');
+      console.log("Cannot enhance cross-origin iframe audio");
     }
   };
 

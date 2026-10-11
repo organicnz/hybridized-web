@@ -1,8 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const FIRSTORY_RSS_URL =
-  "https://feed.firstory.me/rss/user/cl3ps0kge021i01y69qhnf36d";
+const FIRSTORY_RSS_URL = "https://feed.firstory.me/rss/user/cl3ps0kge021i01y69qhnf36d";
 const BATCH_SIZE = 5; // Very small batches to avoid resource limits
 const BATCH_DELAY_MS = 200; // Delay between batches
 const MAX_EPISODES = 20; // Limit RSS episodes to leave time for playlist sync
@@ -40,12 +39,26 @@ interface Band {
   name: string;
 }
 
-interface Episode {
-  id: number;
+interface EpisodeData {
   episode_id: string;
-  band_id: number | null;
+  guid: string;
   title: string;
+  description: string;
+  link: string;
+  audio_url: string;
+  audio_length: number;
+  enclosure_type: string;
+  cover_url: string | null;
+  duration: number;
+  pub_date: string;
+  creator: string;
+  explicit: boolean;
+  band_id: number | null;
 }
+
+type PlaylistResult =
+  | { band: string; found: number; updated: number }
+  | { band: string; error: string };
 
 // Helper to extract text from CDATA or regular tags
 function extractText(xml: string, tag: string): string {
@@ -80,9 +93,7 @@ function matchBandFromTitle(title: string, bands: Band[]): number | null {
 
   // Extract the artist name from title (format: "Artist Name - Show Title")
   const artistMatch = title.match(/^([^-]+)\s*-/);
-  const artistName = artistMatch
-    ? artistMatch[1].trim().toLowerCase()
-    : titleLower;
+  const artistName = artistMatch ? artistMatch[1].trim().toLowerCase() : titleLower;
 
   // Special case: Greg Benz belongs to Benz & MD
   if (artistName.includes("greg benz")) {
@@ -104,10 +115,7 @@ function matchBandFromTitle(title: string, bands: Band[]): number | null {
   // Second pass: check if band name appears at the start of title
   for (const band of sortedBands) {
     const bandNameLower = band.name.toLowerCase();
-    if (
-      titleLower.startsWith(bandNameLower + " -") ||
-      titleLower.startsWith(bandNameLower + "-")
-    ) {
+    if (titleLower.startsWith(`${bandNameLower} -`) || titleLower.startsWith(`${bandNameLower}-`)) {
       return band.id;
     }
   }
@@ -124,7 +132,7 @@ function matchBandFromTitle(title: string, bands: Band[]): number | null {
 }
 
 // Helper to validate episode data
-function validateEpisodeData(data: any): boolean {
+function validateEpisodeData(data: EpisodeData): boolean {
   return !!(
     data.episode_id &&
     data.title &&
@@ -180,13 +188,9 @@ Deno.serve(async (req: Request) => {
     // Limit episodes to avoid timeout
     const items = allItems.slice(0, MAX_EPISODES);
 
-    console.log(
-      `Found ${allItems.length} episodes in RSS feed, processing ${items.length}`,
-    );
+    console.log(`Found ${allItems.length} episodes in RSS feed, processing ${items.length}`);
 
-    const { data: bands, error: bandsError } = await supabase
-      .from("bands")
-      .select("id, name");
+    const { data: bands, error: bandsError } = await supabase.from("bands").select("id, name");
 
     if (bandsError) {
       throw new Error(`Failed to fetch bands: ${bandsError.message}`);
@@ -200,9 +204,7 @@ Deno.serve(async (req: Request) => {
 
     const totalBatches = Math.ceil(items.length / BATCH_SIZE);
 
-    console.log(
-      `Processing ${items.length} episodes in ${totalBatches} batches of ${BATCH_SIZE}`,
-    );
+    console.log(`Processing ${items.length} episodes in ${totalBatches} batches of ${BATCH_SIZE}`);
 
     for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
       const start = batchIndex * BATCH_SIZE;
@@ -224,12 +226,11 @@ Deno.serve(async (req: Request) => {
           const link = extractText(itemXml, "link");
           const audioUrl = extractAttr(itemXml, "enclosure", "url");
           const audioLengthStr = extractAttr(itemXml, "enclosure", "length");
-          const audioLength = audioLengthStr ? parseInt(audioLengthStr) : 0;
-          const enclosureType =
-            extractAttr(itemXml, "enclosure", "type") || "audio/mpeg";
+          const audioLength = audioLengthStr ? Number.parseInt(audioLengthStr) : 0;
+          const enclosureType = extractAttr(itemXml, "enclosure", "type") || "audio/mpeg";
           const coverUrl = extractAttr(itemXml, "itunes:image", "href");
           const durationStr = extractText(itemXml, "itunes:duration");
-          const duration = durationStr ? parseInt(durationStr) : 0;
+          const duration = durationStr ? Number.parseInt(durationStr) : 0;
           const pubDateStr = extractText(itemXml, "pubDate");
           const creator = extractText(itemXml, "dc:creator") || "Hybridized";
           const explicit = extractText(itemXml, "itunes:explicit") === "yes";
@@ -239,7 +240,7 @@ Deno.serve(async (req: Request) => {
           let pubDate: Date;
           try {
             pubDate = pubDateStr ? new Date(pubDateStr) : new Date();
-            if (isNaN(pubDate.getTime())) {
+            if (Number.isNaN(pubDate.getTime())) {
               pubDate = new Date();
             }
           } catch {
@@ -278,9 +279,7 @@ Deno.serve(async (req: Request) => {
             .maybeSingle();
 
           if (existingError) {
-            console.error(
-              `DB error for ${episodeId}: ${existingError.message}`,
-            );
+            console.error(`DB error for ${episodeId}: ${existingError.message}`);
             errors++;
             continue;
           }
@@ -305,22 +304,16 @@ Deno.serve(async (req: Request) => {
               .eq("id", existing.id);
 
             if (updateError) {
-              console.error(
-                `Update failed for ${episodeId}: ${updateError.message}`,
-              );
+              console.error(`Update failed for ${episodeId}: ${updateError.message}`);
               errors++;
             } else {
               updated++;
             }
           } else {
-            const { error: insertError } = await supabase
-              .from("episodes")
-              .insert(episodeData);
+            const { error: insertError } = await supabase.from("episodes").insert(episodeData);
 
             if (insertError) {
-              console.error(
-                `Insert failed for ${episodeId}: ${insertError.message}`,
-              );
+              console.error(`Insert failed for ${episodeId}: ${insertError.message}`);
               errors++;
             } else {
               created++;
@@ -343,7 +336,7 @@ Deno.serve(async (req: Request) => {
 
     let playlistMatched = 0;
     let playlistErrors = 0;
-    const playlistResults: any[] = [];
+    const playlistResults: PlaylistResult[] = [];
     let playlistsProcessed = 0;
 
     for (const [bandName, playlistId] of Object.entries(PLAYLIST_MAPPINGS)) {
@@ -382,9 +375,7 @@ Deno.serve(async (req: Request) => {
 
         // Extract episode IDs from HTML (format: /episodes/clXXXXXXXXXXXXXXXXXXXXXX)
         const episodeMatches = html.matchAll(/\/episodes\/(cl[a-z0-9]+)/g);
-        const episodeIds = [
-          ...new Set(Array.from(episodeMatches).map((m) => m[1])),
-        ];
+        const episodeIds = [...new Set(Array.from(episodeMatches).map((m) => m[1]))];
 
         if (episodeIds.length > 0) {
           // Update episodes with correct band_id
@@ -402,9 +393,7 @@ Deno.serve(async (req: Request) => {
             updated: updatedCount,
           });
 
-          console.log(
-            `${bandName}: ${updatedCount}/${episodeIds.length} episodes matched`,
-          );
+          console.log(`${bandName}: ${updatedCount}/${episodeIds.length} episodes matched`);
         }
 
         playlistsProcessed++;

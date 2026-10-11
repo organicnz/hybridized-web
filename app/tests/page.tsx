@@ -1,112 +1,74 @@
+import { EarTraining } from "@/components/ear-training";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { Headphones, Mic, Music2, Radio } from "lucide-react";
+import { AudioLines, Music } from "lucide-react";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Musical Tests",
+  description:
+    "Train your ear with interval recognition and chord quality tests, rendered in the browser with the Web Audio API.",
+};
+
+const UPCOMING = [
+  {
+    icon: Music,
+    title: "Genre Detective",
+    description: "Identify the genre from a short audio clip",
+    accent: "text-pink-400",
+  },
+  {
+    icon: AudioLines,
+    title: "Rhythm Master",
+    description: "Tap back a rhythm you just heard",
+    accent: "text-cyan-400",
+  },
+];
 
 export default function TestsPage() {
-  const tests = [
-    {
-      icon: Music2,
-      title: "Pitch Perfect",
-      description: "Test your ability to identify musical notes and intervals",
-      difficulty: "Beginner",
-      color: "from-purple-500/10 to-pink-500/10",
-      borderColor: "border-purple-500/20",
-      iconColor: "text-purple-400",
-    },
-    {
-      icon: Headphones,
-      title: "Rhythm Master",
-      description: "Challenge your sense of timing and rhythm patterns",
-      difficulty: "Intermediate",
-      color: "from-blue-500/10 to-cyan-500/10",
-      borderColor: "border-blue-500/20",
-      iconColor: "text-blue-400",
-    },
-    {
-      icon: Radio,
-      title: "Genre Detective",
-      description: "Identify music genres from short audio clips",
-      difficulty: "Advanced",
-      color: "from-pink-500/10 to-purple-500/10",
-      borderColor: "border-pink-500/20",
-      iconColor: "text-pink-400",
-    },
-    {
-      icon: Mic,
-      title: "Harmony Hunter",
-      description: "Recognize chord progressions and harmonic structures",
-      difficulty: "Expert",
-      color: "from-yellow-500/10 to-orange-500/10",
-      borderColor: "border-yellow-500/20",
-      iconColor: "text-yellow-400",
-    },
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-900 via-black to-blue-900">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-24">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-6">
+      <main className="container mx-auto flex-1 px-4 py-16">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-12 text-center">
+            <h1 className="mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-5xl font-black text-transparent md:text-6xl">
               Musical Tests
             </h1>
-            <p className="text-xl text-purple-200/80">
-              Challenge yourself and discover your musical abilities
+            <p className="text-lg text-purple-200/80">
+              Train your ear with interactive tests. All audio is synthesised in your browser — no
+              downloads, no sign-up.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {tests.map((test, index) => {
-              const Icon = test.icon;
-              return (
+          <EarTraining />
+
+          <section className="mt-16">
+            <h2 className="mb-6 text-center text-2xl font-bold text-white">More tests coming soon</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {UPCOMING.map(({ icon: Icon, title, description, accent }) => (
                 <div
-                  key={index}
-                  className={`group relative bg-gradient-to-br ${test.color} backdrop-blur-sm rounded-2xl border ${test.borderColor} hover:border-opacity-50 transition-all p-8 hover:scale-105 cursor-pointer`}
+                  key={title}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm"
                 >
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className={`p-3 bg-black/30 rounded-xl ${test.iconColor}`}>
-                      <Icon className="w-8 h-8" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-2xl font-bold text-white">{test.title}</h3>
-                        <span
-                          className={`text-xs px-3 py-1 rounded-full ${test.iconColor} bg-black/30`}
-                        >
-                          {test.difficulty}
-                        </span>
-                      </div>
-                      <p className="text-purple-200/70">{test.description}</p>
-                    </div>
+                  <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-black/30 ${accent}`}>
+                    <Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
-                  <button
-                    type="button"
-                    className="w-full mt-4 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-colors border border-white/20"
-                  >
-                    Start Test
-                  </button>
+                  <h3 className="text-xl font-bold text-white/80">{title}</h3>
+                  <p className="mt-2 text-sm text-white/50">{description}</p>
+                  <p className="mt-4 inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium text-white/40">
+                    In development
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 md:p-12 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Coming Soon</h2>
-            <p className="text-purple-200/80 max-w-2xl mx-auto">
-              More interactive tests and challenges are on the way. Sign up to be notified when new
-              tests become available!
-            </p>
-            <button
-              type="button"
-              className="mt-6 px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple-500/50"
-            >
-              Notify Me
-            </button>
-          </div>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
     </div>
   );
 }

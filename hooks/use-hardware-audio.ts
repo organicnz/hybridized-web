@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { createAudioContext } from "@/lib/audio-utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface AudioConfig {
   enableHardwareAcceleration?: boolean;
@@ -25,8 +26,8 @@ export function useHardwareAudio(config: AudioConfig = {}) {
         sampleRate: config.sampleRate || 48000, // Higher sample rate for better quality
       };
 
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)(contextOptions);
+      const audioContext = createAudioContext(contextOptions);
+      if (!audioContext) throw new Error("Web Audio API is not supported");
       audioContextRef.current = audioContext;
 
       // Create audio nodes for processing
@@ -57,10 +58,7 @@ export function useHardwareAudio(config: AudioConfig = {}) {
     if (gainNodeRef.current && audioContextRef.current) {
       const clampedVolume = Math.max(0, Math.min(1, volume));
       // Smooth volume changes to prevent clicks/pops
-      gainNodeRef.current.gain.setValueAtTime(
-        clampedVolume,
-        audioContextRef.current.currentTime,
-      );
+      gainNodeRef.current.gain.setValueAtTime(clampedVolume, audioContextRef.current.currentTime);
     }
   }, []);
 
@@ -101,6 +99,8 @@ export function useHardwareAudio(config: AudioConfig = {}) {
     initializeAudioContext,
     setVolume,
     getFrequencyData,
+    /** Live ref to the AnalyserNode driving the graph, for visualiser consumers. */
+    analyserRef,
     resume,
     cleanup,
     isInitialized,

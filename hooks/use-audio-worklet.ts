@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { createAudioContext } from "@/lib/audio-utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface AudioWorkletConfig {
   enableSpatialAudio?: boolean;
@@ -22,11 +23,11 @@ export function useAudioWorklet(config: AudioWorkletConfig = {}) {
       if (audioContextRef.current) return audioContextRef.current;
 
       // Create high-performance audio context with optimal settings
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)({
+      const audioContext = createAudioContext({
         latencyHint: "playback",
         sampleRate: 48000,
       });
+      if (!audioContext) throw new Error("Web Audio API is not supported");
 
       audioContextRef.current = audioContext;
       const source = audioContext.createMediaElementSource(audioElement);
@@ -50,9 +51,7 @@ export function useAudioWorklet(config: AudioWorkletConfig = {}) {
 
       // 10-band Parametric Equalizer with optimal Q values
       if (config.enableEqualizer) {
-        const frequencies = [
-          32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000,
-        ];
+        const frequencies = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
         const filters: BiquadFilterNode[] = [];
 
         frequencies.forEach((freq, index) => {
@@ -98,18 +97,9 @@ export function useAudioWorklet(config: AudioWorkletConfig = {}) {
 
         // Set listener position (user's head)
         if (audioContext.listener.positionX) {
-          audioContext.listener.positionX.setValueAtTime(
-            0,
-            audioContext.currentTime,
-          );
-          audioContext.listener.positionY.setValueAtTime(
-            0,
-            audioContext.currentTime,
-          );
-          audioContext.listener.positionZ.setValueAtTime(
-            0,
-            audioContext.currentTime,
-          );
+          audioContext.listener.positionX.setValueAtTime(0, audioContext.currentTime);
+          audioContext.listener.positionY.setValueAtTime(0, audioContext.currentTime);
+          audioContext.listener.positionZ.setValueAtTime(0, audioContext.currentTime);
         }
 
         currentNode.connect(panner);
