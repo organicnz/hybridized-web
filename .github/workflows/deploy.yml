@@ -41,6 +41,7 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           supabase link --project-ref neslxchdtibzhxijxcbg
-          # Use connection pooler (port 6543) for external CI runners; DB password encoded
+          # Use connection pooler for external CI runners; DB password encoded
           ENCODED_PW=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ.get('SUPABASE_DB_PASSWORD',''), safe=''))")
-          supabase db push --db-url "postgresql://postgres:${ENCODED_PW}@db.neslxchdtibzhxijxcbg.supabase.co:6543/postgres?pgbouncer=true"
+          # Pooler hostname format: aws-0-{region}.pooler.supabase.com
+          supabase db push --db-url "postgresql://postgres:${ENCODED_PW}@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
