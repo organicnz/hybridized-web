@@ -57,20 +57,26 @@ export function Header() {
   };
 
   return (
-    <header className="bg-black/70 border-b border-white/10 sticky top-0 z-50 backdrop-blur-2xl gpu-filter shadow-[0_1px_0_0_rgba(255,255,255,0.05),0_8px_32px_-8px_rgba(124,58,237,0.15)]">
-      <div className="px-4 md:px-10 py-3.5 flex items-center justify-between gap-4">
+    <header className="surface-shell sticky top-0 z-50 border-b shadow-header gpu-filter">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3.5 md:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-          <Image
-            src="/logo.png"
-            alt="Hybridized Logo"
-            title="Hybridized - Home"
-            width={40}
-            height={40}
-            className="w-10 h-10 md:w-12 md:h-12 rounded-full group-hover:scale-105 transition-transform gpu"
-            priority
-          />
-          <span className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 bg-clip-text text-transparent">
+        <Link href="/" className="flex flex-shrink-0 items-center gap-3 group">
+          <span className="relative">
+            <Image
+              src="/logo.png"
+              alt="Hybridized Logo"
+              title="Hybridized - Home"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-xl ring-1 ring-border transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 gpu md:h-11 md:w-11"
+              priority
+            />
+            <span
+              className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-t from-purple-500/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              aria-hidden="true"
+            />
+          </span>
+          <span className="font-display text-xl md:text-2xl font-bold tracking-tight gradient-text">
             Hybridized
           </span>
         </Link>

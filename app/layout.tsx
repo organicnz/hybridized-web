@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hybridized.online";
 const SITE_NAME = "Hybridized";
@@ -82,13 +83,30 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0f0a18] text-foreground`}
+        className={`${inter.variable} ${display.variable} font-sans antialiased bg-background text-foreground`}
       >
         <ThemeProvider>
-          <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_30%_20%,rgba(124,58,237,0.08)_0%,transparent_60%),radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.08)_0%,transparent_60%)] z-[-1]" />
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+          >
+            Skip to content
+          </a>
+          <div className="fixed inset-0 pointer-events-none app-mesh z-[-1]" aria-hidden="true" />
           <RegisterServiceWorker />
           <RecoveryHandler />
-          <Toaster position="top-center" richColors />
+          <Toaster
+            position="top-center"
+            richColors
+            closeButton
+            toastOptions={{
+              style: {
+                background: "hsl(var(--popover))",
+                border: "1px solid hsl(var(--border))",
+                color: "hsl(var(--popover-foreground))",
+              },
+            }}
+          />
           <AudioPlayerProvider>
             {children}
             <AudioPlayerBar />

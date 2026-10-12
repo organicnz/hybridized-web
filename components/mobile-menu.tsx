@@ -2,6 +2,7 @@
 
 import type { NavLink as NavLinkType } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import { NavLink } from "./nav-link";
 
@@ -30,26 +31,48 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
   }, [isOpen, onClose]);
 
   return (
-    <nav
-      className={cn(
-        "md:hidden border-t border-white/10 bg-black/70 backdrop-blur-2xl shadow-[0_20px_40px_-12px_rgba(124,58,237,0.12)] transition-all duration-300 overflow-hidden gpu-filter gpu-opacity",
-        isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <motion.nav
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 320, damping: 32 }}
+          className={cn(
+            "surface-shell overflow-hidden border-t shadow-header md:hidden gpu-filter",
+          )}
+          aria-label="Mobile navigation"
+        >
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
+            }}
+            className="space-y-1 px-4 py-3"
+          >
+            {navLinks.map((link) => (
+              <motion.div
+                key={link.href}
+                variants={{
+                  hidden: { opacity: 0, x: -12 },
+                  visible: { opacity: 1, x: 0 },
+                }}
+              >
+                <NavLink
+                  href={link.href}
+                  label={link.label}
+                  highlight={link.highlight}
+                  variant="mobile"
+                  onClick={onClose}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.nav>
       )}
-      aria-label="Mobile navigation"
-      aria-hidden={!isOpen}
-    >
-      <div className="px-4 py-2 space-y-1">
-        {navLinks.map((link) => (
-          <NavLink
-            key={link.href}
-            href={link.href}
-            label={link.label}
-            highlight={link.highlight}
-            variant="mobile"
-            onClick={onClose}
-          />
-        ))}
-      </div>
-    </nav>
+    </AnimatePresence>
   );
 }

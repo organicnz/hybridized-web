@@ -232,12 +232,11 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 backdrop-blur-md border shadow-lg group ${
+        className={`flex h-10 w-10 items-center justify-center rounded-xl border backdrop-blur-md transition-all duration-200 group ${
           isOpen
-            ? "bg-gradient-to-br from-purple-500/30 to-pink-500/20 text-purple-300 border-purple-400/50 shadow-purple-500/30 scale-110"
-            : "bg-gradient-to-br from-white/10 to-white/5 border-white/20 text-white/70 hover:text-white hover:border-purple-400/30 hover:shadow-purple-500/20 hover:scale-110"
-        } ${initError ? "opacity-50 cursor-not-allowed" : ""}`}
-        style={{ transform: "translateZ(0)", willChange: "transform" }}
+            ? "border-primary/50 bg-primary/15 text-primary shadow-glow"
+            : "border-border bg-accent/40 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+        } ${initError ? "cursor-not-allowed opacity-50" : ""}`}
         aria-label="Equalizer"
         title={initError ? "Equalizer unavailable" : "Equalizer"}
         disabled={initError}
@@ -259,69 +258,64 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
           {/* Equalizer Panel with glassmorphism */}
           <div
-            className="absolute bottom-full right-0 mb-3 bg-gradient-to-br from-zinc-900/95 to-black/95 backdrop-blur-2xl border border-white/20 rounded-2xl p-5 shadow-2xl w-[520px] z-50 animate-in slide-in-from-bottom-4 duration-300"
-            style={{ transform: "translateZ(0)", willChange: "transform" }}
+            className="card-overlay absolute bottom-full right-0 z-50 mb-3 w-[min(520px,90vw)] animate-in slide-in-from-bottom-4 p-5 duration-300"
           >
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 rounded-2xl pointer-events-none" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10" />
             {!isAuthenticated ? (
-              <div className="relative text-center py-8 px-4">
+              <div className="relative px-4 py-8 text-center">
                 <div className="mb-4 flex justify-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center border border-purple-400/30">
-                    <LogIn className="w-8 h-8 text-purple-400" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                    <LogIn className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h3 className="text-white font-semibold text-lg mb-2">Login Required</h3>
-                <p className="text-white/60 text-sm mb-6">
+                <h3 className="mb-2 text-lg font-semibold text-foreground">Login Required</h3>
+                <p className="mb-6 text-sm text-muted-foreground">
                   Sign in to save and sync your equalizer settings across devices
                 </p>
                 <Link
                   href="/auth/login"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-purple-500/50"
+                  className="btn btn-primary"
                 >
                   <LogIn size={18} />
                   Sign In
                 </Link>
               </div>
             ) : initError ? (
-              <div className="relative text-center py-8">
-                <p className="text-white/70 text-sm mb-2">Equalizer unavailable</p>
-                <p className="text-white/50 text-xs">Audio system already initialized</p>
+              <div className="relative py-8 text-center">
+                <p className="mb-2 text-sm text-foreground">Equalizer unavailable</p>
+                <p className="text-xs text-muted-foreground">Audio system already initialized</p>
               </div>
             ) : (
               <>
-                <div className="relative flex items-center justify-between mb-4">
+                <div className="relative mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <h3 className="text-white font-semibold text-sm drop-shadow-lg">Equalizer</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Equalizer</h3>
                     <SyncIndicator status={syncStatus} />
                   </div>
                   <button
                     type="button"
                     onClick={resetEqualizer}
-                    className="text-xs text-purple-400 hover:text-purple-300 transition-all duration-200 px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/30"
+                    className="rounded-lg border border-border bg-accent px-3 py-1 text-xs text-primary transition-colors hover:border-primary/30 hover:text-primary/80"
                   >
                     Reset
                   </button>
                 </div>
 
                 {/* Presets */}
-                <fieldset className="relative mb-5 border-0 p-0 m-0" aria-label="Presets">
-                  <legend className="text-xs text-white/50 mb-2 block font-medium">Presets</legend>
+                <fieldset className="relative m-0 mb-5 border-0 p-0" aria-label="Presets">
+                  <legend className="mb-2 block text-xs font-medium text-muted-foreground">Presets</legend>
                   <div className="grid grid-cols-4 gap-2">
                     {Object.keys(EQ_PRESETS).map((presetName) => (
                       <button
                         type="button"
                         key={presetName}
                         onClick={() => applyPreset(presetName)}
-                        className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 backdrop-blur-sm ${
+                        className={`rounded-lg px-3 py-2 text-xs font-medium backdrop-blur-sm transition-all duration-200 ${
                           currentPreset === presetName
-                            ? "bg-gradient-to-br from-purple-500/40 to-pink-500/30 text-purple-200 border border-purple-400/60 shadow-lg shadow-purple-500/30 scale-105"
-                            : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border border-white/10 hover:border-white/20 hover:scale-105"
+                            ? "border border-primary/60 bg-primary/15 text-primary shadow-glow"
+                            : "border border-border bg-accent text-muted-foreground hover:border-border hover:bg-accent/70 hover:text-foreground"
                         }`}
-                        style={{
-                          transform: "translateZ(0)",
-                          willChange: "transform",
-                        }}
                       >
                         {presetName}
                       </button>
@@ -329,16 +323,16 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                   </div>
                 </fieldset>
 
-                <div className="relative flex items-end gap-3 h-48 px-3 py-4 rounded-xl bg-gradient-to-t from-white/5 to-transparent border border-white/10 overflow-hidden">
+                <div className="relative flex h-48 items-end gap-3 overflow-hidden rounded-xl border border-border bg-accent/40 px-3 py-4">
                   {FREQUENCY_BANDS.map((band, index) => (
                     <div
                       key={band.freq}
-                      className="flex flex-col items-center flex-1 gap-2 group min-w-0"
+                      className="group flex min-w-0 flex-1 flex-col items-center gap-2"
                     >
-                      <div className="relative h-32 w-full max-w-[14px] rounded-full bg-white/10 overflow-hidden backdrop-blur-sm mx-auto">
+                      <div className="relative mx-auto h-32 w-full max-w-[14px] overflow-hidden rounded-full bg-muted backdrop-blur-sm">
                         {/* Glow effect */}
                         <div
-                          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-purple-500 via-pink-500 to-blue-500 transition-all duration-200 rounded-full"
+                          className="absolute inset-x-0 bottom-0 rounded-full bg-gradient-to-t from-purple-500 via-pink-500 to-blue-500 transition-all duration-200"
                           style={{
                             height: `${((gains[index] + 12) / 24) * 100}%`,
                             opacity: 0.6,
@@ -354,26 +348,25 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                           onChange={(e) =>
                             handleGainChange(index, Number.parseFloat(e.target.value))
                           }
-                          className="absolute inset-0 h-full w-full accent-purple-500 cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
+                          className="absolute inset-0 h-full w-full cursor-pointer opacity-0 transition-opacity hover:opacity-100"
                           style={{
                             writingMode: "vertical-lr",
                             WebkitAppearance: "slider-vertical",
-                            transform: "translateZ(0)",
                           }}
                           aria-label={`${band.label} gain`}
                         />
                         {/* Visual slider */}
                         <div
-                          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-purple-400 via-pink-400 to-blue-400 transition-all duration-200 rounded-full"
+                          className="absolute inset-x-0 bottom-0 rounded-full bg-gradient-to-t from-purple-400 via-pink-400 to-blue-400 transition-all duration-200"
                           style={{
                             height: `${((gains[index] + 12) / 24) * 100}%`,
                           }}
                         />
                       </div>
-                      <span className="text-[10px] text-white/60 whitespace-nowrap font-medium group-hover:text-white/80 transition-colors">
+                      <span className="whitespace-nowrap text-[10px] font-medium text-muted-foreground transition-colors group-hover:text-foreground">
                         {band.label}
                       </span>
-                      <span className="text-[9px] text-white/40 font-mono bg-white/5 px-1.5 py-0.5 rounded group-hover:bg-white/10 transition-colors">
+                      <span className="rounded bg-accent px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground transition-colors group-hover:bg-accent/70">
                         {gains[index] > 0 ? "+" : ""}
                         {gains[index].toFixed(1)}
                       </span>

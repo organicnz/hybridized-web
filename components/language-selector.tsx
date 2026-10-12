@@ -50,7 +50,7 @@ export function LanguageSelector() {
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200"
+        className="flex items-center gap-2 rounded-lg px-2 py-1 text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={`Change language (current: ${currentLang.name})`}
         aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
@@ -63,15 +63,17 @@ export function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 py-2 w-40 bg-gray-800 rounded-lg shadow-xl border border-white/10 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="card-overlay absolute right-0 z-50 mt-2 w-44 animate-in fade-in slide-in-from-top-2 duration-200 py-2">
           {LANGUAGES.map((lang) => (
             <button
               type="button"
               key={lang.code}
               onClick={() => handleLanguageChange(lang)}
               className={cn(
-                "w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-white/10 transition-colors",
-                lang.code === currentLang.code ? "text-white bg-white/5" : "text-gray-300",
+                "flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                lang.code === currentLang.code
+                  ? "bg-accent/60 text-accent-foreground"
+                  : "text-muted-foreground",
               )}
               aria-current={lang.code === currentLang.code ? "true" : undefined}
             >

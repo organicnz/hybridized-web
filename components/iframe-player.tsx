@@ -3,7 +3,9 @@
 import { useAudioPlayer } from "@/lib/audio-player-context";
 import { getSupabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/types/database.types";
-import { Play } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { CalendarDays, Clock3, Play } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AuthRequiredModal } from "./auth-required-modal";
 
@@ -15,9 +17,26 @@ type Episode = Database["public"]["Tables"]["episodes"]["Row"] & {
 interface IframePlayerProps {
   episode: Episode;
   artist: string;
+  index?: number;
 }
 
-export function IframePlayer({ episode, artist }: IframePlayerProps) {
+function formatDuration(totalSeconds: number | null): string | null {
+  if (totalSeconds === null || Number.isNaN(totalSeconds) || totalSeconds <= 0) return null;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  if (hours > 0) return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function formatDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+export function IframePlayer({ episode, artist, index }: IframePlayerProps) {
   const { playPlaylist } = useAudioPlayer();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -78,26 +97,80 @@ export function IframePlayer({ episode, artist }: IframePlayerProps) {
     playPlaylist([track], 0);
   };
 
+  const coverUrl = episode.cover_url || episode.bandCoverUrl || undefined;
+  const duration = formatDuration(episode.duration);
+  const pubDate = formatDate(episode.pub_date);
+
   return (
     <>
       {showAuthModal && <AuthRequiredModal isOpen onClose={() => setShowAuthModal(false)} />}
-      <div className="relative w-full rounded-lg border border-white/10 overflow-hidden bg-[#181818] hover:bg-[#282828] transition-colors group">
-        <div className="flex items-center gap-3 p-3">
+      <div className="glass group relative w-full overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glow">
+        <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
+          {/* Index / cover */}
+          {typeof index === "number" ? (
+            <span
+              className="hidden w-7 flex-shrink-0 text-center font-display text-sm font-bold tabular-nums text-muted-foreground/60 sm:block"
+              aria-hidden="true"
+            >
+              {String(index + 1).padStart(2, "0")}
+            </span>
+          ) : null}
+          {coverUrl ? (
+            <span className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border sm:h-14 sm:w-14">
+              <Image
+                src={coverUrl}
+                alt=""
+                width={56}
+                height={56}
+                className="h-full w-full object-cover"
+              />
+            </span>
+          ) : (
+            <span
+              className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/25 via-pink-500/20 to-blue-500/25 font-display text-lg font-bold text-primary ring-1 ring-border sm:h-14 sm:w-14"
+              aria-hidden="true"
+            >
+              {(episode.title || "H").charAt(0).toUpperCase()}
+            </span>
+          )}
+
           {/* Episode Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-white text-sm font-medium truncate">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-sm font-semibold text-foreground sm:text-[15px]">
               {episode.title || "Untitled"}
             </h3>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+              {duration ? (
+                <span className="inline-flex items-center gap-1 tabular-nums">
+                  <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                  {duration}
+                </span>
+              ) : null}
+              {pubDate ? (
+                <span className="inline-flex items-center gap-1">
+                  <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                  {pubDate}
+                </span>
+              ) : null}
+              {episode.bandName ? (
+                <span className="hidden truncate sm:inline">{episode.bandName}</span>
+              ) : null}
+            </div>
           </div>
 
-          {/* Play Button */}
+          {/* Play Button — Spotify green kept intentionally */}
           <button
             type="button"
             onClick={handlePlayClick}
-            className="w-10 h-10 rounded-full bg-[#1DB954] hover:bg-[#1ed760] hover:scale-105 flex items-center justify-center transition-all shadow-lg flex-shrink-0"
+            className={cn(
+              "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full",
+              "bg-[#1DB954] text-black shadow-lg shadow-[#1DB954]/25",
+              "transition-all duration-200 hover:scale-105 hover:bg-[#1ed760] hover:shadow-xl hover:shadow-[#1DB954]/35",
+              "active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1DB954] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            )}
             aria-label={`Play ${episode.title || "episode"}`}
           >
-            <Play className="w-4 h-4 text-black ml-0.5" fill="currentColor" aria-hidden="true" />
+            <Play className="ml-0.5 h-4 w-4" fill="currentColor" aria-hidden="true" />
           </button>
         </div>
       </div>

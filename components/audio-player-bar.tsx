@@ -1,7 +1,7 @@
 "use client";
 
 import { useAudioPlayer } from "@/lib/audio-player-context";
-import { Volume2, VolumeX, X, ChevronUp, ListMusic, Trash2, GripVertical } from "lucide-react";
+import { Volume2, VolumeX, X, ChevronUp, ListMusic, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,27 +9,12 @@ import { AudioEqualizer } from "./audio-equalizer";
 import { CustomAudioPlayer } from "./custom-audio-player";
 import { cn } from "@/lib/utils";
 
-const WAVEFORM_BARS = 64;
-
-function generateWaveformBars(seed: string): number[] {
-  // Deterministic pseudo-random based on track ID
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash << 5) - hash + seed.charCodeAt(i);
-    hash |= 0;
-  }
-  const bars: number[] = [];
-  for (let i = 0; i < WAVEFORM_BARS; i++) {
-    hash = (hash * 1664525 + 1013904223) >>> 0;
-    bars.push(0.15 + (hash / 0xffffffff) * 0.85);
-  }
-  return bars;
-}
-
 export function AudioPlayerBar() {
   const {
     currentTrack,
     setCurrentTrack,
+    setPlaylist,
+    playPlaylist,
     playNext,
     playPrevious,
     playlist,
@@ -82,76 +67,86 @@ export function AudioPlayerBar() {
     [setVolume, isMuted, audioRef],
   );
 
+  const handleSelectTrack = useCallback(
+    (index: number) => {
+      if (index === currentIndex) return;
+      playPlaylist(playlist, index);
+    },
+    [playPlaylist, playlist, currentIndex],
+  );
+
+  const handleRemoveTrack = useCallback(
+    (index: number) => {
+      const next = playlist.filter((_, i) => i !== index);
+      if (next.length === 0) {
+        setCurrentTrack(null);
+        return;
+      }
+      const nextIndex =
+        index < currentIndex ? currentIndex - 1 : index === currentIndex ? 0 : currentIndex;
+      setPlaylist(next, Math.max(0, Math.min(nextIndex, next.length - 1)));
+    },
+    [playlist, currentIndex, setPlaylist, setCurrentTrack],
+  );
+
+  const handleMoveToTop = useCallback(
+    (index: number) => {
+      if (index <= 0) return;
+      const track = playlist[index];
+      const next = [track, ...playlist.filter((_, i) => i !== index)];
+      const nextIndex = index === currentIndex ? 0 : currentIndex < index ? currentIndex + 1 : currentIndex;
+      setPlaylist(next, nextIndex);
+    },
+    [playlist, currentIndex, setPlaylist],
+  );
+
+  const handleClearQueue = useCallback(() => {
+    setCurrentTrack(null);
+    setQueueOpen(false);
+  }, [setCurrentTrack]);
+
   if (!currentTrack) {
     return null;
   }
 
-  const _waveformBars = generateWaveformBars(currentTrack.id);
-  const _progress = audioRef?.current?.duration ? currentTime / audioRef.current.duration : 0;
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl bg-gradient-to-t from-[#0a0215]/95 via-[#0d0015]/90 to-[#0a0215]/80 border-t border-white/10 shadow-[0_-20px_60px_-15px_rgba(124,58,237,0.15),0_0_0_1px_rgba(255,255,255,0.05)]">
-      {/* Glassmorphism background with gradient */}
-      <motion.div
-        initial={{ opacity: 0, y: 100 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed inset-0 bg-gradient-to-t from-black/95 via-purple-900/20 to-transparent backdrop-blur-xl border-t border-white/10"
-        style={{ transform: "translateZ(0)", willChange: "transform, opacity" }}
-      />
-
-      {/* Animated gradient overlay */}
+    <motion.div
+      initial={{ y: 80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="surface-shell fixed inset-x-0 bottom-0 z-50 border-t shadow-player"
+    >
+      {/* Subtle brand glow line */}
       <div
-        className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-blue-500/5 animate-pulse"
-        style={{ transform: "translateZ(0)" }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"
+        aria-hidden="true"
       />
 
-      <div className="relative max-w-7xl mx-auto p-4">
-        <div className="flex items-center gap-4">
-          {/* Track info with glassmorphism */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.1 }}
-            className="flex items-center gap-3 min-w-0 flex-1 max-w-md px-3 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 shadow-lg"
-            style={{ transform: "translateZ(0)", willChange: "transform" }}
-          >
+      <div className="relative mx-auto w-full max-w-7xl p-3 sm:p-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* Track info */}
+          <div className="glass flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-3 py-2 sm:max-w-xs">
             {currentTrack.coverUrl && (
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="relative flex-shrink-0 rounded-lg overflow-hidden shadow-xl ring-2 ring-white/10"
-                style={{ transform: "translateZ(0)", willChange: "transform" }}
-              >
+              <span className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
                 <Image
                   src={currentTrack.coverUrl}
-                  alt={currentTrack.title}
-                  width={56}
-                  height={56}
-                  className="rounded-lg"
+                  alt=""
+                  width={44}
+                  height={44}
+                  className="h-full w-full object-cover"
                 />
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-500/20 to-transparent" />
-              </motion.div>
+              </span>
             )}
             <div className="min-w-0 flex-1">
-              <h3 className="text-white font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-lg">
+              <h3 className="truncate text-sm font-semibold text-foreground">
                 {currentTrack.title}
               </h3>
-              <p className="text-white/60 text-xs whitespace-nowrap overflow-hidden text-ellipsis">
-                {currentTrack.artist}
-              </p>
+              <p className="truncate text-xs text-muted-foreground">{currentTrack.artist}</p>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Audio Player with glassmorphism */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.15 }}
-            className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-md border border-white/10 shadow-2xl"
-            style={{ transform: "translateZ(0)", willChange: "transform" }}
-          >
+          {/* Audio Player */}
+          <div className="glass min-w-0 flex-1 rounded-2xl px-3 py-2 sm:px-4 sm:py-3">
             {audioRef && (
               <CustomAudioPlayer
                 src={currentTrack.audioUrl}
@@ -168,110 +163,102 @@ export function AudioPlayerBar() {
                 initialTime={currentTime}
               />
             )}
-          </motion.div>
+          </div>
 
-          {/* Right Controls Section with glassmorphism */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }}
-            className="flex items-center gap-3 flex-shrink-0"
-          >
+          {/* Right Controls */}
+          <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
             {/* Volume Popover */}
-            <div className="relative">
-              <motion.button
+            <div className="relative" ref={volumePopoverRef}>
+              <button
                 type="button"
                 onClick={() => setVolumePopoverOpen(!volumePopoverOpen)}
-                className="text-white/70 hover:text-white transition-all duration-200 flex-shrink-0 hover:scale-110"
-                style={{ transform: "translateZ(0)" }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
                 aria-label={isMuted ? "Unmute" : "Mute"}
                 aria-expanded={volumePopoverOpen}
               >
                 {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              </motion.button>
+              </button>
 
               <AnimatePresence>
                 {volumePopoverOpen && (
                   <motion.div
-                    ref={volumePopoverRef}
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="absolute bottom-full right-0 mb-2 w-40"
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.16 }}
+                    className="card-overlay absolute bottom-full right-0 mb-2 w-44 p-3"
                   >
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-gradient-to-br from-black/95 to-purple-900/90 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl"
-                      style={{ transform: "translateZ(0)" }}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <motion.button
-                          type="button"
-                          onClick={toggleMute}
-                          className="text-white/70 hover:text-white transition-all duration-200 flex-shrink-0 hover:scale-110"
-                          aria-label={isMuted ? "Unmute" : "Mute"}
-                        >
-                          {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                        </motion.button>
-                        <span className="text-xs text-white/60 w-10 text-right font-mono">
-                          {Math.round(volume * 100)}%
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={isMuted ? 0 : volume}
-                        onChange={(e) => handleVolumeChange(Number.parseFloat(e.target.value))}
-                        className="w-full h-2 accent-purple-500 bg-white/10 rounded-full appearance-none cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, rgb(168 85 247) 0%, rgb(168 85 247) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.1) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.1) 100%)`,
-                        }}
-                        aria-label="Volume"
-                      />
-                    </motion.div>
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={toggleMute}
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                        aria-label={isMuted ? "Unmute" : "Mute"}
+                      >
+                        {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                      </button>
+                      <span className="w-10 text-right font-mono text-xs text-muted-foreground">
+                        {Math.round(volume * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={isMuted ? 0 : volume}
+                      onChange={(e) => handleVolumeChange(Number.parseFloat(e.target.value))}
+                      className="slider-polished w-full"
+                      style={{
+                        background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${(isMuted ? 0 : volume) * 100}%, hsl(var(--muted)) ${(isMuted ? 0 : volume) * 100}%, hsl(var(--muted)) 100%)`,
+                      }}
+                      aria-label="Volume"
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Divider with glow */}
-            <div className="h-10 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent flex-shrink-0" />
+            <div
+              className="h-8 w-px bg-gradient-to-b from-transparent via-border to-transparent"
+              aria-hidden="true"
+            />
 
             {/* Queue Button */}
-            <motion.button
+            <button
               type="button"
               onClick={() => setQueueOpen(true)}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/10 backdrop-blur-md border border-white/20 hover:border-purple-400/50 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-purple-500/30 flex-shrink-0 group"
-              style={{ transform: "translateZ(0)", willChange: "transform" }}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-accent/40 text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:text-foreground hover:shadow-glow"
               aria-label="Open queue"
             >
-              <ListMusic className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
-            </motion.button>
+              <ListMusic className="h-4 w-4" />
+            </button>
 
-            {/* Divider with glow */}
-            <div className="h-10 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent flex-shrink-0" />
+            <div
+              className="hidden h-8 w-px bg-gradient-to-b from-transparent via-border to-transparent sm:block"
+              aria-hidden="true"
+            />
 
             {/* Equalizer */}
-            {audioRef && <AudioEqualizer audioRef={audioRef} />}
+            <div className="hidden sm:block">
+              {audioRef && <AudioEqualizer audioRef={audioRef} />}
+            </div>
 
-            {/* Divider with glow */}
-            <div className="h-10 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent flex-shrink-0" />
+            <div
+              className="h-8 w-px bg-gradient-to-b from-transparent via-border to-transparent"
+              aria-hidden="true"
+            />
 
-            {/* Close button with glassmorphism */}
-            <motion.button
+            {/* Close button */}
+            <button
               type="button"
               onClick={() => setCurrentTrack(null)}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-md border border-white/20 hover:border-red-400/50 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/30 flex-shrink-0 group"
-              style={{ transform: "translateZ(0)", willChange: "transform" }}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-accent/40 text-muted-foreground transition-all duration-200 hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
               aria-label="Close player"
             >
-              <X className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
-            </motion.button>
-          </motion.div>
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -288,135 +275,129 @@ export function AudioPlayerBar() {
               onClick={() => setQueueOpen(false)}
               aria-hidden="true"
             />
-            <motion.div
+            <motion.dialog
+              open
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed right-0 top-0 bottom-20 z-50 w-full max-w-md bg-gradient-to-b from-black/95 to-black/90 backdrop-blur-xl border-l border-white/10 shadow-2xl overflow-y-auto"
-              style={{ transform: "translateZ(0)" }}
+              transition={{ type: "spring", stiffness: 300, damping: 32 }}
+              className="surface-shell fixed bottom-0 left-auto right-0 top-0 z-50 m-0 flex h-full max-h-none w-full max-w-md flex-col border-l p-0 shadow-overlay"
+              aria-label="Play queue"
             >
               {/* Drawer Header */}
-              <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-b from-black/95 to-transparent backdrop-blur-xl">
-                <h3 className="text-white font-semibold text-sm flex items-center gap-2">
-                  <ListMusic className="w-4 h-4 text-primary" />
+              <div className="flex items-center justify-between border-b border-border p-4">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <ListMusic className="h-4 w-4 text-primary" />
                   Up Next
-                  <span className="text-xs text-white/40 bg-white/10 px-2 py-0.5 rounded-full">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums text-muted-foreground">
                     {playlist.length}
                   </span>
                 </h3>
-                <motion.button
+                <button
                   type="button"
                   onClick={() => setQueueOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
                   aria-label="Close queue"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
                 >
-                  <X className="w-4 h-4 text-white/70" />
-                </motion.button>
+                  <X className="h-4 w-4" />
+                </button>
               </div>
 
               {/* Queue List */}
-              <div className="p-2">
+              <div className="scrollbar-thin flex-1 overflow-y-auto p-2">
                 {playlist.length === 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col items-center justify-center h-64 text-white/50"
-                  >
-                    <ListMusic className="w-12 h-12 text-white/20 mb-4" />
-                    <p className="text-white/50">Queue is empty</p>
-                    <p className="text-xs text-white/30 mt-1">Play something to add it here</p>
-                  </motion.div>
+                  <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
+                    <ListMusic className="mb-4 h-12 w-12 text-muted-foreground/30" />
+                    <p>Queue is empty</p>
+                    <p className="mt-1 text-xs text-muted-foreground/70">
+                      Play something to add it here
+                    </p>
+                  </div>
                 ) : (
                   <ul className="space-y-1">
                     {playlist.map((track, index) => (
-                      <motion.li
+                      <li
                         key={track.id}
-                        layout
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.03 }}
                         className={cn(
-                          "relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                          "group relative flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors duration-200",
                           index === currentIndex
-                            ? "bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30"
-                            : "bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10",
+                            ? "border-primary/30 bg-primary/10"
+                            : "border-transparent bg-accent/30 hover:border-border hover:bg-accent",
                         )}
                       >
-                        {/* Drag handle */}
-                        <div className="flex flex-col items-center justify-center text-white/30 hover:text-white/50 cursor-grab active:cursor-grabbing">
-                          <GripVertical className="w-4 h-4" />
-                        </div>
-
                         {/* Track info */}
-                        {track.coverUrl && (
-                          <Image
-                            src={track.coverUrl}
-                            alt=""
-                            width={40}
-                            height={40}
-                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                          />
-                        )}
-                        <div className="min-w-0 flex-1">
+                        {track.coverUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSelectTrack(index)}
+                            className="flex-shrink-0 rounded-lg ring-1 ring-border"
+                            aria-label={`Play ${track.title}`}
+                          >
+                            <Image
+                              src={track.coverUrl}
+                              alt=""
+                              width={40}
+                              height={40}
+                              className="h-10 w-10 rounded-lg object-cover"
+                            />
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => handleSelectTrack(index)}
+                          className="min-w-0 flex-1 text-left"
+                          aria-label={`Play ${track.title}`}
+                        >
                           <p
                             className={cn(
-                              "text-sm font-medium truncate",
-                              index === currentIndex ? "text-primary" : "text-white",
+                              "truncate text-sm font-medium",
+                              index === currentIndex ? "text-primary" : "text-foreground",
                             )}
                           >
                             {track.title}
                           </p>
                           <p
                             className={cn(
-                              "text-xs truncate",
-                              index === currentIndex ? "text-primary/70" : "text-white/50",
+                              "truncate text-xs",
+                              index === currentIndex
+                                ? "text-primary/70"
+                                : "text-muted-foreground",
                             )}
                           >
                             {track.artist}
                           </p>
-                        </div>
+                        </button>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <motion.button
+                        <div className="flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+                          {index > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => handleMoveToTop(index)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
+                              aria-label={`Move ${track.title} to top`}
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </button>
+                          )}
+                          <button
                             type="button"
-                            onClick={() => {
-                              // Move to top of queue
-                            }}
-                            className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors"
-                            aria-label="Move to top"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleRemoveTrack(index)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive"
+                            aria-label={`Remove ${track.title} from queue`}
                           >
-                            <ChevronUp className="w-4 h-4" />
-                          </motion.button>
-                          <motion.button
-                            type="button"
-                            onClick={() => {
-                              // Remove from queue
-                            }}
-                            className="w-8 h-8 rounded-lg bg-white/5 hover:bg-red-500/20 flex items-center justify-center text-white/60 hover:text-red-400 transition-colors"
-                            aria-label="Remove from queue"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </motion.button>
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
 
                         {/* Current track indicator */}
                         {index === currentIndex && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"
+                          <span
+                            className="absolute -left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-primary"
                             aria-hidden="true"
                           />
                         )}
-                      </motion.li>
+                      </li>
                     ))}
                   </ul>
                 )}
@@ -424,22 +405,20 @@ export function AudioPlayerBar() {
 
               {/* Clear queue button */}
               {playlist.length > 0 && (
-                <motion.button
-                  type="button"
-                  onClick={() => {
-                    // Clear queue
-                  }}
-                  className="mx-2 mb-4 w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-sm font-medium transition-colors"
-                  whileHover={{ backgroundColor: "rgba(255,255,255,0.15)" }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Clear Queue
-                </motion.button>
+                <div className="border-t border-border p-3">
+                  <button
+                    type="button"
+                    onClick={handleClearQueue}
+                    className="btn btn-outline w-full"
+                  >
+                    Clear Queue
+                  </button>
+                </div>
               )}
-            </motion.div>
+            </motion.dialog>
           </>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

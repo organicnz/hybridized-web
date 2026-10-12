@@ -43,6 +43,7 @@ export function ScrollReveal({
   const containerVariantsSr: Variants = {
     hidden: { opacity: 0 },
     visible: {
+      opacity: 1,
       transition: { staggerChildren: staggerChildren / 1000, delayChildren: delay / 1000 },
     },
   };
@@ -123,7 +124,7 @@ export function StaggerContainer({
   }, []);
   const containerVariantsSt: Variants = {
     hidden: { opacity: 0 },
-    visible: { transition: { staggerChildren: stagger, delayChildren } },
+    visible: { opacity: 1, transition: { staggerChildren: stagger, delayChildren } },
   };
   return (
     <motion.div

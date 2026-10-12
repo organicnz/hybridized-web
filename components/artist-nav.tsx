@@ -63,7 +63,7 @@ export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
     <nav
       ref={navRef}
       className={cn(
-        "bg-zinc-900/50 backdrop-blur-sm border-b border-white/5 h-14 px-6 flex items-center gap-8 overflow-x-auto scrollbar-hide",
+        "surface-shell flex h-14 items-center gap-7 overflow-x-auto border-b px-6 scrollbar-hide",
         className,
       )}
       aria-label="Artist navigation"
@@ -79,10 +79,10 @@ export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
             href={`/home/${getArtistSlug(artist)}`}
             onClick={(e) => handleClick(e, artist)}
             className={cn(
-              "whitespace-nowrap text-sm font-semibold pb-4 border-b-2 transition-all flex-shrink-0",
+              "flex-shrink-0 whitespace-nowrap border-b-2 pb-4 font-display text-sm font-semibold transition-all",
               isActive
-                ? "text-white border-[#1DB954] cursor-default"
-                : "text-white/60 border-transparent hover:text-white hover:border-white/20 cursor-pointer",
+                ? "cursor-default border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
             )}
             aria-current={isActive ? "page" : undefined}
             aria-disabled={isActive}

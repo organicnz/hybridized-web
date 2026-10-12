@@ -95,31 +95,36 @@ async function ArtistContent({ params }: PageProps) {
   const artistProfile = artistBands[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0220] via-[#0f0a18] to-[#0a0a0f] text-foreground">
-      {/* Ambient gradient mesh — glassmorphic spec */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_20%_30%,rgba(124,58,237,0.12)_0%,transparent_50%),radial-gradient(circle_at_80%_70%,rgba(236,72,153,0.12)_0%,transparent_50%),radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08)_0%,transparent_60%)]" />
+    <div className="min-h-screen text-foreground">
+      {/* Content only — ambient mesh handled by root layout */}
 
-      <div className="relative z-10 flex flex-col min-h-screen overflow-hidden">
+      <div className="relative z-10 flex min-h-screen flex-col overflow-hidden">
         <ArtistNav activeArtist={artistName} />
-        <main className="flex-1 overflow-y-auto px-4 py-10 md:px-8 lg:px-12">
-          <div className="max-w-6xl mx-auto space-y-12">
+        <main className="flex-1 overflow-y-auto px-4 py-8 md:px-8 md:py-10 lg:px-12">
+          <div className="mx-auto max-w-6xl space-y-8">
             {/* Hero header — glass card with gradient text */}
-            <section className="relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-2xl shadow-[0_20px_60px_-20px_rgba(124,58,237,0.25)] p-8 md:p-12">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-purple-400/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-72 h-72 bg-pink-400/20 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+            <section className="glass relative overflow-hidden rounded-3xl p-8 md:p-12">
+              <div
+                className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-purple-500/15 blur-[120px]"
+                aria-hidden="true"
+              />
+              <div
+                className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-pink-500/15 blur-[100px]"
+                aria-hidden="true"
+              />
 
-              <h1 className="text-fluid-2xl md:text-fluid-3xl font-black gradient-text tracking-tight mb-4">
+              <h1 className="gradient-text mb-4 font-display text-fluid-2xl font-bold tracking-tight md:text-fluid-3xl">
                 {artistName}
               </h1>
               {artistProfile.description && (
-                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed font-light">
+                <p className="max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
                   {artistProfile.description}
                 </p>
               )}
             </section>
 
             {/* Main content from home-client inside glass card */}
-            <section className="rounded-3xl border border-white/10 bg-card/60 backdrop-blur-xl shadow-[0_12px_40px_-12px_rgba(0,0,0,0.5)] p-6 md:p-8">
+            <section className="glass rounded-3xl p-4 sm:p-6 md:p-8">
               <HomeClient
                 items={bandsWithEpisodes}
                 currentArtist={artistName}

@@ -5,6 +5,7 @@ import { IframePlayer } from "@/components/iframe-player";
 import { useAudioPlayer } from "@/lib/audio-player-context";
 import { soundCloudManager } from "@/lib/soundcloud-widget-manager";
 import type { Database } from "@/lib/types/database.types";
+import { Disc3, ExternalLink } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { StaggerContainer, StaggerItem } from "@/components/page-transition";
@@ -124,33 +125,65 @@ export function HomeClient({
   }, [isPlaying]);
 
   return (
-    <main className="h-full flex flex-col lg:flex-row gap-6 p-4 md:p-6 min-h-0">
+    <div className="flex h-full min-h-0 flex-col gap-6 lg:flex-row">
       {/* Main Content Panel - 65% */}
-      <div className="w-full lg:w-[65%] flex flex-col min-h-0">
+      <div className="flex min-h-0 w-full flex-col lg:w-[65%]">
+        {!showSoundCloudOnly && allEpisodes.length > 0 && (
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Latest episodes
+              </p>
+              <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground">
+                {currentArtist}
+                <span className="ml-2 rounded-full border border-border bg-muted px-2.5 py-0.5 align-middle text-xs font-semibold tabular-nums text-muted-foreground">
+                  {allEpisodes.length}
+                </span>
+              </h2>
+            </div>
+          </div>
+        )}
         {showSoundCloudOnly ? (
-          <div className="relative flex-1 rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-purple-900/30 via-black/80 to-blue-900/20 shadow-[0_20px_60px_-15px_rgba(124,58,237,0.2)] backdrop-blur-2xl">
-            {/* Decorative gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-blue-500/5 pointer-events-none" />
+          <div className="glass flex min-h-[420px] flex-1 flex-col overflow-hidden rounded-3xl">
+            {/* SoundCloud frame header */}
+            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  SoundCloud
+                </p>
+                <p className="truncate font-display text-sm font-bold text-foreground">
+                  {currentArtist}
+                </p>
+              </div>
+              <a
+                href={soundcloudUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline btn-sm flex-shrink-0"
+              >
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                Open
+              </a>
+            </div>
 
             {/* Iframe container - fills all available space */}
-            <iframe
-              ref={iframeRef}
-              width="100%"
-              height="100%"
-              scrolling="no"
-              frameBorder="no"
-              allow="autoplay"
-              src={getSoundCloudEmbedUrl(soundcloudUrl)}
-              className="w-full h-full relative z-10"
-              title={`${currentArtist} on SoundCloud`}
-            />
-
-            {/* Bottom gradient fade */}
-            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-20" />
+            <div className="relative min-h-[380px] flex-1">
+              <iframe
+                ref={iframeRef}
+                width="100%"
+                height="100%"
+                scrolling="no"
+                frameBorder="no"
+                allow="autoplay"
+                src={getSoundCloudEmbedUrl(soundcloudUrl)}
+                className="absolute inset-0 h-full w-full"
+                title={`${currentArtist} on SoundCloud`}
+              />
+            </div>
           </div>
         ) : (
-          <div className="space-y-4 overflow-y-auto pr-2">
-            <StaggerContainer stagger={0.04} delayChildren={0.05}>
+          <div className="scrollbar-thin space-y-3 overflow-y-auto pr-1">
+            <StaggerContainer stagger={0.04} delayChildren={0.05} className="space-y-3">
               {allEpisodes.map((episode, index) => (
                 <StaggerItem key={episode.id} custom={index}>
                   <motion.div
@@ -158,7 +191,7 @@ export function HomeClient({
                     whileHover={{ y: -2 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
-                    <IframePlayer episode={episode} artist={currentArtist ?? ""} />
+                    <IframePlayer episode={episode} artist={currentArtist ?? ""} index={index} />
                   </motion.div>
                 </StaggerItem>
               ))}
@@ -166,12 +199,22 @@ export function HomeClient({
 
             {allEpisodes.length === 0 && !soundcloudUrl && (
               <motion.div
-                className="card-flat p-12 text-center"
+                className="glass p-12 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                <p className="text-muted-foreground">No episodes available for this artist</p>
+                <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-border">
+                  <Disc3 className="h-7 w-7 text-primary" aria-hidden="true" />
+                </span>
+                <h3 className="font-display text-lg font-bold text-foreground">
+                  No episodes yet
+                </h3>
+                <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+                  {currentArtist
+                    ? `New mixes from ${currentArtist} will appear here as soon as they're published.`
+                    : "No episodes available for this artist."}
+                </p>
               </motion.div>
             )}
           </div>
@@ -179,8 +222,8 @@ export function HomeClient({
       </div>
 
       {/* Sidebar Panel - 35% */}
-      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: WCAG 2.1.1 requires a scrollable region with no focusable children to be keyboard-reachable (axe: scrollable-region-focusable) */}
-      <aside className="w-full lg:w-[35%] overflow-y-auto" tabIndex={0}>
+      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: WCAG 2.1.1 scrollable region with no focusable children must be keyboard-reachable */}
+      <aside className="scrollbar-thin w-full overflow-y-auto lg:sticky lg:top-20 lg:w-[35%] lg:self-start" tabIndex={0}>
         <ArtistProfile
           artist={{
             name: currentArtist ?? "",
@@ -191,7 +234,7 @@ export function HomeClient({
           }}
         />
       </aside>
-    </main>
+    </div>
   );
 }
 

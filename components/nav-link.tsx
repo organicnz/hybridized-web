@@ -32,12 +32,29 @@ export function NavLink({ href, label, highlight, variant = "desktop", onClick }
         href={href}
         onClick={handleClick}
         className={cn(
-          "block px-4 py-2.5 rounded-xl font-medium transition-all duration-300 border border-transparent",
-          isActive &&
-            "bg-white/5 text-white border-white/5 cursor-default shadow-[inset_0_0_20px_rgba(255,255,255,0.03)]",
-          highlight
-            ? "text-green-400 hover:bg-green-400/10"
-            : "text-white/70 hover:bg-white/10 hover:text-white",
+          "block rounded-xl border border-transparent px-4 py-2.5 font-medium transition-all duration-200",
+          isActive && "cursor-default border-border bg-accent text-accent-foreground",
+          !isActive &&
+            (highlight
+              ? "text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400"
+              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"),
+        )}
+        aria-current={isActive ? "page" : undefined}
+        aria-disabled={isActive}
+      >
+        {label}
+      </Link>
+    );
+  }
+
+  if (highlight) {
+    return (
+      <Link
+        href={href}
+        onClick={handleClick}
+        className={cn(
+          "inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-semibold text-emerald-500 transition-all duration-200 hover:border-emerald-500/50 hover:bg-emerald-500/15 hover:text-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]",
+          isActive && "border-emerald-500/60 bg-emerald-500/20 cursor-default",
         )}
         aria-current={isActive ? "page" : undefined}
         aria-disabled={isActive}
@@ -52,9 +69,8 @@ export function NavLink({ href, label, highlight, variant = "desktop", onClick }
       href={href}
       onClick={handleClick}
       className={cn(
-        "font-semibold text-sm transition-colors relative group",
-        isActive && "text-white cursor-default",
-        highlight ? "text-green-400 hover:text-green-300" : "text-white/70 hover:text-white",
+        "group relative font-display text-sm font-semibold tracking-wide transition-colors",
+        isActive ? "cursor-default text-foreground" : "text-muted-foreground hover:text-foreground",
       )}
       aria-current={isActive ? "page" : undefined}
       aria-disabled={isActive}
@@ -62,7 +78,7 @@ export function NavLink({ href, label, highlight, variant = "desktop", onClick }
       {label}
       <span
         className={cn(
-          "absolute -bottom-1 left-0 h-0.5 bg-green-400 transition-all",
+          "absolute -bottom-1.5 left-0 h-0.5 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 transition-all duration-300",
           isActive ? "w-full" : "w-0 group-hover:w-full",
         )}
       />
