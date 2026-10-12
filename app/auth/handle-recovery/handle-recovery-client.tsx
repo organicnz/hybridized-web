@@ -1,15 +1,9 @@
 "use client";
 
-import type { Metadata } from "next";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
-export const metadata: Metadata = {
-  title: "Account Recovery",
-  description: "Recover access to your Hybridized account.",
-  robots: { index: false },
-};
+import { AuthShell } from "@/components/auth/auth-shell";
 
 export function HandleRecoveryPage() {
   const router = useRouter();
@@ -23,14 +17,11 @@ export function HandleRecoveryPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
-      <div className="w-full max-w-md">
-        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 text-center">
-          <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-4 animate-spin" />
-          <h2 className="text-2xl font-bold text-white mb-2">Processing Reset Link</h2>
-          <p className="text-purple-200/70">Redirecting you to password reset...</p>
-        </div>
+    <AuthShell title="Account Recovery" subtitle="Redirecting you to password reset...">
+      <div className="p-2 text-center">
+        <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" aria-hidden="true" />
+        <p className="text-sm text-muted-foreground">Processing your reset link...</p>
       </div>
-    </div>
+    </AuthShell>
   );
 }

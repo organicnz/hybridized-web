@@ -207,9 +207,7 @@ export function HomeClient({
                 <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-border">
                   <Disc3 className="h-7 w-7 text-primary" aria-hidden="true" />
                 </span>
-                <h3 className="font-display text-lg font-bold text-foreground">
-                  No episodes yet
-                </h3>
+                <h3 className="font-display text-lg font-bold text-foreground">No episodes yet</h3>
                 <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
                   {currentArtist
                     ? `New mixes from ${currentArtist} will appear here as soon as they're published.`
@@ -222,8 +220,7 @@ export function HomeClient({
       </div>
 
       {/* Sidebar Panel - 35% */}
-      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: WCAG 2.1.1 scrollable region with no focusable children must be keyboard-reachable */}
-      <aside className="scrollbar-thin w-full overflow-y-auto lg:sticky lg:top-20 lg:w-[35%] lg:self-start" tabIndex={0}>
+      <aside className="scrollbar-thin w-full overflow-y-auto lg:sticky lg:top-20 lg:w-[35%] lg:self-start">
         <ArtistProfile
           artist={{
             name: currentArtist ?? "",

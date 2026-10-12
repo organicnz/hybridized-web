@@ -1,24 +1,17 @@
 "use client";
 
-import type { Metadata } from "next";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { getSupabase } from "@/lib/supabase/client";
 import { compressImage, validateImageFile } from "@/lib/utils/image-compression";
-import { AlertCircle, Camera, CheckCircle, LogOut, Mail, Save, User } from "lucide-react";
+import { AlertCircle, ArrowLeft, Camera, CheckCircle, LogOut, Mail, Save, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export const metadata: Metadata = {
-  title: "Profile",
-  description: "Manage your Hybridized profile, avatar and audio preferences.",
-  robots: { index: false },
-};
-
-function ProfileContent() {
+export function ProfileContent() {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const [fullName, setFullName] = useState("");
@@ -173,61 +166,70 @@ function ProfileContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="section-container py-10 md:py-12">
+      <div className="mx-auto max-w-2xl">
         <div className="mb-8">
-          <Link href="/home" className="text-purple-200/70 hover:text-white transition-colors">
-            ← Back to Home
+          <Link
+            href="/home"
+            className="inline-flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-colors hover:text-foreground group"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" aria-hidden="true" />
+            Back to Home
           </Link>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8">
-          <h1 className="text-3xl font-bold text-white mb-6">Profile Settings</h1>
+        <div className="glass rounded-2xl p-6 sm:p-8">
+          <h1 className="mb-6 font-display text-3xl font-bold tracking-tight text-foreground">
+            Profile Settings
+          </h1>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-red-200 text-sm">{error}</p>
+            <div
+              className="mb-6 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4"
+              role="alert"
+            >
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive" aria-hidden="true" />
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-              <p className="text-green-200 text-sm">Profile updated successfully!</p>
-            </div>
+            <output className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+              <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" aria-hidden="true" />
+              <p className="text-sm text-foreground">Profile updated successfully!</p>
+            </output>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Avatar Upload */}
-            <div className="flex flex-col items-center mb-8">
+            <div className="mb-8 flex flex-col items-center">
               <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30 flex items-center justify-center">
+                <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 ring-2 ring-border">
                   {avatarUrl ? (
                     <Image
                       src={avatarUrl}
                       alt="Profile avatar"
                       width={128}
                       height={128}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                       unoptimized
                       key={avatarUrl}
                     />
                   ) : (
-                    <User className="w-16 h-16 text-purple-300/50" />
+                    <User className="h-16 w-16 text-primary/50" aria-hidden="true" />
                   )}
                 </div>
                 <button
                   type="button"
                   onClick={handleAvatarClick}
                   disabled={uploadingAvatar}
-                  className="absolute bottom-0 right-0 p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-lg hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+                  className="btn btn-primary absolute bottom-0 right-0 h-10 w-10 rounded-full p-0 shadow-glow"
                   aria-label="Upload avatar"
                 >
                   {uploadingAvatar ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
                   ) : (
-                    <Camera className="w-5 h-5 text-white" />
+                    <Camera className="h-5 w-5" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -239,7 +241,7 @@ function ProfileContent() {
                 className="hidden"
                 aria-label="Avatar file input"
               />
-              <p className="text-xs text-purple-200/50 mt-3 text-center">
+              <p className="mt-3 text-center text-xs text-muted-foreground">
                 Click camera icon to upload avatar
                 <br />
                 Max 5MB • JPEG, PNG, or WebP
@@ -247,37 +249,37 @@ function ProfileContent() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-white font-medium mb-2">
+              <label htmlFor="email" className="label mb-2 block">
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <input
                   id="email"
                   type="email"
                   value={user?.email || ""}
                   disabled
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white/50 cursor-not-allowed"
+                  className="input cursor-not-allowed pl-10 opacity-60"
                 />
                 {emailVerified && (
-                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-400" />
+                  <CheckCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-500" aria-hidden="true" />
                 )}
               </div>
               {emailVerified ? (
-                <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" />
+                <p className="mt-1.5 flex items-center gap-1 text-xs text-emerald-500">
+                  <CheckCircle className="h-3 w-3" aria-hidden="true" />
                   Email verified
                 </p>
               ) : (
                 <div className="mt-2">
-                  <p className="text-xs text-yellow-400 mb-2">
+                  <p className="mb-1.5 text-xs text-amber-500">
                     Email not verified. Please check your inbox.
                   </p>
                   <button
                     type="button"
                     onClick={handleResendVerification}
                     disabled={resendingVerification}
-                    className="text-xs text-purple-400 hover:text-pink-400 hover:underline transition-colors disabled:opacity-50"
+                    className="rounded-md text-xs font-medium text-primary hover:underline disabled:opacity-50"
                   >
                     {resendingVerification ? "Sending..." : "Resend verification email"}
                   </button>
@@ -286,18 +288,18 @@ function ProfileContent() {
             </div>
 
             <div>
-              <label htmlFor="fullName" className="block text-white font-medium mb-2">
+              <label htmlFor="fullName" className="label mb-2 block">
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <input
                   id="fullName"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder:text-purple-300/50 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-purple-500/50"
+                  className="input pl-10"
                   placeholder="Your full name"
                 />
               </div>
@@ -306,21 +308,21 @@ function ProfileContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-purple-500/50 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+              className="btn btn-primary btn-lg flex w-full items-center justify-center gap-2"
             >
-              <Save className="w-5 h-5" />
+              <Save className="h-5 w-5" aria-hidden="true" />
               {loading ? "Saving..." : "Save Changes"}
             </button>
           </form>
 
-          <div className="mt-8 pt-8 border-t border-purple-500/20">
+          <div className="mt-8 border-t border-border pt-8">
             <button
               type="button"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="w-full px-6 py-3 bg-red-500/10 border border-red-500/30 text-red-300 rounded-full font-semibold hover:bg-red-500/20 hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+              className="btn btn-outline flex w-full items-center justify-center gap-2 border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="h-5 w-5" aria-hidden="true" />
               {loggingOut ? "Signing out..." : "Sign Out"}
             </button>
           </div>

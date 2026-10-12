@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AppShell } from "@/components/app-shell";
 import { ProfilePage } from "./profile-client";
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ProfilePage />;
+  return (
+    <AppShell>
+      <ProfilePage />
+    </AppShell>
+  );
 }
