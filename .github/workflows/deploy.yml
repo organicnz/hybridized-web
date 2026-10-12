@@ -1,31 +1,12 @@
-name: Deploy (DB + Build)
+name: DB Migrations
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build:
-    needs: db-migrate
-    # Existing build logic stays — this just adds dependency ordering
-    name: Build & Verify
-    runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      NEXT_PUBLIC_SITE_URL: https://hybridized.online
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun install --frozen-lockfile
-      - run: bun run lint
-      - run: bun run typecheck
-      - run: bun run test
-      - run: bun run build
-
+  # Vercel owns build + deploy. This workflow only keeps the database schema in
+  # sync; it deliberately re-runs nothing that Vercel's build already does.
   db-migrate:
     name: Apply Supabase Migrations
     runs-on: ubuntu-latest
