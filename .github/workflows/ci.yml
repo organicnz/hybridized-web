@@ -13,7 +13,7 @@ concurrency:
 jobs:
   lint:
     name: Lint & Typecheck
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +33,7 @@ jobs:
 
   test:
     name: Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: lint
     steps:
       - uses: actions/checkout@v4
@@ -51,11 +51,10 @@ jobs:
 
   shaders:
     name: Shader Validation
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: lint
-    # GitHub-hosted runners have no WebGPU adapter, so validation cannot run
-    # there. Keep the check running where an adapter exists, but don't block
-    # merges on environments it can never pass in.
+    # Requires a self-hosted runner with a real WebGPU/GPU adapter. Keep it
+    # non-blocking until such a runner is confirmed online.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
