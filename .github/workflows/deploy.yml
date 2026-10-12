@@ -41,6 +41,6 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           supabase link --project-ref neslxchdtibzhxijxcbg
-          # DB password contains URL-significant chars (@ # [ ] ;) — encode it
+          # Use connection pooler (port 6543) for external CI runners; DB password encoded
           ENCODED_PW=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ.get('SUPABASE_DB_PASSWORD',''), safe=''))")
-          supabase db push --db-url "postgresql://postgres:${ENCODED_PW}@db.neslxchdtibzhxijxcbg.supabase.co:5432/postgres"
+          supabase db push --db-url "postgresql://postgres:${ENCODED_PW}@db.neslxchdtibzhxijxcbg.supabase.co:6543/postgres?pgbouncer=true"
