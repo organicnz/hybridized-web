@@ -41,4 +41,4 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           supabase link --project-ref neslxchdtibzhxijxcbg
-          supabase db push --linked --db-url "postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.neslxchdtibzhxijxcbg.supabase.co:5432/postgres"
+          supabase db push --db-url "postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.neslxchdtibzhxijxcbg.supabase.co:5432/postgres"
