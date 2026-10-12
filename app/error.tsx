@@ -20,37 +20,36 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
   }, [error]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-black to-blue-900 px-4">
-      <div className="text-center max-w-md">
-        <div className="text-7xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+    <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="glass mx-auto w-full max-w-md rounded-3xl p-10 text-center">
+        <div className="gradient-text mb-4 font-display text-7xl font-bold tracking-tight">
           Oops
         </div>
-        <h1 className="text-2xl font-bold text-white mb-3">Something went wrong</h1>
-        <p className="text-purple-200/70 mb-2">
+        <h1 className="mb-3 font-display text-2xl font-bold text-foreground">
+          Something went wrong
+        </h1>
+        <p className="mb-2 text-muted-foreground">
           An unexpected error occurred while loading this page.
         </p>
         {isDev && error.message && (
-          <p className="text-xs text-red-300/80 font-mono bg-black/30 rounded-lg px-3 py-2 mb-2 break-words">
+          <p className="mb-2 break-words rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
             {error.message}
             {error.digest ? ` (digest: ${error.digest})` : ""}
           </p>
         )}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <button
             type="button"
             onClick={() => {
               reset();
               router.refresh();
             }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-purple-500/50"
+            className="btn btn-primary btn-lg w-full sm:w-auto"
           >
             <RefreshCw size={18} />
             Try Again
           </button>
-          <Link
-            href="/home"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 hover:text-white font-medium transition-all duration-200 border border-white/10"
-          >
+          <Link href="/home" className="btn btn-outline btn-lg w-full sm:w-auto">
             <Home size={18} />
             Back to Home
           </Link>

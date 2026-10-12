@@ -80,28 +80,28 @@ async function SearchContent({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900">
+    <div className="min-h-screen bg-background">
       <Link
         href="/home"
-        className="fixed top-6 left-6 flex items-center gap-2 text-purple-300/80 hover:text-white transition-all group z-10"
+        className="fixed left-6 top-6 z-10 flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground backdrop-blur-md ring-1 ring-border transition-all hover:text-foreground group"
       >
-        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
         <span className="font-medium">Back to Home</span>
       </Link>
 
       <div className="container mx-auto px-4 py-24">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <ScrollReveal variant="fade-up" delay={100} className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
+            <h1 className="gradient-text mb-4 font-display text-4xl font-bold tracking-tight md:text-5xl">
               Search Results
             </h1>
           </ScrollReveal>
 
           {query && (
             <ScrollReveal variant="fade-up" delay={200} className="mb-8">
-              <p className="text-white/70">
+              <p className="text-muted-foreground">
                 Showing results for:{" "}
-                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">
+                <span className="gradient-text font-semibold">
                   {query}
                 </span>
               </p>
@@ -110,22 +110,22 @@ async function SearchContent({
 
           {error && (
             <ScrollReveal variant="fade-up" delay={300} className="mb-8">
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-                <p className="text-red-400">Error loading search results. Please try again.</p>
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4">
+                <p className="text-destructive">Error loading search results. Please try again.</p>
               </div>
             </ScrollReveal>
           )}
 
           {!query.trim() ? (
-            <ScrollReveal variant="scale-up" delay={200} className="max-w-xl mx-auto">
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 text-center hover:bg-white/10 transition-colors">
-                <p className="text-white/70">Enter a search query to find mixes</p>
+            <ScrollReveal variant="scale-up" delay={200} className="mx-auto max-w-xl">
+              <div className="glass rounded-xl p-8 text-center">
+                <p className="text-muted-foreground">Enter a search query to find mixes</p>
               </div>
             </ScrollReveal>
           ) : (
             <>
               <ScrollReveal variant="fade-up" delay={200} className="mb-6">
-                <h2 className="text-2xl font-semibold text-white/80">Episodes</h2>
+                <h2 className="font-display text-2xl font-semibold text-foreground/80">Episodes</h2>
               </ScrollReveal>
               <ScrollReveal variant="fade-up" delay={300}>
                 <SearchResults results={results} query={query} />
@@ -146,8 +146,8 @@ export default async function SearchPage({
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 flex items-center justify-center">
-          <p className="text-white/70">Loading...</p>
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       }
     >

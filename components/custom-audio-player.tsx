@@ -166,27 +166,27 @@ export function CustomAudioPlayer({
   };
 
   return (
-    <div className="flex items-center gap-3 w-full">
+    <div className="flex w-full items-center gap-2 sm:gap-3">
       {/* biome-ignore lint/a11y/useMediaCaption: no caption track exists for user-uploaded audio */}
       <audio ref={internalAudioRef} src={src} preload="auto" crossOrigin="anonymous" playsInline />
 
       {/* Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         {showSkipControls && (
           <button
             type="button"
             onClick={onPrevious}
-            className="text-white/70 hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             aria-label="Previous"
           >
-            <SkipBack size={20} />
+            <SkipBack size={18} />
           </button>
         )}
 
         <button
           type="button"
           onClick={() => skip(-10)}
-          className="text-white/70 hover:text-white transition-colors text-xs"
+          className="rounded-lg px-1.5 py-1 font-mono text-[11px] font-medium tabular-nums text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           aria-label="Rewind 10 seconds"
         >
           -10s
@@ -195,20 +195,20 @@ export function CustomAudioPlayer({
         <button
           type="button"
           onClick={togglePlay}
-          className="w-8 h-8 rounded-full bg-white hover:bg-white/90 flex items-center justify-center transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow transition-all duration-200 hover:scale-105 hover:bg-primary/90 active:scale-95"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
-            <Pause size={18} className="text-black" fill="currentColor" />
+            <Pause size={17} fill="currentColor" />
           ) : (
-            <Play size={18} className="text-black ml-0.5" fill="currentColor" />
+            <Play size={17} className="ml-0.5" fill="currentColor" />
           )}
         </button>
 
         <button
           type="button"
           onClick={() => skip(10)}
-          className="text-white/70 hover:text-white transition-colors text-xs"
+          className="rounded-lg px-1.5 py-1 font-mono text-[11px] font-medium tabular-nums text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           aria-label="Forward 10 seconds"
         >
           +10s
@@ -218,19 +218,21 @@ export function CustomAudioPlayer({
           <button
             type="button"
             onClick={onNext}
-            className="text-white/70 hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             aria-label="Next"
           >
-            <SkipForward size={20} />
+            <SkipForward size={18} />
           </button>
         )}
       </div>
 
       {/* Time */}
-      <span className="text-xs text-white/50 tabular-nums">{formatTime(currentTime)}</span>
+      <span className="hidden font-mono text-[11px] tabular-nums text-muted-foreground sm:inline">
+        {formatTime(currentTime)}
+      </span>
 
       {/* Progress Bar */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <input
           type="range"
           min="0"
@@ -238,16 +240,18 @@ export function CustomAudioPlayer({
           step="0.1"
           value={currentTime}
           onChange={handleSeek}
-          className="w-full accent-white h-1 bg-white/20 rounded-full appearance-none cursor-pointer"
+          className="slider-polished w-full"
           style={{
-            background: `linear-gradient(to right, white 0%, white ${(currentTime / duration) * 100}%, rgba(255,255,255,0.2) ${(currentTime / duration) * 100}%, rgba(255,255,255,0.2) 100%)`,
+            background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${(currentTime / duration) * 100 || 0}%, hsl(var(--muted)) ${(currentTime / duration) * 100 || 0}%, hsl(var(--muted)) 100%)`,
           }}
           aria-label="Seek"
         />
       </div>
 
       {/* Duration */}
-      <span className="text-xs text-white/50 tabular-nums">{formatTime(duration)}</span>
+      <span className="hidden font-mono text-[11px] tabular-nums text-muted-foreground sm:inline">
+        {formatTime(duration)}
+      </span>
     </div>
   );
 }

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { DonationPage } from "./donation-client";
+import { AppShell } from "@/components/app-shell";
+import { DonationClient } from "./donation-client";
 
 export const metadata: Metadata = {
-  title: "Support Hybridized",
-  description:
-    "Hybridized is free and listener-supported. Donate to help keep the music archive online and ad-free.",
+  title: "Donate",
+  description: "Support the Hybridized archive.",
 };
 
-export const cacheLife = "days";
-
-export default function Page() {
-  return <DonationPage />;
+export default function DonationPage() {
+  return (
+    <AppShell>
+      <DonationClient />
+    </AppShell>
+  );
 }
