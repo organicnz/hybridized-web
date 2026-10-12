@@ -1,19 +1,11 @@
 "use client";
 
-import type { Metadata } from "next";
 import { getSupabase } from "@/lib/supabase/client";
-import { AlertCircle, ArrowLeft, CheckCircle, Lock, Mail, User } from "lucide-react";
-import Image from "next/image";
+import { CheckCircle, Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-export const metadata: Metadata = {
-  title: "Create Account",
-  description:
-    "Create a free Hybridized account to save your audio preferences and sync them everywhere.",
-  robots: { index: false },
-};
+import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 
 export function SignupPage() {
   const [email, setEmail] = useState("");
@@ -52,161 +44,99 @@ export function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
-        <div className="w-full max-w-md">
-          <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm rounded-2xl border border-green-500/20 p-8 text-center">
-            <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">Check Your Email</h2>
-            <p className="text-purple-200/70 mb-6">
-              We've sent you a confirmation email. Please check your inbox and click the link to
-              verify your account.
-            </p>
-            <Link
-              href="/auth/login"
-              className="inline-block px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-purple-500/50"
-            >
-              Go to Login
-            </Link>
-          </div>
+      <AuthShell title="Check Your Email" subtitle="One more step to join the journey">
+        <div className="p-2 text-center">
+          <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/30">
+            <CheckCircle className="h-8 w-8 text-emerald-500" aria-hidden="true" />
+          </span>
+          <p className="mb-6 text-muted-foreground">
+            We&apos;ve sent you a confirmation email. Please check your inbox and click the link
+            to verify your account.
+          </p>
+          <Link href="/auth/login" className="btn btn-primary btn-lg w-full">
+            Go to Login
+          </Link>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
-      <Link
-        href="/home"
-        className="fixed top-6 left-6 flex items-center gap-2 text-purple-200/70 hover:text-white transition-colors group"
-      >
-        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-        <span className="font-medium">Back to Home</span>
-      </Link>
-
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
-            <Image
-              src="/logo.png"
-              alt="Hybridized Logo"
-              width={48}
-              height={48}
-              className="w-12 h-12 rounded-full group-hover:scale-105 transition-transform"
-            />
-            <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Hybridized
-            </span>
-          </Link>
-          <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
-          <p className="text-purple-200/70">Join the musical journey</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8">
-          {error && (
-            <div
-              className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3"
-              role="alert"
-            >
-              <AlertCircle
-                className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"
-                aria-hidden="true"
-              />
-              <p className="text-red-200 text-sm">{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSignup} className="space-y-6">
-            <div>
-              <label htmlFor="fullName" className="block text-white font-medium mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50"
-                  aria-hidden="true"
-                />
-                <input
-                  id="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  disabled={loading}
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder:text-purple-300/50 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-purple-500/50"
-                  placeholder="John Doe"
-                  required
-                  aria-required="true"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-white font-medium mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50"
-                  aria-hidden="true"
-                />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder:text-purple-300/50 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-purple-500/50"
-                  placeholder="your@email.com"
-                  required
-                  aria-required="true"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-white font-medium mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50"
-                  aria-hidden="true"
-                />
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder:text-purple-300/50 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-purple-500/50"
-                  placeholder="••••••••"
-                  required
-                  aria-required="true"
-                  minLength={6}
-                />
-              </div>
-              <p className="text-xs text-purple-200/50 mt-1">Minimum 6 characters</p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-purple-500/50 disabled:opacity-50 disabled:hover:scale-100"
-            >
-              {loading ? "Creating account..." : "Sign Up"}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center text-sm text-purple-200/50 mt-6">
+    <AuthShell
+      title="Create Account"
+      subtitle="Join the musical journey"
+      footer={
+        <>
           Already have an account?{" "}
-          <Link
-            href="/auth/login"
-            className="text-purple-400 hover:text-pink-400 hover:underline font-semibold transition-colors"
-          >
+          <Link href="/auth/login" className="font-semibold text-primary hover:underline">
             Sign in
           </Link>
-        </p>
-      </div>
-    </div>
+        </>
+      }
+    >
+      {error && <AuthAlert variant="error">{error}</AuthAlert>}
+
+      <form onSubmit={handleSignup} className="space-y-5">
+        <AuthField
+          label="Full Name"
+          htmlFor="fullName"
+          icon={<User className="h-5 w-5" aria-hidden="true" />}
+        >
+          <input
+            id="fullName"
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            disabled={loading}
+            className={authInputClass}
+            placeholder="John Doe"
+            required
+            aria-required="true"
+          />
+        </AuthField>
+
+        <AuthField
+          label="Email"
+          htmlFor="email"
+          icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+        >
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            className={authInputClass}
+            placeholder="your@email.com"
+            required
+            aria-required="true"
+          />
+        </AuthField>
+
+        <AuthField
+          label="Password"
+          htmlFor="password"
+          icon={<Lock className="h-5 w-5" aria-hidden="true" />}
+          hint={<p className="mt-1.5 text-xs text-muted-foreground">Minimum 6 characters</p>}
+        >
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            className={authInputClass}
+            placeholder="••••••••"
+            required
+            aria-required="true"
+            minLength={6}
+          />
+        </AuthField>
+
+        <button type="submit" disabled={loading} className="btn btn-primary btn-lg w-full">
+          {loading ? "Creating account..." : "Sign Up"}
+        </button>
+      </form>
+    </AuthShell>
   );
 }

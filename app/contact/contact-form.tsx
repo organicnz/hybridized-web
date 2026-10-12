@@ -3,7 +3,6 @@
 import { Mail, MessageSquare, Send } from "lucide-react";
 import { useState } from "react";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { cn } from "@/lib/utils";
 
 const CONTACT_EMAIL = "hello@hybridized.com";
 
@@ -40,18 +39,20 @@ export function ContactForm() {
   return (
     <>
       <ScrollReveal variant="fade-up" delay={100} className="text-center mb-8">
-        <Mail className="w-10 h-10 text-primary mx-auto mb-3" />
-        <h1 className="text-fluid-xl font-black bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent mb-2">
+        <span className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-border">
+          <Mail className="h-8 w-8 text-primary" aria-hidden="true" />
+        </span>
+        <h1 className="gradient-text mb-2 font-display text-fluid-xl font-bold tracking-tight">
           Get in Touch
         </h1>
         <p className="text-muted-foreground">Have questions? We&apos;d love to hear from you</p>
       </ScrollReveal>
 
       <ScrollReveal variant="scale-up" delay={200} className="max-w-2xl mx-auto">
-        <div className="card-raised p-6 md:p-8">
-          <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="glass p-6 md:p-8">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="name" className="label">
+              <label htmlFor="name" className="label mb-1.5 block">
                 Name
               </label>
               <input
@@ -64,7 +65,7 @@ export function ContactForm() {
               />
             </div>
             <div>
-              <label htmlFor="email" className="label">
+              <label htmlFor="email" className="label mb-1.5 block">
                 Email
               </label>
               <input
@@ -77,12 +78,12 @@ export function ContactForm() {
               />
             </div>
             <div>
-              <label htmlFor="message" className="label">
+              <label htmlFor="message" className="label mb-1.5 block">
                 Message
               </label>
               <textarea
                 id="message"
-                className="input resize-none"
+                className="input min-h-28 resize-y"
                 rows={4}
                 placeholder="Tell us what's on your mind..."
                 value={message}
@@ -111,14 +112,14 @@ export function ContactForm() {
       </ScrollReveal>
 
       <ScrollReveal variant="fade-up" delay={300} className="mt-6 grid md:grid-cols-2 gap-4">
-        <section className={cn("card-flat p-4 text-center")}>
+        <section className="glass p-5 text-center">
           <MessageSquare className="w-6 h-6 text-primary mx-auto mb-2" />
           <h2 className="text-sm font-semibold text-foreground mb-1">Chat with us</h2>
           <p className="text-xs text-muted-foreground">Respond within 24h</p>
         </section>
         <a
           href={`mailto:${CONTACT_EMAIL}`}
-          className={cn("card-flat p-4 text-center transition-colors hover:border-primary/30")}
+          className="glass p-5 text-center transition-all hover:-translate-y-0.5 hover:shadow-glow"
         >
           <Mail className="w-6 h-6 text-primary mx-auto mb-2" />
           <h2 className="text-sm font-semibold text-foreground mb-1">Email us</h2>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AppShell } from "@/components/app-shell";
 import { ArrowLeft, Book, Mail, MessageCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -11,86 +12,45 @@ export const cacheLife = "days";
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-[#121212]">
-      <div className="container mx-auto px-4 py-16">
+    <AppShell>
+      <div className="section-container py-10 md:py-12">
         <Link
           href="/home"
-          className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors mb-8"
+          className="mb-8 inline-flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-colors hover:text-foreground group"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Home
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to Home
         </Link>
-
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-            Support
-          </h1>
-
-          <p className="text-white/70 text-lg mb-12">
-            Need help? We're here for you. Choose the best way to get support.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <Link
-              href="/contact"
-              className="bg-zinc-900/50 backdrop-blur-sm border border-white/10 rounded-lg p-6 hover:bg-zinc-800/50 transition-all hover:scale-105"
-            >
-              <Mail className="w-12 h-12 text-green-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Contact Us</h3>
-              <p className="text-white/70">Send us a message and we'll get back to you soon.</p>
+          <h1 className="mb-4 font-display text-5xl font-bold tracking-tight gradient-text">Support</h1>
+          <p className="text-muted-foreground text-lg mb-12">Need help? Choose the best way to get support.</p>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link href="/contact" className="glass rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow group">
+              <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border transition-transform group-hover:scale-105">
+                <Mail className="w-7 h-7 text-primary" />
+              </span>
+              <h3 className="font-display text-xl font-semibold mb-2">Contact Us</h3>
+              <p className="text-sm text-muted-foreground">Send us a message.</p>
             </Link>
-
-            <div className="bg-zinc-900/50 backdrop-blur-sm border border-white/10 rounded-lg p-6">
-              <MessageCircle className="w-12 h-12 text-green-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Community</h3>
-              <p className="text-white/70">Join our community for discussions and tips.</p>
-            </div>
-
-            <div className="bg-zinc-900/50 backdrop-blur-sm border border-white/10 rounded-lg p-6">
-              <Book className="w-12 h-12 text-green-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Documentation</h3>
-              <p className="text-white/70">Browse our guides and tutorials.</p>
-            </div>
+            <Link href="/terms" className="glass rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow group">
+              <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border transition-transform group-hover:scale-105">
+                <Book className="w-7 h-7 text-primary" />
+              </span>
+              <h3 className="font-display text-xl font-semibold mb-2">Terms</h3>
+              <p className="text-sm text-muted-foreground">Read our terms of service.</p>
+            </Link>
+            <Link href="/privacy" className="glass rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow group">
+              <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border transition-transform group-hover:scale-105">
+                <MessageCircle className="w-7 h-7 text-primary" />
+              </span>
+              <h3 className="font-display text-xl font-semibold mb-2">Privacy</h3>
+              <p className="text-sm text-muted-foreground">Our privacy policy.</p>
+            </Link>
           </div>
-
-          <div className="bg-zinc-900/50 backdrop-blur-sm border border-white/10 rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-green-400 mb-2">
-                  How do I explore hybrid sounds?
-                </h3>
-                <p className="text-white/70">
-                  Navigate to the home page to browse our collection of unique musical hybrids. Each
-                  entry includes a formula and embedded content.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-green-400 mb-2">Do I need an account?</h3>
-                <p className="text-white/70">
-                  You can browse hybrids without an account, but creating one unlocks additional
-                  features and personalization.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-green-400 mb-2">
-                  How can I support the platform?
-                </h3>
-                <p className="text-white/70">
-                  Visit our{" "}
-                  <Link href="/donation" className="text-green-400 hover:text-green-300 underline">
-                    donation page
-                  </Link>{" "}
-                  to learn about supporting Hybridized.
-                </p>
-              </div>
-            </div>
+          <div className="mt-10 text-sm text-muted-foreground">
+            <p>Also visit our <Link href="/donation" className="font-medium text-primary hover:underline">donation page</Link> to learn about supporting Hybridized.</p>
           </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

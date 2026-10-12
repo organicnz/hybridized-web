@@ -1,17 +1,10 @@
 "use client";
 
-import type { Metadata } from "next";
 import { AlertCircle, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-export const metadata: Metadata = {
-  title: "Confirm Email",
-  description: "Confirm your email address to activate your Hybridized account.",
-  robots: { index: false },
-};
+import { AuthShell } from "@/components/auth/auth-shell";
 
 export function ConfirmEmailPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -49,78 +42,64 @@ export function ConfirmEmailPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-black to-blue-900">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
-            <Image
-              src="/logo.png"
-              alt="Hybridized Logo"
-              width={48}
-              height={48}
-              className="w-12 h-12 rounded-full group-hover:scale-105 transition-transform"
-            />
-            <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Hybridized
-            </span>
-          </Link>
+    <AuthShell title="Confirm Email" subtitle="Verifying your address">
+      {status === "loading" && (
+        <div className="p-2 text-center">
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" aria-hidden="true" />
+          <p className="text-sm text-muted-foreground">
+            Please wait while we verify your email address...
+          </p>
         </div>
+      )}
 
-        {status === "loading" && (
-          <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-8 text-center">
-            <Loader2 className="w-16 h-16 text-purple-400 mx-auto mb-4 animate-spin" />
-            <h2 className="text-2xl font-bold text-white mb-2">Confirming Email</h2>
-            <p className="text-purple-200/70">Please wait while we verify your email address...</p>
-          </div>
-        )}
-
-        {status === "success" && (
-          <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm rounded-2xl border border-green-500/20 p-8 text-center">
-            <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">Email Confirmed!</h2>
-            <p className="text-purple-200/70 mb-6">
-              Your email has been successfully verified. You can now access all features of
-              Hybridized.
+      {status === "success" && (
+        <div className="p-2 text-center">
+          <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/30">
+            <CheckCircle className="h-8 w-8 text-emerald-500" aria-hidden="true" />
+          </span>
+          <h2 className="mb-2 font-display text-2xl font-bold text-foreground">
+            Email Confirmed!
+          </h2>
+          <p className="mb-6 text-muted-foreground">
+            Your email has been successfully verified. You can now access all features of
+            Hybridized.
+          </p>
+          <div className="space-y-3">
+            <Link href="/home" className="btn btn-primary btn-lg w-full">
+              Go to Home
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              Redirecting automatically in {countdown} seconds...
             </p>
-            <div className="space-y-3">
-              <Link
-                href="/home"
-                className="block w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-purple-500/50"
-              >
-                Go to Home
-                <ArrowRight className="w-5 h-5 inline ml-2" />
-              </Link>
-              <p className="text-sm text-purple-200/50">
-                Redirecting automatically in {countdown} seconds...
-              </p>
-            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {status === "error" && (
-          <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl border border-red-500/20 p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">Confirmation Failed</h2>
-            <p className="text-purple-200/70 mb-6">
-              We couldn't verify your email. The link may have expired or already been used.
-            </p>
-            <div className="space-y-3">
-              <Link
-                href="/auth/signup"
-                className="block w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-purple-500/50"
-              >
-                Try Signing Up Again
-              </Link>
-              <Link
-                href="/auth/login"
-                className="block text-sm text-purple-400 hover:text-pink-400 hover:underline transition-colors"
-              >
-                Already have an account? Sign in
-              </Link>
-            </div>
+      {status === "error" && (
+        <div className="p-2 text-center">
+          <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 ring-1 ring-destructive/30">
+            <AlertCircle className="h-8 w-8 text-destructive" aria-hidden="true" />
+          </span>
+          <h2 className="mb-2 font-display text-2xl font-bold text-foreground">
+            Confirmation Failed
+          </h2>
+          <p className="mb-6 text-muted-foreground">
+            We couldn&apos;t verify your email. The link may have expired or already been used.
+          </p>
+          <div className="space-y-3">
+            <Link href="/auth/signup" className="btn btn-primary btn-lg w-full">
+              Try Signing Up Again
+            </Link>
+            <Link
+              href="/auth/login"
+              className="block text-sm font-medium text-primary hover:underline"
+            >
+              Already have an account? Sign in
+            </Link>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </AuthShell>
   );
 }
