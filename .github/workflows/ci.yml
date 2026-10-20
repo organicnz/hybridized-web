@@ -140,10 +140,12 @@ jobs:
       - name: Install pinned Bun
         run: bun scripts/install-bun.ts --output-dir "$HOME/.bun/bin"
 
-      - name: Setup Postgres
-        uses: shogo82148/actions-setup-postgresql@v2
-        with:
-          postgresql-version: "18"
+      - name: Install Postgres
+        # The runner's own packages rather than a third-party action: the
+        # migration check only needs initdb, pg_ctl and psql.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql
 
       - name: Check the migration chain
         run: bun run check:migrations

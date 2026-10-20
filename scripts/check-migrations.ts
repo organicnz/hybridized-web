@@ -38,16 +38,26 @@ const SUPABASE_ONLY = /sync_cron/;
  * Where the Postgres binaries are.
  *
  * `mise` installs them under its own prefix, and the project pins the
- * version, so the binaries are looked up there first and on `PATH` second.
+ * version, so the binaries are looked up there first. Then the usual
+ * places a distribution puts them, and finally `PATH`.
  */
 function findPostgres(): { bin: string; psql: string } | null {
   const candidates = [
     ...(Bun.env.MISE_POSTGRES_PATH ? [Bun.env.MISE_POSTGRES_PATH] : []),
     join(Bun.env.HOME ?? "", ".local/share/mise/installs/postgres/18.6/bin"),
-    ...(Bun.env.PATH ?? "").split(":").map((dir) => join(dir, "")),
+    // Where a distribution installs it, versioned.
+    ...["16", "17", "18", "19"].map((version) => `/usr/lib/postgresql/${version}/bin`),
+    "/usr/local/pgsql/bin",
+    "/opt/homebrew/opt/postgresql@18/bin",
+    "/opt/homebrew/opt/postgresql@17/bin",
+    "/opt/homebrew/opt/postgresql@16/bin",
+    "/usr/local/opt/postgresql@18/bin",
+    // Whatever is on PATH.
+    ...(Bun.env.PATH ?? "").split(":"),
   ];
 
   for (const dir of candidates) {
+    if (!dir) continue;
     const psql = join(dir, "psql");
     const initdb = join(dir, "initdb");
     if (existsSync(psql) && existsSync(initdb)) {
