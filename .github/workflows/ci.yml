@@ -95,6 +95,20 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install a software Vulkan renderer
+        # GitHub's hosted runners have no GPU and no Vulkan driver, so Dawn
+        # cannot acquire an adapter and `--require-validation` would fail
+        # with VGPU-WGSL-VALIDATE-NO-DEVICE. Mesa's lavapipe is a CPU Vulkan
+        # implementation; installing it gives Dawn a device to validate
+        # against. This is the alternative vgpu's own doctor prescribes.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvulkan1 libdrm2 zlib1g libzstd1 libudev1 mesa-vulkan-drivers
+          ICD=$(find /usr/share/vulkan/icd.d -name 'lvp_icd*.json' | head -1)
+          echo "Vulkan ICD: $ICD"
+          echo "VK_ICD_FILENAMES=$ICD" >> "$GITHUB_ENV"
+          echo "VK_DRIVER_FILES=$ICD" >> "$GITHUB_ENV"
+
       # `next build` never validates WGSL, so validate it here.
       - name: Validate WGSL
         run: bun run shader:check
