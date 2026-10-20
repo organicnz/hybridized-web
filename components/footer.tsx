@@ -11,6 +11,7 @@ const FOOTER_LINKS = [
 
 const SUPPORT_LINKS = [{ href: "/support", label: "Support & Resources" }] as const;
 
+
 export function Footer() {
   return (
     <footer className="surface-shell border-t">
@@ -27,7 +28,7 @@ export function Footer() {
               </span>
               <Link
                 href={link.href}
-                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {link.label}
               </Link>
@@ -45,7 +46,7 @@ export function Footer() {
               </span>
               <Link
                 href={link.href}
-                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {link.label}
               </Link>

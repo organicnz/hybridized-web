@@ -247,8 +247,10 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
       {isOpen && (
         <>
           {/* Backdrop to close on click outside */}
-          <div
-            className="fixed inset-0 z-40 backdrop-blur-sm bg-black/20"
+          <button
+            type="button"
+            aria-label="Close equalizer"
+            className="fixed inset-0 z-40 cursor-default backdrop-blur-sm bg-black/20"
             onClick={() => setIsOpen(false)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setIsOpen(false);
@@ -257,15 +259,13 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
           />
 
           {/* Equalizer Panel with glassmorphism */}
-          <div
-            className="card-overlay absolute bottom-full right-0 z-50 mb-3 w-[min(520px,90vw)] animate-in slide-in-from-bottom-4 p-5 duration-300"
-          >
+          <div className="card-overlay absolute bottom-full right-0 z-50 mb-3 w-[min(520px,90vw)] animate-in slide-in-from-bottom-4 p-5 duration-300">
             {/* Gradient overlay */}
-            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-purple-500/10 via-transparent to-blue-500/10" />
             {!isAuthenticated ? (
               <div className="relative px-4 py-8 text-center">
                 <div className="mb-4 flex justify-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-linear-to-br from-purple-500/20 to-pink-500/20">
                     <LogIn className="h-8 w-8 text-primary" />
                   </div>
                 </div>
@@ -273,10 +273,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                 <p className="mb-6 text-sm text-muted-foreground">
                   Sign in to save and sync your equalizer settings across devices
                 </p>
-                <Link
-                  href="/auth/login"
-                  className="btn btn-primary"
-                >
+                <Link href="/auth/login" className="btn btn-primary">
                   <LogIn size={18} />
                   Sign In
                 </Link>
@@ -304,7 +301,9 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
                 {/* Presets */}
                 <fieldset className="relative m-0 mb-5 border-0 p-0" aria-label="Presets">
-                  <legend className="mb-2 block text-xs font-medium text-muted-foreground">Presets</legend>
+                  <legend className="mb-2 block text-xs font-medium text-muted-foreground">
+                    Presets
+                  </legend>
                   <div className="grid grid-cols-4 gap-2">
                     {Object.keys(EQ_PRESETS).map((presetName) => (
                       <button
@@ -332,7 +331,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                       <div className="relative mx-auto h-32 w-full max-w-[14px] overflow-hidden rounded-full bg-muted backdrop-blur-sm">
                         {/* Glow effect */}
                         <div
-                          className="absolute inset-x-0 bottom-0 rounded-full bg-gradient-to-t from-purple-500 via-pink-500 to-blue-500 transition-all duration-200"
+                          className="absolute inset-x-0 bottom-0 rounded-full bg-linear-to-t from-purple-500 via-pink-500 to-blue-500 transition-all duration-200"
                           style={{
                             height: `${((gains[index] + 12) / 24) * 100}%`,
                             opacity: 0.6,
@@ -357,7 +356,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                         />
                         {/* Visual slider */}
                         <div
-                          className="absolute inset-x-0 bottom-0 rounded-full bg-gradient-to-t from-purple-400 via-pink-400 to-blue-400 transition-all duration-200"
+                          className="absolute inset-x-0 bottom-0 rounded-full bg-linear-to-t from-purple-400 via-pink-400 to-blue-400 transition-all duration-200"
                           style={{
                             height: `${((gains[index] + 12) / 24) * 100}%`,
                           }}

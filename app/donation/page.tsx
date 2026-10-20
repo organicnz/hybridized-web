@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { AppShell } from "@/components/app-shell";
+import type { Metadata } from "next";
 import { DonationClient } from "./donation-client";
 
 export const metadata: Metadata = {

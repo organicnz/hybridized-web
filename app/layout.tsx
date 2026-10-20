@@ -71,9 +71,10 @@ export const viewport: Viewport = {
 import { AudioPlayerBar } from "@/components/audio-player-bar";
 import { RecoveryHandler } from "@/components/auth/recovery-handler";
 import { AudioPlayerProvider } from "@/lib/audio-player-context";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { RegisterServiceWorker } from "./register-sw";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
@@ -101,9 +102,9 @@ export default function RootLayout({
             closeButton
             toastOptions={{
               style: {
-                background: "hsl(var(--popover))",
-                border: "1px solid hsl(var(--border))",
-                color: "hsl(var(--popover-foreground))",
+                background: "var(--popover)",
+                border: "1px solid var(--border)",
+                color: "var(--popover-foreground)",
               },
             }}
           />
@@ -111,7 +112,14 @@ export default function RootLayout({
             {children}
             <AudioPlayerBar />
           </AudioPlayerProvider>
-          <SpeedInsights />
+          {/* SpeedInsights reads the route params to report the page path, so
+              it has to sit behind a Suspense boundary in the shared root
+              layout — otherwise the static shell of every dynamic route
+              becomes URL-specific and cannot be prerendered. It renders
+              nothing visible, so an empty fallback is correct. */}
+          <Suspense fallback={null}>
+            <SpeedInsights />
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>

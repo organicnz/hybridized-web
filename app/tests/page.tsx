@@ -1,9 +1,8 @@
+import { AppShell } from "@/components/app-shell";
 import { EarTraining } from "@/components/ear-training";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
+
 import { AudioLines, Music } from "lucide-react";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Musical Tests",
@@ -28,12 +27,11 @@ const UPCOMING = [
 
 export default function TestsPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-900 via-black to-blue-900">
-      <Header />
-      <main className="container mx-auto flex-1 px-4 py-16">
+    <AppShell>
+      <div className="container mx-auto px-4 py-10 md:py-12">
         <div className="mx-auto max-w-4xl">
           <div className="mb-12 text-center">
-            <h1 className="mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-5xl font-black text-transparent md:text-6xl">
+            <h1 className="mb-4 bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-5xl font-black text-transparent md:text-6xl">
               Musical Tests
             </h1>
             <p className="text-lg text-purple-200/80">
@@ -69,10 +67,7 @@ export default function TestsPage() {
             </div>
           </section>
         </div>
-      </main>
-      <Suspense fallback={null}>
-        <Footer />
-      </Suspense>
-    </div>
+      </div>
+    </AppShell>
   );
 }

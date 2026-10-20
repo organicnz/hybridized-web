@@ -1,7 +1,7 @@
-import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
 import { createStaticClient } from "@/lib/supabase/static";
 import { slugifyEncoded } from "@/lib/utils/slug";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 
 async function ArtistRedirect() {
   const supabase = createStaticClient();

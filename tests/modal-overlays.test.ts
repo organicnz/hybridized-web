@@ -1,21 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
 
 const COMPONENTS = "components";
 
-async function tsxFiles(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true });
-  const out: string[] = [];
-  for (const e of entries) {
-    const full = join(dir, e.name);
-    if (e.isDirectory()) out.push(...(await tsxFiles(full)));
-    else if (e.name.endsWith(".tsx")) out.push(full);
-  }
-  return out;
-}
-
-const files = await tsxFiles(COMPONENTS);
+const files = [...new Bun.Glob(`${COMPONENTS}/**/*.tsx`).scanSync({ cwd: "." })];
 
 describe("modal overlay safety", () => {
   it("finds component files", () => {

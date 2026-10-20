@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { effect, init, target, uniforms } from "vgpu/mock";
 import { BAR_COUNT, computeBars } from "@/lib/vgpu/spectrum";
+import { effect, init, target, uniforms } from "vgpu/mock";
 
 const SHADER = `
 struct Params {

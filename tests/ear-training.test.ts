@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import {
+  CHORD_QUALITIES,
+  INTERVALS,
   buildChordQuestion,
   buildIntervalQuestion,
   buildQuestion,
-  CHORD_QUALITIES,
   createRng,
   describeQuestion,
   describeScore,
-  INTERVALS,
   isAnswerCorrect,
   midiToFreq,
   midiToName,

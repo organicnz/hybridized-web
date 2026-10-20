@@ -64,3 +64,72 @@ describe("findEpisodeById", () => {
     expect(findEpisodeById(XML, "nope")).toBeNull();
   });
 });
+
+describe("native XML parsing (Bun.XML)", () => {
+  it("reads text from an element that also has attributes", () => {
+    // <guid isPermaLink="false">ep-1</guid> — mixed content, text under #text.
+    const xml = `<rss><channel><item>
+      <title>Attr Guid</title>
+      <guid isPermaLink="false">ep-9</guid>
+      <enclosure url="https://audio.example/9.mp3"/>
+    </item></channel></rss>`;
+
+    expect(parseFeedFull(xml)[0].episodeId).toBe("ep-9");
+  });
+
+  it("parses Atom <entry> elements", () => {
+    const xml = `<feed><entry>
+      <title>Atom Entry</title>
+      <guid>ep-atom</guid>
+      <link>https://open.firstory.me/story/ep-atom</link>
+      <enclosure url="https://audio.example/atom.mp3"/>
+    </entry></feed>`;
+
+    const [episode] = parseFeedFull(xml);
+    expect(episode.title).toBe("Atom Entry");
+    expect(episode.episodeId).toBe("ep-atom");
+    expect(episode.audioUrl).toBe("https://audio.example/atom.mp3");
+  });
+
+  it("keeps CDATA content verbatim", () => {
+    const xml = `<rss><channel><item>
+      <title><![CDATA[Raw &amp; unescaped]]></title>
+      <enclosure url="https://audio.example/1.mp3"/>
+    </item></channel></rss>`;
+
+    expect(parseFeed(xml)[0].title).toBe("Raw &amp; unescaped");
+  });
+
+  it("survives a stray HTML entity outside CDATA", () => {
+    // A conforming XML processor rejects undeclared entities; the parser
+    // retries with them neutralised instead of returning nothing.
+    const xml = `<rss><channel><item>
+      <title>Gap&nbsp;To</title>
+      <guid>ep-entity</guid>
+      <enclosure url="https://audio.example/1.mp3"/>
+    </item></channel></rss>`;
+
+    const [episode] = parseFeedFull(xml);
+    expect(episode.episodeId).toBe("ep-entity");
+    expect(episode.title).toContain("Gap");
+    expect(episode.title).toContain("To");
+  });
+
+  it("returns no episodes for malformed XML instead of throwing", () => {
+    expect(parseFeed("<rss><channel><item><title>Broken")).toEqual([]);
+    expect(parseFeed("not xml at all")).toEqual([]);
+    expect(parseFeed("")).toEqual([]);
+    expect(findEpisodeById("<rss><item>", "ep-1")).toBeNull();
+  });
+
+  it("reads the itunes:image cover attribute", () => {
+    const xml = `<rss><channel><item>
+      <title>With Cover</title>
+      <guid>ep-cover</guid>
+      <enclosure url="https://audio.example/1.mp3"/>
+      <itunes:image href="https://img.example/cover.jpg"/>
+    </item></channel></rss>`;
+
+    expect(parseFeedFull(xml)[0].coverUrl).toBe("https://img.example/cover.jpg");
+  });
+});

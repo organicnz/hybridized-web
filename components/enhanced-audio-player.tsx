@@ -72,7 +72,7 @@ export function EnhancedAudioPlayer({
 
   return (
     <div
-      className={`bg-gradient-to-br from-purple-900/20 via-black/40 to-blue-900/20 backdrop-blur-sm border border-white/10 rounded-lg p-4 ${className}`}
+      className={`bg-linear-to-br from-purple-900/20 via-black/40 to-blue-900/20 backdrop-blur-sm border border-white/10 rounded-lg p-4 ${className}`}
     >
       {title && <h3 className="text-white font-semibold mb-3 text-sm">{title}</h3>}
 
@@ -89,7 +89,7 @@ export function EnhancedAudioPlayer({
         <button
           type="button"
           onClick={togglePlay}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-2 rounded-full transition-all hover:scale-105"
+          className="bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-2 rounded-full transition-all hover:scale-105"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}

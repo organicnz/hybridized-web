@@ -226,11 +226,11 @@ Deno.serve(async (req: Request) => {
           const link = extractText(itemXml, "link");
           const audioUrl = extractAttr(itemXml, "enclosure", "url");
           const audioLengthStr = extractAttr(itemXml, "enclosure", "length");
-          const audioLength = audioLengthStr ? Number.parseInt(audioLengthStr) : 0;
+          const audioLength = audioLengthStr ? Number.parseInt(audioLengthStr, 10) : 0;
           const enclosureType = extractAttr(itemXml, "enclosure", "type") || "audio/mpeg";
           const coverUrl = extractAttr(itemXml, "itunes:image", "href");
           const durationStr = extractText(itemXml, "itunes:duration");
-          const duration = durationStr ? Number.parseInt(durationStr) : 0;
+          const duration = durationStr ? Number.parseInt(durationStr, 10) : 0;
           const pubDateStr = extractText(itemXml, "pubDate");
           const creator = extractText(itemXml, "dc:creator") || "Hybridized";
           const explicit = extractText(itemXml, "itunes:explicit") === "yes";

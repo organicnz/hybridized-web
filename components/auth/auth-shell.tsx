@@ -1,10 +1,10 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
 
 interface AuthShellProps {
   title: string;
@@ -56,9 +56,7 @@ export function AuthShell({
 
         <div className="glass rounded-2xl p-6 sm:p-8">{children}</div>
 
-        {footer && (
-          <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>
-        )}
+        {footer && <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>}
       </div>
     </div>
   );
@@ -83,19 +81,11 @@ export function AuthAlert({
       role={isError ? "alert" : "status"}
     >
       {isError ? (
-        <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive" aria-hidden="true" />
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" aria-hidden="true" />
       ) : (
-        <CheckCircle
-          className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500"
-          aria-hidden="true"
-        />
+        <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" aria-hidden="true" />
       )}
-      <div
-        className={cn(
-          "text-sm",
-          isError ? "text-destructive" : "text-foreground",
-        )}
-      >
+      <div className={cn("text-sm", isError ? "text-destructive" : "text-foreground")}>
         {children}
       </div>
     </div>

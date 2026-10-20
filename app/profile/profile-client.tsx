@@ -5,7 +5,16 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { getSupabase } from "@/lib/supabase/client";
 import { compressImage, validateImageFile } from "@/lib/utils/image-compression";
-import { AlertCircle, ArrowLeft, Camera, CheckCircle, LogOut, Mail, Save, User } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Camera,
+  CheckCircle,
+  LogOut,
+  Mail,
+  Save,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -173,7 +182,10 @@ export function ProfileContent() {
             href="/home"
             className="inline-flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-colors hover:text-foreground group"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" aria-hidden="true" />
+            <ArrowLeft
+              className="h-4 w-4 transition-transform group-hover:-translate-x-1"
+              aria-hidden="true"
+            />
             Back to Home
           </Link>
         </div>
@@ -188,14 +200,20 @@ export function ProfileContent() {
               className="mb-6 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4"
               role="alert"
             >
-              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive" aria-hidden="true" />
+              <AlertCircle
+                className="mt-0.5 h-5 w-5 shrink-0 text-destructive"
+                aria-hidden="true"
+              />
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
           {success && (
             <output className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-              <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" aria-hidden="true" />
+              <CheckCircle
+                className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500"
+                aria-hidden="true"
+              />
               <p className="text-sm text-foreground">Profile updated successfully!</p>
             </output>
           )}
@@ -204,7 +222,7 @@ export function ProfileContent() {
             {/* Avatar Upload */}
             <div className="mb-8 flex flex-col items-center">
               <div className="relative group">
-                <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 ring-2 ring-border">
+                <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-purple-500/20 to-pink-500/20 ring-2 ring-border">
                   {avatarUrl ? (
                     <Image
                       src={avatarUrl}
@@ -253,7 +271,10 @@ export function ProfileContent() {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Mail
+                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <input
                   id="email"
                   type="email"
@@ -262,7 +283,10 @@ export function ProfileContent() {
                   className="input cursor-not-allowed pl-10 opacity-60"
                 />
                 {emailVerified && (
-                  <CheckCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-500" aria-hidden="true" />
+                  <CheckCircle
+                    className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-500"
+                    aria-hidden="true"
+                  />
                 )}
               </div>
               {emailVerified ? (
@@ -292,7 +316,10 @@ export function ProfileContent() {
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <User
+                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <input
                   id="fullName"
                   type="text"

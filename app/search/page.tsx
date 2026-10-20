@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { SEARCH_RESULT_LIMIT, normalizeSearchQuery } from "@/lib/search";
+import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/types/database.types";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { SearchResults } from "./search-results";
 import { Suspense } from "react";
-import { ScrollReveal } from "@/components/scroll-reveal";
+import { SearchResults } from "./search-results";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -100,10 +100,7 @@ async function SearchContent({
           {query && (
             <ScrollReveal variant="fade-up" delay={200} className="mb-8">
               <p className="text-muted-foreground">
-                Showing results for:{" "}
-                <span className="gradient-text font-semibold">
-                  {query}
-                </span>
+                Showing results for: <span className="gradient-text font-semibold">{query}</span>
               </p>
             </ScrollReveal>
           )}

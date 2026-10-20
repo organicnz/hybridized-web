@@ -1,11 +1,11 @@
 "use client";
 
+import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 import { getSupabase } from "@/lib/supabase/client";
 import { AlertCircle, CheckCircle, Loader2, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 
 export function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -101,10 +101,11 @@ export function ResetPasswordPage() {
     return (
       <AuthShell title="Verifying Reset Link" subtitle="Please wait a moment...">
         <div className="p-2 text-center">
-          <Loader2 className="mx-auto mb-2 h-12 w-12 animate-spin text-primary" aria-hidden="true" />
-          <p className="text-sm text-muted-foreground">
-            Verifying your password reset link...
-          </p>
+          <Loader2
+            className="mx-auto mb-2 h-12 w-12 animate-spin text-primary"
+            aria-hidden="true"
+          />
+          <p className="text-sm text-muted-foreground">Verifying your password reset link...</p>
         </div>
       </AuthShell>
     );
@@ -163,7 +164,6 @@ export function ResetPasswordPage() {
             className={authInputClass}
             placeholder="••••••••"
             required
-            aria-required="true"
             minLength={6}
           />
         </AuthField>
@@ -182,7 +182,6 @@ export function ResetPasswordPage() {
             className={authInputClass}
             placeholder="••••••••"
             required
-            aria-required="true"
             minLength={6}
           />
         </AuthField>

@@ -1,11 +1,11 @@
 "use client";
 
 import { IframePlayer } from "@/components/iframe-player";
+import { StaggerContainer, StaggerItem, motion } from "@/components/page-transition";
 import type { Database } from "@/lib/types/database.types";
+import { cn } from "@/lib/utils";
 import { Music } from "lucide-react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { motion, StaggerContainer, StaggerItem } from "@/components/page-transition";
 
 type EpisodeRow = Database["public"]["Tables"]["episodes"]["Row"] & {
   bands?: { id: number; name: string; cover_url?: string; firstory_user_id?: string } | null;
@@ -73,7 +73,7 @@ export function SearchResults({
                 >
                   <div className="flex items-center gap-4 p-4">
                     {coverUrl && (
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <Image
                           src={coverUrl}
                           alt={episode.title}
@@ -96,7 +96,7 @@ export function SearchResults({
                       )}
                     </div>
 
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <IframePlayer episode={episode} artist={artistName} />
                     </div>
                   </div>

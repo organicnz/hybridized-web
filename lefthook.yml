@@ -1,26 +1,32 @@
 # Lefthook Configuration — bun + biome + oxlint
+#
+# Every tool is executed through `bun x --bun`, which forces the Bun runtime
+# instead of Node.js. The project has no Node.js dependency at all.
 
 pre-commit:
   parallel: true
   commands:
     format:
       glob: "*.{js,ts,jsx,tsx,json,css,md}"
-      run: bun x biome format --write --no-errors-on-unmatched {staged_files}
+      run: bun x --bun biome format --write --no-errors-on-unmatched {staged_files}
 
     lint-biome:
       glob: "*.{js,ts,jsx,tsx}"
-      run: bun x biome lint {staged_files}
+      run: bun x --bun biome lint --no-errors-on-unmatched {staged_files}
 
     lint-oxlint:
       glob: "*.{js,ts,jsx,tsx}"
-      run: bun x oxlint --config oxlint.json {staged_files}
+      run: bun x --bun oxlint --config oxlint.json {staged_files}
 
     type-check:
       glob: "*.{ts,tsx}"
-      run: bun x tsc --noEmit
+      run: bun x --bun tsc --noEmit
 
 pre-push:
   parallel: false
   commands:
+    test:
+      run: bun test
+
     build:
       run: bun run build

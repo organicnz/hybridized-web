@@ -1,10 +1,10 @@
 "use client";
 
+import { AuthShell } from "@/components/auth/auth-shell";
 import { AlertCircle, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AuthShell } from "@/components/auth/auth-shell";
 
 export function ConfirmEmailPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -45,7 +45,10 @@ export function ConfirmEmailPage() {
     <AuthShell title="Confirm Email" subtitle="Verifying your address">
       {status === "loading" && (
         <div className="p-2 text-center">
-          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" aria-hidden="true" />
+          <Loader2
+            className="mx-auto mb-4 h-12 w-12 animate-spin text-primary"
+            aria-hidden="true"
+          />
           <p className="text-sm text-muted-foreground">
             Please wait while we verify your email address...
           </p>
@@ -57,9 +60,7 @@ export function ConfirmEmailPage() {
           <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/30">
             <CheckCircle className="h-8 w-8 text-emerald-500" aria-hidden="true" />
           </span>
-          <h2 className="mb-2 font-display text-2xl font-bold text-foreground">
-            Email Confirmed!
-          </h2>
+          <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Email Confirmed!</h2>
           <p className="mb-6 text-muted-foreground">
             Your email has been successfully verified. You can now access all features of
             Hybridized.

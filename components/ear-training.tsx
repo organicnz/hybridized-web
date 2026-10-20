@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  buildQuestion,
+  type AnswerRecord,
   CHORD_QUALITIES,
+  INTERVALS,
+  type Question,
+  buildQuestion,
   describeQuestion,
   describeScore,
-  INTERVALS,
   isAnswerCorrect,
   summarise,
-  type AnswerRecord,
-  type Question,
 } from "@/lib/audio/ear-training";
 import { NotePlayer } from "@/lib/audio/note-player";
 import { AudioLines, CheckCircle2, Music, Play, RotateCcw, XCircle } from "lucide-react";
@@ -118,7 +118,7 @@ export function EarTraining() {
             onClick={() => start(id)}
             className="group relative overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-8 text-left backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-purple-400/40 hover:shadow-xl hover:shadow-purple-500/10"
           >
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-purple-500/20 to-pink-500/20">
               <Icon className="h-6 w-6 text-purple-300" aria-hidden="true" />
             </div>
             <h3 className="text-xl font-bold text-white">{label}</h3>
@@ -137,7 +137,7 @@ export function EarTraining() {
     const percent = Math.round(summary.accuracy * 100);
     return (
       <div className="rounded-2xl border border-white/15 bg-white/5 p-8 text-center backdrop-blur-sm">
-        <div className="text-6xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <div className="text-6xl font-black bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
           {percent}%
         </div>
         <p className="mt-2 text-sm text-white/60">
@@ -156,7 +156,7 @@ export function EarTraining() {
           <button
             type="button"
             onClick={() => setAnswers([])}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 font-medium text-white transition-all hover:from-purple-600 hover:to-pink-600"
+            className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-purple-500 to-pink-500 px-6 py-3 font-medium text-white transition-all hover:from-purple-600 hover:to-pink-600"
           >
             <Play className="h-4 w-4" aria-hidden="true" />
             Run it again
@@ -182,7 +182,7 @@ export function EarTraining() {
 
       <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+          className="h-full rounded-full bg-linear-to-r from-purple-500 to-pink-500 transition-all"
           style={{ width: `${(answers.length / QUESTION_COUNT) * 100}%` }}
         />
       </div>
@@ -191,7 +191,7 @@ export function EarTraining() {
         <button
           type="button"
           onClick={replay}
-          className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30 transition-transform hover:scale-105 active:scale-95"
+          className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30 transition-transform hover:scale-105 active:scale-95"
           aria-label="Play the question again"
         >
           <Play className="h-8 w-8" aria-hidden="true" />

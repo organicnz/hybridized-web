@@ -10,7 +10,7 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen flex flex-col bg-[#121212] overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
       <div className="flex-1 flex flex-col overflow-hidden">{children}</div>
       <Suspense fallback={null}>

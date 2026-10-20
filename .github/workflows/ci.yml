@@ -11,62 +11,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint & Typecheck
-    runs-on: self-hosted
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+
+    # Every project step runs on Bun. There is deliberately no
+    # actions/setup-node: Node.js never enters the project toolchain.
+    # (GitHub Actions runs its own JS actions on an internal Node runtime —
+    # that is the runner's implementation detail, not a project dependency.)
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Bun
+        # The project tracks the Bun canary channel: `.bun-version` is
+        # "latest" for mise locally, and CI installs the canary channel.
+        # `package.json` pins the exact canary build for the lockfile layer.
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: canary
+
+      - name: Cache Bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Lint
-        run: bun run lint
+      - name: Doctor (Bun environment invariants)
+        run: bun run doctor
 
-      - name: Typecheck
-        run: bun run typecheck
+      - name: Verify (lint + typecheck + test)
+        run: bun run verify
 
-  test:
-    name: Tests
-    runs-on: self-hosted
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
+      - name: Build
+        run: bun run build
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Run tests
-        run: bun run test
-
-  shaders:
-    name: Shader Validation
-    runs-on: self-hosted
-    needs: lint
-    # Requires a self-hosted runner with a real WebGPU/GPU adapter. Keep it
-    # non-blocking until such a runner is confirmed online.
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      # next build never validates WGSL, so validate against a real device here.
-      - name: Validate WGSL
-        run: bun run shader:check
+      - name: Audit dependencies
+        # Reporting only — advisories should not block a deploy on their own.
+        continue-on-error: true
+        run: bun audit --audit-level=high

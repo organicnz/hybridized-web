@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import { ArtistNav } from "@/components/artist-nav";
 import { createStaticClient } from "@/lib/supabase/static";
 import { slugify, slugifyEncoded } from "@/lib/utils/slug";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { HomeClient } from "../home-client";
 import { Suspense } from "react";
+import { HomeClient } from "../home-client";
 
 interface PageProps {
   params: Promise<{ artist: string }>;

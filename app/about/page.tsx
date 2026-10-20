@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { AppShell } from "@/components/app-shell";
 import { Download, Heart, Music, Sparkles, Users } from "lucide-react";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "About",
@@ -51,7 +51,7 @@ export default function AboutPage() {
           <div className="space-y-6">
             <div className="glass rounded-2xl p-8">
               <div className="mb-4 flex items-start gap-4">
-                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
                   <Music className="h-6 w-6 text-primary" />
                 </span>
                 <div>
@@ -73,7 +73,7 @@ export default function AboutPage() {
 
             <div className="glass rounded-2xl p-8">
               <div className="mb-4 flex items-start gap-4">
-                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
                   <Download className="h-6 w-6 text-primary" />
                 </span>
                 <div>
@@ -99,7 +99,7 @@ export default function AboutPage() {
 
             <div className="glass rounded-2xl p-8">
               <div className="mb-4 flex items-start gap-4">
-                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
                   <Sparkles className="h-6 w-6 text-primary" />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -113,7 +113,7 @@ export default function AboutPage() {
                     {FEATURED_ARTISTS.map((name) => (
                       <li key={name} className="flex items-center gap-2 text-sm">
                         <span
-                          className="h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+                          className="h-2 w-2 shrink-0 rounded-full bg-linear-to-r from-purple-500 to-pink-500"
                           aria-hidden="true"
                         />
                         {name}
@@ -126,11 +126,13 @@ export default function AboutPage() {
 
             <div className="glass rounded-2xl p-8">
               <div className="mb-4 flex items-start gap-4">
-                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border">
                   <Users className="h-6 w-6 text-primary" />
                 </span>
                 <div>
-                  <h2 className="mb-4 font-display text-2xl font-bold text-foreground">Our Legacy</h2>
+                  <h2 className="mb-4 font-display text-2xl font-bold text-foreground">
+                    Our Legacy
+                  </h2>
                   <p className="leading-relaxed text-muted-foreground">
                     Continuing the amazing work of Andy Grundman, Hybridized remains committed to
                     bringing you the finest electronic music from around the world.

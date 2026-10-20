@@ -339,8 +339,8 @@ Customize in Supabase Dashboard:
 Use Supabase local development:
 
 ```bash
-npx supabase start
-npx supabase db reset
+bun x supabase start
+bun x supabase db reset
 ```
 
 ## Production Checklist

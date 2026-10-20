@@ -1,17 +1,27 @@
+# ── Install ──────────────────────────────────────────────────────────────────
 [install]
-# Use exact versions for reproducibility
-exact = false
-frozen = false
+# Never auto-install packages as a side effect of `bun run`.
+# Dependencies are installed explicitly with `bun install`.
+auto = "disable"
+
+# When a dependency is added, record it without a semver range so the
+# installed version is pinned in package.json.
+exact = true
 
 [install.cache]
-# Enable caching
+# Share the install cache across projects and machines.
 dir = "~/.bun/install/cache"
 disable = false
 
+# ── Run ──────────────────────────────────────────────────────────────────────
 [run]
-# Auto-install missing packages on run
+# Every package.json script executes on the Bun runtime — never Node.js.
 bun = true
 
+# Script orchestration (`&&`, `||`, redirections) runs in Bun's own shell
+# instead of bash/zsh, so no system shell is required.
+shell = "bun"
+
+# ── Test ─────────────────────────────────────────────────────────────────────
 [test]
-# Test configuration
 timeout = 10000

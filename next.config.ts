@@ -1,8 +1,18 @@
-import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Next.js 16.3+ expects Partial Prefetching alongside Cache Components;
+  // both become the default in the next major. Without it, Next warns and
+  // routes keyed by params lose their static shell.
+  partialPrefetching: true,
+  // Type checking is done by `tsrs` (the Rust port of the TypeScript
+  // compiler) in `bun run typecheck` / `bun run verify`. Next's own `tsc`
+  // pass would duplicate that work on every build.
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   turbopack: {
     root: import.meta.dirname,
     rules: {

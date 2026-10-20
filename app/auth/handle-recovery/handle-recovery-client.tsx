@@ -1,9 +1,9 @@
 "use client";
 
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AuthShell } from "@/components/auth/auth-shell";
 
 export function HandleRecoveryPage() {
   const router = useRouter();

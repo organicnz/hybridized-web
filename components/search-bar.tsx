@@ -100,8 +100,10 @@ export function SearchBar() {
       {showDropdown && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
+          <button
+            type="button"
+            aria-label="Close search results"
+            className="fixed inset-0 z-40 cursor-default"
             onClick={() => setIsFocused(false)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setIsFocused(false);
@@ -130,7 +132,7 @@ export function SearchBar() {
                     className="btn btn-ghost w-full justify-start gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-fast border-transparent"
                     type="button"
                   >
-                    <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
                     <span className="text-sm truncate flex-1">{search}</span>
                   </button>
                 ))}

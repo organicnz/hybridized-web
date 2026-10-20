@@ -1,10 +1,10 @@
 "use client";
 
+import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 import { getSupabase } from "@/lib/supabase/client";
 import { CheckCircle, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -79,7 +79,6 @@ export function ForgotPasswordPage() {
             className={authInputClass}
             placeholder="your@email.com"
             required
-            aria-required="true"
           />
         </AuthField>
 

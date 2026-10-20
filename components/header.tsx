@@ -1,11 +1,11 @@
 "use client";
 
+import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { useTheme } from "@/components/theme-provider";
 import { HEADER_STYLES, NAV_LINKS } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
-import { Menu, User, Sun, Moon } from "lucide-react";
+import { Menu, Moon, Sun, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
@@ -60,7 +60,7 @@ export function Header() {
     <header className="surface-shell sticky top-0 z-50 border-b shadow-header gpu-filter">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3.5 md:px-8">
         {/* Logo */}
-        <Link href="/" className="flex flex-shrink-0 items-center gap-3 group">
+        <Link href="/" className="flex shrink-0 items-center gap-3 group">
           <span className="relative">
             <Image
               src="/logo.png"
@@ -72,7 +72,7 @@ export function Header() {
               priority
             />
             <span
-              className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-t from-purple-500/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              className="pointer-events-none absolute inset-0 rounded-xl bg-linear-to-t from-purple-500/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               aria-hidden="true"
             />
           </span>

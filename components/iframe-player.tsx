@@ -25,7 +25,8 @@ function formatDuration(totalSeconds: number | null): string | null {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = Math.floor(totalSeconds % 60);
-  if (hours > 0) return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  if (hours > 0)
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
@@ -109,14 +110,14 @@ export function IframePlayer({ episode, artist, index }: IframePlayerProps) {
           {/* Index / cover */}
           {typeof index === "number" ? (
             <span
-              className="hidden w-7 flex-shrink-0 text-center font-display text-sm font-bold tabular-nums text-muted-foreground/60 sm:block"
+              className="hidden w-7 shrink-0 text-center font-display text-sm font-bold tabular-nums text-muted-foreground/60 sm:block"
               aria-hidden="true"
             >
               {String(index + 1).padStart(2, "0")}
             </span>
           ) : null}
           {coverUrl ? (
-            <span className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border sm:h-14 sm:w-14">
+            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl ring-1 ring-border sm:h-14 sm:w-14">
               <Image
                 src={coverUrl}
                 alt=""
@@ -127,7 +128,7 @@ export function IframePlayer({ episode, artist, index }: IframePlayerProps) {
             </span>
           ) : (
             <span
-              className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/25 via-pink-500/20 to-blue-500/25 font-display text-lg font-bold text-primary ring-1 ring-border sm:h-14 sm:w-14"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-purple-500/25 via-pink-500/20 to-blue-500/25 font-display text-lg font-bold text-primary ring-1 ring-border sm:h-14 sm:w-14"
               aria-hidden="true"
             >
               {(episode.title || "H").charAt(0).toUpperCase()}
@@ -163,10 +164,10 @@ export function IframePlayer({ episode, artist, index }: IframePlayerProps) {
             type="button"
             onClick={handlePlayClick}
             className={cn(
-              "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
               "bg-[#1DB954] text-black shadow-lg shadow-[#1DB954]/25",
               "transition-all duration-200 hover:scale-105 hover:bg-[#1ed760] hover:shadow-xl hover:shadow-[#1DB954]/35",
-              "active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1DB954] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1DB954] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             )}
             aria-label={`Play ${episode.title || "episode"}`}
           >

@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
 
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("q");
-    const limit = Number.parseInt(searchParams.get("limit") || "10");
+    const limit = Number.parseInt(searchParams.get("limit") || "10", 10);
 
     if (!query) {
       return new Response(

@@ -1,13 +1,13 @@
 "use client";
 
 import { useAudioPlayer } from "@/lib/audio-player-context";
-import { Volume2, VolumeX, X, ChevronUp, ListMusic, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronUp, ListMusic, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AudioEqualizer } from "./audio-equalizer";
 import { CustomAudioPlayer } from "./custom-audio-player";
-import { cn } from "@/lib/utils";
 
 export function AudioPlayerBar() {
   const {
@@ -94,7 +94,8 @@ export function AudioPlayerBar() {
       if (index <= 0) return;
       const track = playlist[index];
       const next = [track, ...playlist.filter((_, i) => i !== index)];
-      const nextIndex = index === currentIndex ? 0 : currentIndex < index ? currentIndex + 1 : currentIndex;
+      const nextIndex =
+        index === currentIndex ? 0 : currentIndex < index ? currentIndex + 1 : currentIndex;
       setPlaylist(next, nextIndex);
     },
     [playlist, currentIndex, setPlaylist],
@@ -118,7 +119,7 @@ export function AudioPlayerBar() {
     >
       {/* Subtle brand glow line */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-purple-500/50 to-transparent"
         aria-hidden="true"
       />
 
@@ -127,7 +128,7 @@ export function AudioPlayerBar() {
           {/* Track info */}
           <div className="glass flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-3 py-2 sm:max-w-xs">
             {currentTrack.coverUrl && (
-              <span className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
+              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
                 <Image
                   src={currentTrack.coverUrl}
                   alt=""
@@ -166,7 +167,7 @@ export function AudioPlayerBar() {
           </div>
 
           {/* Right Controls */}
-          <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             {/* Volume Popover */}
             <div className="relative" ref={volumePopoverRef}>
               <button
@@ -220,7 +221,7 @@ export function AudioPlayerBar() {
             </div>
 
             <div
-              className="h-8 w-px bg-gradient-to-b from-transparent via-border to-transparent"
+              className="h-8 w-px bg-linear-to-b from-transparent via-border to-transparent"
               aria-hidden="true"
             />
 
@@ -235,7 +236,7 @@ export function AudioPlayerBar() {
             </button>
 
             <div
-              className="hidden h-8 w-px bg-gradient-to-b from-transparent via-border to-transparent sm:block"
+              className="hidden h-8 w-px bg-linear-to-b from-transparent via-border to-transparent sm:block"
               aria-hidden="true"
             />
 
@@ -245,7 +246,7 @@ export function AudioPlayerBar() {
             </div>
 
             <div
-              className="h-8 w-px bg-gradient-to-b from-transparent via-border to-transparent"
+              className="h-8 w-px bg-linear-to-b from-transparent via-border to-transparent"
               aria-hidden="true"
             />
 
@@ -330,7 +331,7 @@ export function AudioPlayerBar() {
                           <button
                             type="button"
                             onClick={() => handleSelectTrack(index)}
-                            className="flex-shrink-0 rounded-lg ring-1 ring-border"
+                            className="shrink-0 rounded-lg ring-1 ring-border"
                             aria-label={`Play ${track.title}`}
                           >
                             <Image
@@ -359,9 +360,7 @@ export function AudioPlayerBar() {
                           <p
                             className={cn(
                               "truncate text-xs",
-                              index === currentIndex
-                                ? "text-primary/70"
-                                : "text-muted-foreground",
+                              index === currentIndex ? "text-primary/70" : "text-muted-foreground",
                             )}
                           >
                             {track.artist}

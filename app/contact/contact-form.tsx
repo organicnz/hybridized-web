@@ -1,8 +1,8 @@
 "use client";
 
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { Mail, MessageSquare, Send } from "lucide-react";
 import { useState } from "react";
-import { ScrollReveal } from "@/components/scroll-reveal";
 
 const CONTACT_EMAIL = "hello@hybridized.com";
 

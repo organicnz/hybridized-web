@@ -1,7 +1,7 @@
 import { AudioEngineDemo } from "@/components/audio-engine-demo";
-import type { Metadata } from "next";
-import { cn } from "@/lib/utils";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Audio Engine Demo",
@@ -14,7 +14,7 @@ export default function AudioDemoPage() {
     <div className={cn("min-h-screen p-8 bg-gradient-hero")}>
       <div className="max-w-4xl mx-auto space-y-8">
         <ScrollReveal variant="fade-up" delay={100} className="text-center mb-12">
-          <h1 className="text-fluid-xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent mb-4">
+          <h1 className="text-fluid-xl font-bold bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent mb-4">
             Hardware-Accelerated Audio Engine
           </h1>
           <p className="text-muted-foreground">

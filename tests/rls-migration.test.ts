@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, readdirSync } from "bun:fs";
+import { join } from "bun:path";
 
 const MIGRATIONS_DIR = join(import.meta.dir, "../supabase/migrations");
 

@@ -2,13 +2,13 @@
 
 import { ArtistProfile } from "@/components/artist-profile";
 import { IframePlayer } from "@/components/iframe-player";
+import { StaggerContainer, StaggerItem } from "@/components/page-transition";
 import { useAudioPlayer } from "@/lib/audio-player-context";
 import { soundCloudManager } from "@/lib/soundcloud-widget-manager";
 import type { Database } from "@/lib/types/database.types";
+import { motion } from "framer-motion";
 import { Disc3, ExternalLink } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { StaggerContainer, StaggerItem } from "@/components/page-transition";
 
 // Extend Window interface for SoundCloud Widget API
 declare global {
@@ -159,7 +159,7 @@ export function HomeClient({
                 href={soundcloudUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-outline btn-sm flex-shrink-0"
+                className="btn btn-outline btn-sm shrink-0"
               >
                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
                 Open

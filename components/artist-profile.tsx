@@ -54,7 +54,7 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
         ) : (
           <div
             className={cn(
-              "absolute inset-0 flex items-center justify-center bg-gradient-to-br",
+              "absolute inset-0 flex items-center justify-center bg-linear-to-br",
               gradientClass,
             )}
           >
@@ -68,7 +68,7 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
         )}
         {/* Legibility scrim + name overlay */}
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"
+          className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent"
           aria-hidden="true"
         />
         <div className="absolute inset-x-0 bottom-0 flex items-end gap-2 p-5">

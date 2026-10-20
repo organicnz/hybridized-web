@@ -78,7 +78,7 @@ export function NavLink({ href, label, highlight, variant = "desktop", onClick }
       {label}
       <span
         className={cn(
-          "absolute -bottom-1.5 left-0 h-0.5 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 transition-all duration-300",
+          "absolute -bottom-1.5 left-0 h-0.5 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 transition-all duration-300",
           isActive ? "w-full" : "w-0 group-hover:w-full",
         )}
       />

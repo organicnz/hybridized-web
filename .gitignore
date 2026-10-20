@@ -1,7 +1,5 @@
 # dependencies
 /node_modules
-/.pnp
-.pnp.js
 
 # testing
 /coverage
@@ -15,16 +13,14 @@
 
 # misc
 .DS_Store
+.DS_Store.*
+._.DS_Store
 *.pem
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
 # local env files
-.env*.local
 .env
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -32,14 +28,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env*
 
-# Bun
-.env.local
-bun.lock
+# bun
+.bun/
 
-# Supabase temp
+# supabase temp
 supabase/.temp/
 
-# Accidental tilde directory
+# accidental tilde directory
 ~/

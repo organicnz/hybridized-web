@@ -79,7 +79,7 @@ export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
             href={`/home/${getArtistSlug(artist)}`}
             onClick={(e) => handleClick(e, artist)}
             className={cn(
-              "flex-shrink-0 whitespace-nowrap border-b-2 pb-4 font-display text-sm font-semibold transition-all",
+              "shrink-0 whitespace-nowrap border-b-2 pb-4 font-display text-sm font-semibold transition-all",
               isActive
                 ? "cursor-default border-primary text-foreground"
                 : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",

@@ -1,5 +1,5 @@
-import { slugify } from "@/lib/utils/slug";
 import { createStaticClient } from "@/lib/supabase/static";
+import { slugify } from "@/lib/utils/slug";
 import type { MetadataRoute } from "next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hybridized.online";

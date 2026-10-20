@@ -1,12 +1,12 @@
 "use client";
 
+import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 import { getSupabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Lock, Mail, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 
 const REDIRECT_AFTER_LOGIN = "/home";
 
@@ -87,10 +87,7 @@ export function LoginPage() {
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <Link
-            href="/auth/signup"
-            className="font-semibold text-primary hover:underline"
-          >
+          <Link href="/auth/signup" className="font-semibold text-primary hover:underline">
             Sign up
           </Link>
         </>
@@ -149,7 +146,6 @@ export function LoginPage() {
             className={authInputClass}
             placeholder="your@email.com"
             required
-            aria-required="true"
           />
         </AuthField>
 
@@ -168,7 +164,6 @@ export function LoginPage() {
               className={authInputClass}
               placeholder="••••••••"
               required
-              aria-required="true"
             />
           </AuthField>
         )}
@@ -176,7 +171,7 @@ export function LoginPage() {
         {useMagicLink && (
           <div className="rounded-xl border border-primary/25 bg-primary/5 p-4">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Sparkles className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+              <Sparkles className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
               We&apos;ll send you a magic link to sign in without a password
             </p>
           </div>

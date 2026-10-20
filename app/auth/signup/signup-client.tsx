@@ -1,11 +1,11 @@
 "use client";
 
+import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 import { getSupabase } from "@/lib/supabase/client";
 import { CheckCircle, Lock, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AuthAlert, AuthField, AuthShell, authInputClass } from "@/components/auth/auth-shell";
 
 export function SignupPage() {
   const [email, setEmail] = useState("");
@@ -50,8 +50,8 @@ export function SignupPage() {
             <CheckCircle className="h-8 w-8 text-emerald-500" aria-hidden="true" />
           </span>
           <p className="mb-6 text-muted-foreground">
-            We&apos;ve sent you a confirmation email. Please check your inbox and click the link
-            to verify your account.
+            We&apos;ve sent you a confirmation email. Please check your inbox and click the link to
+            verify your account.
           </p>
           <Link href="/auth/login" className="btn btn-primary btn-lg w-full">
             Go to Login
@@ -91,7 +91,6 @@ export function SignupPage() {
             className={authInputClass}
             placeholder="John Doe"
             required
-            aria-required="true"
           />
         </AuthField>
 
@@ -109,7 +108,6 @@ export function SignupPage() {
             className={authInputClass}
             placeholder="your@email.com"
             required
-            aria-required="true"
           />
         </AuthField>
 
@@ -128,7 +126,6 @@ export function SignupPage() {
             className={authInputClass}
             placeholder="••••••••"
             required
-            aria-required="true"
             minLength={6}
           />
         </AuthField>

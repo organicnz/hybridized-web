@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import {
   DEFAULT_LANGUAGE,
+  LANGUAGES,
   getLanguageByCode,
   isValidLanguageCode,
-  LANGUAGES,
 } from "@/lib/constants/languages";
 
 describe("LANGUAGES", () => {

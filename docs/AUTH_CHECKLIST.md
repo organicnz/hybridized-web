@@ -68,7 +68,7 @@ Run the migration to create profiles table:
 
 ```bash
 # Option A: Using Supabase CLI
-npx supabase db push
+bun x supabase db push
 
 # Option B: Manual
 # Copy supabase/migrations/20240101000000_auth_setup.sql
@@ -86,7 +86,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ### 3. Test Auth Flow
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 Visit:
