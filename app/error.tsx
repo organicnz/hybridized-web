@@ -32,7 +32,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
           An unexpected error occurred while loading this page.
         </p>
         {isDev && error.message && (
-          <p className="mb-2 break-words rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
+          <p className="mb-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 font-mono text-xs break-words text-destructive">
             {error.message}
             {error.digest ? ` (digest: ${error.digest})` : ""}
           </p>

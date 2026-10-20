@@ -243,19 +243,24 @@ export function Header() {
 2. Supabase clears session
 3. Redirected to `/auth/login`
 
-## Middleware
+## The Proxy
 
-The middleware automatically:
+Next.js 16 renamed the middleware file: it is `proxy.ts`, and the exported
+function is `proxy` rather than `middleware`. The proxy automatically:
 
 - Updates session on every request
 - Handles cookie management
 - Maintains auth state across navigation
+- Rate-limits the API per IP
 
-Protected routes can be added in `middleware.ts`:
+Protected routes are listed in `proxy.ts`:
 
 ```typescript
-const protectedPaths = ["/profile", "/dashboard", "/admin"];
+const protectedPaths = ["/profile", "/dashboard"];
 ```
+
+> The list above is the one in the code today. Add a path here when a new
+> route needs a session.
 
 ## Security Best Practices
 
@@ -263,7 +268,7 @@ const protectedPaths = ["/profile", "/dashboard", "/admin"];
 2. **Environment Variables**: Never commit `.env` file
 3. **Password Requirements**: Minimum 6 characters (configurable in Supabase)
 4. **Email Verification**: Enabled by default
-5. **Session Management**: Handled automatically by middleware
+5. **Session Management**: Handled automatically by the proxy
 
 ## Customization
 

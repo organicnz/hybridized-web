@@ -1,0 +1,43 @@
+#!/usr/bin/env bun
+/**
+ * Pre-push hook — the full gates, on the whole project.
+ *
+ *   1. `bun test` — the unit suite
+ *   2. `deno check` + `deno lint` — the Supabase edge functions
+ *   3. `bun run check:migrations` — the migration chain, against a real
+ *      Postgres, compared with the generated types
+ *   4. `bun run audit:secrets` — every object the repository has ever held
+ *   5. `bun run build` — the production build, which also prerenders every
+ *      route and so catches the Next.js 16.5 Instant Navigation failures
+ *      that a type check cannot see
+ *
+ * The pre-commit hook keeps commits fast; this one is the last chance to
+ * stop a broken tree from reaching the remote.
+ */
+import { gate, bun } from "../scripts/hooks/lib";
+
+if (!gate("test", [bun, "run", "test"])) process.exit(1);
+
+// The edge functions run on Deno, so Deno checks them. It is not part of the
+// Bun toolchain, so the check is skipped when Deno is not installed — CI
+// installs it and runs the same gate.
+if (Bun.which("deno")) {
+  if (!gate("typecheck:edge", [bun, "run", "typecheck:edge"])) process.exit(1);
+  if (!gate("lint:edge", [bun, "run", "lint:edge"])) process.exit(1);
+} else {
+  console.log("\n▸ edge functions — skipped, Deno is not installed");
+}
+
+// The migration chain is checked against a real Postgres. Postgres is not
+// part of the Bun toolchain either, so it skips the same way.
+if (Bun.which("initdb") || Bun.which("psql")) {
+  if (!gate("check:migrations", [bun, "run", "check:migrations"])) process.exit(1);
+} else {
+  console.log("\n▸ migration chain — skipped, Postgres is not installed");
+}
+
+// A credential that was committed is in the history forever. The audit walks
+// every object the repository has ever held.
+if (!gate("audit:secrets", [bun, "run", "audit:secrets"])) process.exit(1);
+
+if (!gate("build", [bun, "run", "build"])) process.exit(1);

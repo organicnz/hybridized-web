@@ -57,10 +57,10 @@ export function Header() {
   };
 
   return (
-    <header className="surface-shell sticky top-0 z-50 border-b shadow-header gpu-filter">
+    <header className="surface-shell gpu-filter sticky top-0 z-50 border-b shadow-header">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3.5 md:px-8">
         {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center gap-3 group">
+        <Link href="/" className="group flex shrink-0 items-center gap-3">
           <span className="relative">
             <Image
               src="/logo.png"
@@ -68,7 +68,7 @@ export function Header() {
               title="Hybridized - Home"
               width={40}
               height={40}
-              className="h-10 w-10 rounded-xl ring-1 ring-border transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 gpu md:h-11 md:w-11"
+              className="gpu h-10 w-10 rounded-xl ring-1 ring-border transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 md:h-11 md:w-11"
               priority
             />
             <span
@@ -76,13 +76,13 @@ export function Header() {
               aria-hidden="true"
             />
           </span>
-          <span className="font-display text-xl md:text-2xl font-bold tracking-tight gradient-text">
+          <span className="gradient-text font-display text-xl font-bold tracking-tight md:text-2xl">
             Hybridized
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
           {NAV_LINKS.map((link) => (
             <NavLink key={link.href} {...link} variant="desktop" />
           ))}
@@ -107,7 +107,7 @@ export function Header() {
             href={user ? "/profile" : "/auth/login"}
             className={cn(
               HEADER_STYLES.button,
-              user && profile?.avatar_url && "p-0 overflow-hidden",
+              user && profile?.avatar_url && "overflow-hidden p-0",
             )}
             aria-label={user ? "Profile" : "Sign in"}
             title={user ? "Profile" : "Sign in"}
@@ -118,7 +118,7 @@ export function Header() {
                 alt="Profile"
                 width={40}
                 height={40}
-                className="w-10 h-10 object-cover"
+                className="h-10 w-10 object-cover"
                 key={profile.avatar_url}
                 unoptimized
               />

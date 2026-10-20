@@ -1,5 +1,8 @@
 # Authentication Fix Summary
 
+> **Historical record.** This is the summary of the fixes as they were made.
+> For how the auth flow works now, see `docs/AUTH.md`.
+
 ## Issues Fixed
 
 ### 1. Infinite Re-render in Auth Hooks
@@ -18,11 +21,15 @@
 
 **Problem:** Middleware wasn't checking user authentication before allowing access to protected routes.
 
-**Solution:** Updated middleware to:
+**Solution:** Updated the proxy to:
 
 - Check user session with `supabase.auth.getUser()`
 - Redirect unauthenticated users from `/profile` and `/dashboard` to login
 - Redirect authenticated users away from auth pages
+
+> Next.js 16 renamed the file: `middleware.ts` is now `proxy.ts`, and the
+> exported function is `proxy` rather than `middleware`. The entries below
+> use the current name.
 
 ### 4. Session Not Persisting After Login
 
@@ -46,7 +53,7 @@
 
 1. `hooks/use-auth.ts` - Fixed infinite re-render
 2. `hooks/use-profile.ts` - Fixed infinite re-render
-3. `middleware.ts` - Added proper auth checks and redirects
+3. `proxy.ts` - Added proper auth checks and redirects
 4. `app/auth/login/page.tsx` - Hard refresh after login
 5. `app/auth/callback/route.ts` - NEW: OAuth callback handler
 6. `components/header.tsx` - Dynamic profile/login link

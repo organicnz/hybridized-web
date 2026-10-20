@@ -72,9 +72,9 @@ export function EnhancedAudioPlayer({
 
   return (
     <div
-      className={`bg-linear-to-br from-purple-900/20 via-black/40 to-blue-900/20 backdrop-blur-sm border border-white/10 rounded-lg p-4 ${className}`}
+      className={`rounded-lg border border-white/10 bg-linear-to-br from-purple-900/20 via-black/40 to-blue-900/20 p-4 backdrop-blur-sm ${className}`}
     >
-      {title && <h3 className="text-white font-semibold mb-3 text-sm">{title}</h3>}
+      {title && <h3 className="mb-3 text-sm font-semibold text-white">{title}</h3>}
 
       {/* biome-ignore lint/a11y/useMediaCaption: no caption track exists for streamed audio */}
       <audio ref={audioRef} src={src} preload="auto" loop={loop} />
@@ -82,14 +82,14 @@ export function EnhancedAudioPlayer({
       <GpuAudioVisualizer
         analyser={analyserRef.current}
         isPlaying={isPlaying}
-        className="w-full aspect-[4/1] max-h-24 mb-3 rounded"
+        className="mb-3 aspect-[4/1] max-h-24 w-full rounded"
       />
 
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={togglePlay}
-          className="bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-2 rounded-full transition-all hover:scale-105"
+          className="rounded-full bg-linear-to-r from-purple-500 to-pink-500 p-2 text-white transition-all hover:scale-105 hover:from-purple-600 hover:to-pink-600"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
@@ -98,7 +98,7 @@ export function EnhancedAudioPlayer({
         <button
           type="button"
           onClick={toggleMute}
-          className="text-white/70 hover:text-white transition-colors"
+          className="text-white/70 transition-colors hover:text-white"
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
           {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -117,7 +117,7 @@ export function EnhancedAudioPlayer({
       </div>
 
       {isInitialized && (
-        <p className="text-xs text-white/50 mt-2">Hardware-accelerated audio enabled</p>
+        <p className="mt-2 text-xs text-white/50">Hardware-accelerated audio enabled</p>
       )}
     </div>
   );

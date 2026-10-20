@@ -105,7 +105,7 @@ async function ArtistContent({ params }: PageProps) {
             {/* Hero header — glass card with gradient text */}
             <section className="glass relative overflow-hidden rounded-3xl p-8 md:p-12">
               <div
-                className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-purple-500/15 blur-[120px]"
+                className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-purple-500/15 blur-[120px]"
                 aria-hidden="true"
               />
               <div
@@ -117,7 +117,7 @@ async function ArtistContent({ params }: PageProps) {
                 {artistName}
               </h1>
               {artistProfile.description && (
-                <p className="max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+                <p className="max-w-2xl text-lg leading-relaxed font-light text-muted-foreground md:text-xl">
                   {artistProfile.description}
                 </p>
               )}
@@ -144,7 +144,7 @@ export default async function ArtistPage({ params }: PageProps) {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex h-full flex-col overflow-hidden">
           <ArtistNav activeArtist="" />
         </div>
       }

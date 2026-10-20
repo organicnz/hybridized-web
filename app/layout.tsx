@@ -84,16 +84,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${display.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${display.variable} bg-background font-sans text-foreground antialiased`}
       >
         <ThemeProvider>
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
           >
             Skip to content
           </a>
-          <div className="fixed inset-0 pointer-events-none app-mesh z-[-1]" aria-hidden="true" />
+          <div className="app-mesh pointer-events-none fixed inset-0 z-[-1]" aria-hidden="true" />
           <RegisterServiceWorker />
           <RecoveryHandler />
           <Toaster

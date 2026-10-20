@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const FIRSTORY_RSS_URL = "https://feed.firstory.me/rss/user/cl3ps0kge021i01y69qhnf36d";
@@ -56,8 +56,9 @@ interface EpisodeData {
   band_id: number | null;
 }
 
-type PlaylistResult =
-  { band: string; found: number; updated: number } | { band: string; error: string };
+type BandSyncResult = { band: string; found: number; updated: number };
+type BandSyncError = { band: string; error: string };
+type PlaylistResult = BandSyncResult | BandSyncError;
 
 // Helper to extract text from CDATA or regular tags
 function extractText(xml: string, tag: string): string {
@@ -65,10 +66,12 @@ function extractText(xml: string, tag: string): string {
     const cdataMatch = xml.match(
       new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`),
     );
-    if (cdataMatch) return cdataMatch[1].trim();
+    const cdata = cdataMatch?.[1];
+    if (cdata !== undefined) return cdata.trim();
 
     const textMatch = xml.match(new RegExp(`<${tag}[^>]*>([^<]*)<\\/${tag}>`));
-    return textMatch ? textMatch[1].trim() : "";
+    const text = textMatch?.[1];
+    return text !== undefined ? text.trim() : "";
   } catch {
     return "";
   }
@@ -78,7 +81,8 @@ function extractText(xml: string, tag: string): string {
 function extractAttr(xml: string, tag: string, attr: string): string {
   try {
     const match = xml.match(new RegExp(`<${tag}[^>]*${attr}="([^"]*)"`));
-    return match ? match[1] : "";
+    const value = match?.[1];
+    return value !== undefined ? value : "";
   } catch {
     return "";
   }
@@ -92,7 +96,7 @@ function matchBandFromTitle(title: string, bands: Band[]): number | null {
 
   // Extract the artist name from title (format: "Artist Name - Show Title")
   const artistMatch = title.match(/^([^-]+)\s*-/);
-  const artistName = artistMatch ? artistMatch[1].trim().toLowerCase() : titleLower;
+  const artistName = artistMatch?.[1]?.trim().toLowerCase() ?? titleLower;
 
   // Special case: Greg Benz belongs to Benz & MD
   if (artistName.includes("greg benz")) {
@@ -216,7 +220,7 @@ Deno.serve(async (req: Request) => {
 
       for (const itemMatch of batch) {
         try {
-          const itemXml = itemMatch[1];
+          const itemXml = itemMatch[1] ?? "";
 
           // Carefully extract all fields
           const title = extractText(itemXml, "title");

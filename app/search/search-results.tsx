@@ -33,9 +33,9 @@ export function SearchResults({ results, query }: { results: EpisodeRow[]; query
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <Music className="w-16 h-16 text-primary/30 mx-auto mb-4" />
+        <Music className="mx-auto mb-4 h-16 w-16 text-primary/30" />
         <p className="text-lg text-muted-foreground">No results found for "{query}"</p>
-        <p className="text-sm text-muted-foreground/70 mt-2">Try a different search term</p>
+        <p className="mt-2 text-sm text-muted-foreground/70">Try a different search term</p>
       </motion.div>
     );
   }
@@ -43,7 +43,7 @@ export function SearchResults({ results, query }: { results: EpisodeRow[]; query
   return (
     <div className="space-y-4">
       <motion.p
-        className="text-muted-foreground mb-4"
+        className="mb-4 text-muted-foreground"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.05 }}
@@ -60,7 +60,7 @@ export function SearchResults({ results, query }: { results: EpisodeRow[]; query
             return (
               <StaggerItem key={episode.id} custom={index}>
                 <motion.div
-                  className={cn("card-raised overflow-hidden group")}
+                  className={cn("card-raised group overflow-hidden")}
                   variants={itemVariants}
                   whileHover={{ y: -4, boxShadow: "0 20px 40px -12px hsl(0 0% 0% / 0.5)" }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -73,18 +73,18 @@ export function SearchResults({ results, query }: { results: EpisodeRow[]; query
                           alt={episode.title}
                           width={80}
                           height={80}
-                          className="rounded-lg object-cover group-hover:scale-105 transition-transform duration-fast"
+                          className="rounded-lg object-cover transition-transform duration-fast group-hover:scale-105"
                         />
                       </div>
                     )}
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-foreground mb-1 truncate group-hover:text-primary transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="mb-1 truncate text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
                         {episode.title}
                       </h3>
-                      <p className="text-sm text-primary/70 mb-2">{artistName}</p>
+                      <p className="mb-2 text-sm text-primary/70">{artistName}</p>
                       {episode.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
                           {episode.description}
                         </p>
                       )}

@@ -1,5 +1,9 @@
 # Edge Functions Security Audit - Final Report
 
+> **Historical record.** This is the audit as it was written on 2025-01-18. The
+> issues it lists were fixed. For how the functions work now, see
+> `docs/edge-functions.md`.
+
 ## ✅ All Functions Verified and Secured
 
 **Audit Date:** 2025-01-18  
@@ -27,17 +31,23 @@
 All protected functions implement this authorization pattern:
 
 ```typescript
-// Authorization check using custom secret
+// Authorization check using custom secret — fails closed
 const authHeader = req.headers.get("Authorization");
 const functionSecret = Deno.env.get("FUNCTION_SECRET");
 
-if (functionSecret && authHeader !== `Bearer ${functionSecret}`) {
+if (!functionSecret || authHeader !== `Bearer ${functionSecret}`) {
   return new Response(JSON.stringify({ error: "Unauthorized" }), {
     status: 401,
     headers: { "Content-Type": "application/json" },
   });
 }
 ```
+
+> The check is **fail-closed**: a missing `FUNCTION_SECRET` rejects every
+> request. The original audit recorded `if (functionSecret && …)`, which
+> failed _open_ — with the secret unset, the guard passed and the function
+> was unprotected. That was tightened afterwards; the snippet above is the
+> current one.
 
 **Functions with this protection:**
 
@@ -125,7 +135,7 @@ curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/sync-firstory
 
 ```bash
 curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/sync-firstory \
-  -H "Authorization: Bearer REDACTED_FUNCTION_SECRET="
+  -H "Authorization: Bearer $FUNCTION_SECRET"
 # Expected: Sync results
 ```
 
@@ -144,12 +154,12 @@ curl "https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/search-bands?q=test"
 
 **Supabase Edge Function Secrets:**
 
-- `FUNCTION_SECRET` = `REDACTED_FUNCTION_SECRET=`
+- `FUNCTION_SECRET` = `your-function-secret-here`
 
 **Local .env:**
 
 ```env
-FUNCTION_SECRET=REDACTED_FUNCTION_SECRET=
+FUNCTION_SECRET=your-function-secret-here
 ```
 
 **Automatically Available:**

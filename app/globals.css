@@ -361,15 +361,15 @@
   .btn-outline,
   .btn-destructive,
   .btn-link {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-fast focus-ring disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium focus-ring transition-all duration-fast disabled:pointer-events-none disabled:opacity-50;
   }
 
   /* Button variants */
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary shadow-xs;
+    @apply bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary;
   }
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary border border-border;
+    @apply border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary;
   }
   .btn-ghost {
     @apply bg-transparent hover:bg-accent active:bg-accent;
@@ -386,10 +386,10 @@
 
   /* Button sizes — declared after the variants so a size always wins. */
   .btn-sm {
-    @apply px-3 py-1.5 text-xs gap-1.5;
+    @apply gap-1.5 px-3 py-1.5 text-xs;
   }
   .btn-lg {
-    @apply px-6 py-3 text-base gap-2;
+    @apply gap-2 px-6 py-3 text-base;
   }
   .btn-icon {
     @apply p-2;
@@ -401,7 +401,7 @@
   .card-raised,
   .card-floating,
   .card-glow {
-    @apply rounded-xl bg-card text-card-foreground border border-border;
+    @apply rounded-xl border border-border bg-card text-card-foreground;
   }
 
   /* Card variants */
@@ -415,7 +415,7 @@
     @apply shadow-card-floating;
   }
   .card-overlay {
-    @apply rounded-xl bg-popover text-popover-foreground border border-border shadow-overlay;
+    @apply rounded-xl border border-border bg-popover text-popover-foreground shadow-overlay;
   }
   .card-glow {
     @apply shadow-glow;
@@ -431,12 +431,12 @@
 
   /* Input styles */
   .input {
-    @apply flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-fast;
+    @apply flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors duration-fast file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* Label */
   .label {
-    @apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
+    @apply text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
   }
 
   /* Scrollbar */

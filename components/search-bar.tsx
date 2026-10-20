@@ -91,10 +91,10 @@ export function SearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           placeholder="Search mixes..."
-          className="input w-40 md:w-64 pl-10"
+          className="input w-40 pl-10 md:w-64"
           aria-label="Search mixes"
         />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       </form>
 
       {showDropdown && (
@@ -111,10 +111,10 @@ export function SearchBar() {
           />
 
           {/* Recent Searches Dropdown */}
-          <div className="absolute top-full left-0 right-0 mt-2 card-overlay animate-in slide-in-from-top-2 duration-200 z-50">
+          <div className="card-overlay absolute top-full right-0 left-0 z-50 mt-2 animate-in duration-200 slide-in-from-top-2">
             <div className="p-3">
-              <div className="flex items-center justify-between mb-2 px-2">
-                <h3 className="text-muted-foreground font-medium text-xs">Recent Searches</h3>
+              <div className="mb-2 flex items-center justify-between px-2">
+                <h3 className="text-xs font-medium text-muted-foreground">Recent Searches</h3>
                 <button
                   onClick={clearRecentSearches}
                   className="btn btn-ghost btn-sm text-xs text-muted-foreground hover:text-foreground"
@@ -129,11 +129,11 @@ export function SearchBar() {
                   <button
                     key={search}
                     onClick={() => handleRecentSearchClick(search)}
-                    className="btn btn-ghost w-full justify-start gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-fast border-transparent"
+                    className="btn btn-ghost w-full justify-start gap-3 rounded-lg border-transparent px-3 py-2 text-sm text-muted-foreground transition-all duration-fast hover:bg-accent hover:text-foreground"
                     type="button"
                   >
-                    <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm truncate flex-1">{search}</span>
+                    <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="flex-1 truncate text-sm">{search}</span>
                   </button>
                 ))}
               </div>

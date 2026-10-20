@@ -38,7 +38,7 @@ export function ContactForm() {
 
   return (
     <>
-      <ScrollReveal variant="fade-up" delay={100} className="text-center mb-8">
+      <ScrollReveal variant="fade-up" delay={100} className="mb-8 text-center">
         <span className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-border">
           <Mail className="h-8 w-8 text-primary" aria-hidden="true" />
         </span>
@@ -48,7 +48,7 @@ export function ContactForm() {
         <p className="text-muted-foreground">Have questions? We&apos;d love to hear from you</p>
       </ScrollReveal>
 
-      <ScrollReveal variant="scale-up" delay={200} className="max-w-2xl mx-auto">
+      <ScrollReveal variant="scale-up" delay={200} className="mx-auto max-w-2xl">
         <div className="glass p-6 md:p-8">
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
@@ -104,25 +104,25 @@ export function ContactForm() {
             )}
 
             <button type="submit" className="btn btn-primary btn-lg w-full justify-center gap-2">
-              <Send className="w-4 h-4" />
+              <Send className="h-4 w-4" />
               Send Message
             </button>
           </form>
         </div>
       </ScrollReveal>
 
-      <ScrollReveal variant="fade-up" delay={300} className="mt-6 grid md:grid-cols-2 gap-4">
+      <ScrollReveal variant="fade-up" delay={300} className="mt-6 grid gap-4 md:grid-cols-2">
         <section className="glass p-5 text-center">
-          <MessageSquare className="w-6 h-6 text-primary mx-auto mb-2" />
-          <h2 className="text-sm font-semibold text-foreground mb-1">Chat with us</h2>
+          <MessageSquare className="mx-auto mb-2 h-6 w-6 text-primary" />
+          <h2 className="mb-1 text-sm font-semibold text-foreground">Chat with us</h2>
           <p className="text-xs text-muted-foreground">Respond within 24h</p>
         </section>
         <a
           href={`mailto:${CONTACT_EMAIL}`}
           className="glass p-5 text-center transition-all hover:-translate-y-0.5 hover:shadow-glow"
         >
-          <Mail className="w-6 h-6 text-primary mx-auto mb-2" />
-          <h2 className="text-sm font-semibold text-foreground mb-1">Email us</h2>
+          <Mail className="mx-auto mb-2 h-6 w-6 text-primary" />
+          <h2 className="mb-1 text-sm font-semibold text-foreground">Email us</h2>
           <p className="text-xs text-muted-foreground">{CONTACT_EMAIL}</p>
         </a>
       </ScrollReveal>

@@ -2,13 +2,15 @@
 
 ## ✅ Completed
 
-### Auth Pages (6)
+### Auth Pages (8)
 
 - ✅ `/auth/login` - Sign in page
 - ✅ `/auth/signup` - Registration with email verification
 - ✅ `/auth/forgot-password` - Password reset request
 - ✅ `/auth/reset-password` - Set new password
 - ✅ `/auth/callback` - OAuth callback handler
+- ✅ `/auth/confirm-email` - Email confirmation handler
+- ✅ `/auth/handle-recovery` - Recovery link handler
 - ✅ `/auth/logout` - Sign out route
 
 ### Hooks (2)
@@ -16,26 +18,25 @@
 - ✅ `useAuth()` - Current user and auth state
 - ✅ `useProfile()` - User profile management
 
-### Components (4)
+### Components (3)
 
-- ✅ `<UserMenu />` - Dropdown with profile/sign out
-- ✅ `<ProtectedRoute>` - Client-side route protection
-- ✅ `<SocialAuthButtons />` - GitHub/Google OAuth
-- ✅ `<HeaderWithAuth />` - Auth-enabled header
+- ✅ `<ProtectedRoute>` - Client-side route protection (`components/auth/protected-route.tsx`)
+- ✅ `<AuthShell>` - The shared frame around every auth page (`components/auth/auth-shell.tsx`)
+- ✅ `<RecoveryHandler>` - Applies a recovery link to the session (`components/auth/recovery-handler.tsx`)
 
-### Utilities (2 files, 9 functions)
+The header renders the profile link itself, from `useAuth()` and
+`useProfile()` — there is no separate `UserMenu`, `SocialAuthButtons` or
+`HeaderWithAuth` component.
 
-- ✅ `lib/auth/utils.ts`
-  - `getCurrentUser()` - Get user in Server Components
-  - `requireAuth()` - Require auth with redirect
-  - `getUserProfile()` - Fetch profile data
-  - `isAuthenticated()` - Check auth status
-- ✅ `lib/auth/session.ts`
-  - `getSession()` - Get current session
-  - `refreshSession()` - Refresh session
-  - `clearAuthCookies()` - Clear auth cookies
-  - `getSessionExpiry()` - Get expiry time
-  - `isSessionExpired()` - Check if expired
+### Where the auth helpers actually live
+
+There is no `lib/auth/` directory. The behaviour is split by where it runs:
+
+- `lib/supabase/server.ts` - `createClient()`, the Server Component client
+- `lib/supabase/client.ts` - `getSupabase()`, the browser client
+- `proxy.ts` - the session refresh, the cookie handling and the route guards
+- `components/auth/protected-route.tsx` - the client-side guard
+- `app/auth/logout/route.ts` - sign out
 
 ### Database
 
@@ -44,9 +45,10 @@
 - ✅ Auto-trigger for profile creation
 - ✅ TypeScript types already exist in `lib/types/database.types.ts`
 
-### Middleware
+### The Proxy
 
-- ✅ Enhanced `middleware.ts` with protected routes config
+- ✅ `proxy.ts` with the protected-route config — Next.js 16 renamed the file
+  from `middleware.ts`, and the exported function from `middleware` to `proxy`
 - ✅ Automatic session management
 
 ### Documentation (4 files)
@@ -99,9 +101,12 @@ Visit:
 
 ### Social Auth (OAuth)
 
-1. Enable providers in Supabase Dashboard
-2. Add `<SocialAuthButtons />` to login/signup pages
-3. Configure OAuth redirect URLs
+Not implemented. To add it:
+
+1. Enable providers in the Supabase Dashboard
+2. Add a provider button to `app/auth/login/login-client.tsx` and
+   `app/auth/signup/signup-client.tsx` — call `supabase.auth.signInWithOAuth`
+3. Configure the OAuth redirect URLs
 
 ### Email Customization
 
@@ -120,16 +125,21 @@ Visit:
 
 ## 🎯 Integration Points
 
-### Replace Header
+### The Header
+
+Already done — there is no separate `HeaderWithAuth`. `components/header.tsx`
+reads `useAuth()` and `useProfile()` itself and renders the profile link or
+the sign-in link. It is mounted by `components/app-shell.tsx` and by
+`app/home/layout.tsx`:
 
 ```tsx
-// In app/layout.tsx
-import { HeaderWithAuth } from "@/components/header-with-auth";
+// components/app-shell.tsx
+import { Header } from "@/components/header";
 
-export default function Layout({ children }) {
+export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <HeaderWithAuth />
+      <Header />
       {children}
     </>
   );
@@ -138,16 +148,10 @@ export default function Layout({ children }) {
 
 ### Protect Routes
 
+Two ways, depending on where the check happens.
+
 ```tsx
-// Server Component
-import { requireAuth } from "@/lib/auth/utils";
-
-export default async function Page() {
-  const user = await requireAuth();
-  return <div>Protected</div>;
-}
-
-// Client Component
+// Client Component — components/auth/protected-route.tsx
 import { ProtectedRoute } from "@/components/auth/protected-route";
 
 export default function Page() {
@@ -156,6 +160,23 @@ export default function Page() {
       <div>Protected</div>
     </ProtectedRoute>
   );
+}
+```
+
+```tsx
+// Server Component — the session comes from the request-scoped client
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+
+export default async function Page() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/auth/login");
+
+  return <div>Protected</div>;
 }
 ```
 
@@ -172,34 +193,39 @@ export default function Page() {
 7. ✅ Set new password
 8. ✅ Sign out
 
-### Automated Tests (Future)
+### Automated Tests
 
-- [ ] Unit tests for hooks
-- [ ] Integration tests for auth flow
-- [ ] E2E tests for complete user journey
+The auth surface is covered by the `bun test` suite:
+
+- ✅ `tests/api-auth.test.ts` — the shared-secret path of `isSyncAuthorized`
+- ✅ `tests/api-auth-admin.test.ts` — the admin-profile path, and the profile query
+- ✅ `tests/supabase-client.test.ts` — the browser client, and its memoisation
+- ✅ `tests/supabase-server.test.ts` — the server client and its cookie adapter
+- ✅ `tests/user-storage*.test.ts` — the user-scoped storage, signed in and out
+- ✅ `tests/rls-migration.test.ts` — the RLS policies in the migrations
+
+Still open:
+
+- [ ] E2E tests for the complete user journey
 
 ## 📊 File Summary
 
-**Total Files Created: 19**
-
-- Auth Pages: 6
-- Components: 4
-- Hooks: 2
-- Utilities: 2
+- Auth Pages: 8
+- Auth Components: 3
+- Auth Hooks: 2
+- Supabase clients: 4 (`lib/supabase/`)
+- Test files covering auth: 6
 - Documentation: 4
-- Migration: 1
-
-**Lines of Code: ~2,500+**
+- Migrations: 1
 
 ## 🚀 Next Steps
 
 1. Run database migration
 2. Add `NEXT_PUBLIC_SITE_URL` to `.env`
 3. Test signup/login flow
-4. Integrate `<UserMenu />` into header
-5. Protect routes as needed
-6. Customize email templates
-7. Enable OAuth providers (optional)
+4. Protect further routes as needed — add them to `protectedPaths` in `proxy.ts`
+5. Customize email templates
+6. Enable OAuth providers (optional)
 
 ## 📚 Documentation
 
@@ -264,7 +290,7 @@ See `docs/AUTH.md` for detailed troubleshooting guide.
 Common issues:
 
 - Email not sending → Check Supabase email settings
-- Session not persisting → Verify middleware config
+- Session not persisting → Verify the proxy config
 - Profile not created → Check database trigger
 - Redirect issues → Verify `NEXT_PUBLIC_SITE_URL`
 

@@ -13,12 +13,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Bun
+      - name: Setup Bun (bootstrap)
         # Bun is here for one thing: the URL-encoding of the database
         # password below. The project has no Node.js and no Python.
+        #
+        # This only provides a Bun capable of running the installer below; the
+        # pinned build replaces it in place, in the same directory, so every
+        # later step runs the build `.bun-version` names.
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: canary
+
+      - name: Install pinned Bun
+        # The same installer CI uses, so the migration runs on the same build
+        # as the rest of the project rather than on whatever the canary
+        # channel served that day.
+        run: bun scripts/install-bun.ts --output-dir "$HOME/.bun/bin"
+
+      - name: Verify Bun revision
+        run: bun --revision
 
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
@@ -31,10 +44,16 @@ jobs:
         # Supabase management API, so it needs no access token — only the
         # database password. `supabase link` would need an access token, and
         # the project ref is already carried by the pooler username.
+        #
+        # `--include-all` applies every migration the remote has not
+        # recorded, whatever its position. `20240101000001_core_tables.sql`
+        # sorts *before* migrations that have already been applied, so
+        # without the flag the CLI refuses it as out of order. The migration
+        # is idempotent, so on the production database it is a no-op.
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           # Use connection pooler for external CI runners; DB password encoded
           ENCODED_PW=$(bun -e 'console.log(encodeURIComponent(process.env.SUPABASE_DB_PASSWORD ?? ""))')
           # Pooler requires tenant identifier: username = postgres.{project_ref}
-          supabase db push --db-url "postgresql://postgres.neslxchdtibzhxijxcbg:${ENCODED_PW}@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+          supabase db push --include-all --db-url "postgresql://postgres.neslxchdtibzhxijxcbg:${ENCODED_PW}@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"

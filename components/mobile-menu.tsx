@@ -39,7 +39,7 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
           exit={{ height: 0, opacity: 0 }}
           transition={{ type: "spring", stiffness: 320, damping: 32 }}
           className={cn(
-            "surface-shell overflow-hidden border-t shadow-header md:hidden gpu-filter",
+            "surface-shell gpu-filter overflow-hidden border-t shadow-header md:hidden",
           )}
           aria-label="Mobile navigation"
         >

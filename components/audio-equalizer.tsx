@@ -232,7 +232,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex h-10 w-10 items-center justify-center rounded-xl border backdrop-blur-md transition-all duration-200 group ${
+        className={`group flex h-10 w-10 items-center justify-center rounded-xl border backdrop-blur-md transition-all duration-200 ${
           isOpen
             ? "border-primary/50 bg-primary/15 text-primary shadow-glow"
             : "border-border bg-accent/40 text-muted-foreground hover:border-primary/30 hover:text-foreground"
@@ -250,7 +250,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
           <button
             type="button"
             aria-label="Close equalizer"
-            className="fixed inset-0 z-40 cursor-default backdrop-blur-sm bg-black/20"
+            className="fixed inset-0 z-40 cursor-default bg-black/20 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setIsOpen(false);
@@ -259,7 +259,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
           />
 
           {/* Equalizer Panel with glassmorphism */}
-          <div className="card-overlay absolute bottom-full right-0 z-50 mb-3 w-[min(520px,90vw)] animate-in slide-in-from-bottom-4 p-5 duration-300">
+          <div className="card-overlay absolute right-0 bottom-full z-50 mb-3 w-[min(520px,90vw)] animate-in p-5 duration-300 slide-in-from-bottom-4">
             {/* Gradient overlay */}
             <div className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-purple-500/10 via-transparent to-blue-500/10" />
             {!isAuthenticated ? (
@@ -362,7 +362,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
                           }}
                         />
                       </div>
-                      <span className="whitespace-nowrap text-[10px] font-medium text-muted-foreground transition-colors group-hover:text-foreground">
+                      <span className="text-[10px] font-medium whitespace-nowrap text-muted-foreground transition-colors group-hover:text-foreground">
                         {band.label}
                       </span>
                       <span className="rounded bg-accent px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground transition-colors group-hover:bg-accent/70">

@@ -6,9 +6,9 @@ import { Suspense } from "react";
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden">
       <Header />
-      <div className="flex-1 flex flex-col overflow-hidden">{children}</div>
+      <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
       <Suspense fallback={null}>
         <Footer />
       </Suspense>

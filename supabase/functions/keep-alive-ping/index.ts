@@ -1,6 +1,6 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 
-Deno.serve(async (_req) => {
+Deno.serve((_req) => {
   console.log("Keep-alive ping received at:", new Date().toISOString());
 
   const responseMessage = {

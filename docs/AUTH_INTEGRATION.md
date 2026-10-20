@@ -39,12 +39,12 @@ export function Header() {
 
       {/* Replace the User icon link with: */}
       {loading ? (
-        <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse" />
+        <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
       ) : isAuthenticated ? (
         <UserMenu />
       ) : (
         <Link href="/auth/login">
-          <User className="w-5 h-5" />
+          <User className="h-5 w-5" />
         </Link>
       )}
     </header>
@@ -212,7 +212,7 @@ export function SignOutButton() {
       onClick={handleSignOut}
       className="flex items-center gap-2 text-red-400 hover:text-red-300"
     >
-      <LogOut className="w-4 h-4" />
+      <LogOut className="h-4 w-4" />
       Sign Out
     </button>
   );
@@ -233,7 +233,7 @@ export function AuthAwareComponent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="w-8 h-8 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-500/30 border-t-purple-500" />
       </div>
     );
   }
@@ -287,30 +287,76 @@ export function CommentForm() {
 }
 ```
 
-## Middleware Protection
+## Route Protection
 
-Protect multiple routes at once in `middleware.ts`:
+Route protection lives in `proxy.ts`. Next.js 16 renamed the file — it used to
+be `middleware.ts`, and the exported function used to be `middleware` — and
+the session refresh is inline rather than behind a helper module.
 
 ```typescript
-import { updateSession } from "@/lib/supabase/middleware";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+// proxy.ts
+import { createServerClient } from "@supabase/ssr";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  const response = await updateSession(request);
-
-  // Protected routes
-  const protectedPaths = ["/profile", "/dashboard", "/settings", "/admin"];
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  if (protectedPaths.some((p) => path.startsWith(p))) {
-    // Add additional auth checks here if needed
-    // The session is already updated by updateSession
+  // Per-IP rate limiting for the API.
+  if (path.startsWith("/api/")) {
+    const limited = rateLimit(request);
+    if (limited) return limited;
   }
 
-  return response;
+  // Session refresh + auth route guards for pages.
+  if (!path.startsWith("/api/")) {
+    let supabaseResponse = NextResponse.next({ request });
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            for (const { name, value } of cookiesToSet) {
+              request.cookies.set(name, value);
+            }
+            supabaseResponse = NextResponse.next({ request });
+            for (const { name, value, options } of cookiesToSet) {
+              supabaseResponse.cookies.set(name, value, options);
+            }
+          },
+        },
+      },
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const protectedPaths = ["/profile", "/dashboard"];
+    const authPaths = ["/auth/login", "/auth/signup"];
+
+    if (!user && protectedPaths.some((p) => path.startsWith(p))) {
+      const redirectUrl = new URL("/auth/login", request.url);
+      redirectUrl.searchParams.set("redirectTo", path);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (user && authPaths.some((p) => path.startsWith(p))) {
+      return NextResponse.redirect(new URL("/home", request.url));
+    }
+
+    return supabaseResponse;
+  }
+
+  return NextResponse.next({ request });
 }
 ```
+
+To protect another route, add its path to `protectedPaths` in `proxy.ts`.
 
 ## API Route Protection
 

@@ -27,7 +27,7 @@ export function Footer() {
               </span>
               <Link
                 href={link.href}
-                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
               >
                 {link.label}
               </Link>
@@ -45,7 +45,7 @@ export function Footer() {
               </span>
               <Link
                 href={link.href}
-                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                className="rounded-md underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
               >
                 {link.label}
               </Link>

@@ -32,33 +32,29 @@
 
 ### ⚠️ Missing/Incomplete Flows
 
-1. **Email Confirmation Handler** ❌
-   - Users receive confirmation email but no dedicated handler
-   - Currently relies on generic callback
-   - **Needed:** Dedicated confirmation success page
-
-2. **Change Email Address** ❌
-   - No UI to change email
+1. **Change Email Address** ❌
+   - No UI to change email — the profile field is read-only
    - No email verification flow for new email
    - **Needed:** Profile page email change form + verification handler
 
-3. **Invite User** ❌
-   - No admin interface to invite users
+2. **Invite User** ⚠️
+   - The `invite-users` edge function exists and takes the list of addresses
+     from its request body, but there is no admin interface to call it
    - No invite acceptance flow
-   - **Needed:** Admin panel + invite handler
+   - **Needed:** Admin panel to call the function
 
-4. **Reauthentication** ❌
+3. **Reauthentication** ❌
    - No flow to re-verify identity before sensitive actions
    - **Needed:** Modal/page for password re-entry before critical operations
 
-5. **Email Verification Status** ⚠️
-   - No clear indication if email is verified
-   - No resend verification option
-   - **Needed:** Profile indicator + resend button
-
-6. **Account Deletion** ❌
+4. **Account Deletion** ❌
    - No way for users to delete their account
    - **Needed:** Profile page delete account flow with confirmation
+
+> The email confirmation handler (`/auth/confirm-email`) and the email
+> verification status on the profile — the badge and the resend button — were
+> listed here as missing when this document was written. Both are implemented
+> now.
 
 ## Recommended Implementation Priority
 
@@ -130,28 +126,21 @@
 
 ## Implementation Guide
 
-### 1. Email Confirmation Success Page
+### 1. Email Confirmation Success Page — done
 
-Create `/auth/confirm-email/page.tsx`:
+`app/auth/confirm-email/page.tsx`, with the client half in
+`app/auth/confirm-email/confirm-email-client.tsx`. It handles a successful
+email confirmation, shows the result and redirects to login or home.
 
-```typescript
-// Handles successful email confirmation
-// Shows success message and redirects to login or home
-```
+### 2. Email Verification Status — done
 
-### 2. Email Verification Status
+`app/profile/profile-client.tsx` reads `user.email_confirmed_at`, shows the
+verified badge, and offers a resend button that calls
+`supabase.auth.resend({ type: "signup" })`.
 
-Update `/app/profile/page.tsx`:
+### 3. Change Email Flow — not done
 
-```typescript
-// Add email_confirmed_at check
-// Show verification badge or resend button
-// Implement resend verification email function
-```
-
-### 3. Change Email Flow
-
-Create `/auth/change-email/page.tsx`:
+Create `app/auth/change-email/page.tsx`:
 
 ```typescript
 // Form to enter new email
@@ -159,16 +148,16 @@ Create `/auth/change-email/page.tsx`:
 // Shows message to verify new email
 ```
 
-Create `/auth/verify-email-change/page.tsx`:
+Create `app/auth/verify-email-change/page.tsx`:
 
 ```typescript
 // Handles email change verification token
-// Similar to reset password handler
+// Similar to the reset-password handler
 ```
 
-### 4. Reauthentication Modal
+### 4. Reauthentication Modal — not done
 
-Create `/components/auth/reauth-modal.tsx`:
+Create `components/auth/reauth-modal.tsx`:
 
 ```typescript
 // Modal that prompts for password
@@ -176,9 +165,9 @@ Create `/components/auth/reauth-modal.tsx`:
 // Returns success/failure to parent component
 ```
 
-### 5. Account Deletion
+### 5. Account Deletion — not done
 
-Update `/app/profile/page.tsx`:
+Update `app/profile/profile-client.tsx`:
 
 ```typescript
 // Add delete account button

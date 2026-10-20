@@ -35,5 +35,9 @@ next-env.d.ts
 # supabase temp
 supabase/.temp/
 
+# Deno's node_modules for the edge functions — the Supabase edge runtime is
+# Deno, so it resolves its own npm dependencies here.
+supabase/functions/node_modules/
+
 # accidental tilde directory
 ~/

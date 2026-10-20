@@ -16,47 +16,47 @@ export default function SupportPage() {
       <div className="section-container py-10 md:py-12">
         <Link
           href="/home"
-          className="mb-8 inline-flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-colors hover:text-foreground group"
+          className="group mb-8 inline-flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to
           Home
         </Link>
-        <div className="max-w-4xl mx-auto">
-          <h1 className="mb-4 font-display text-5xl font-bold tracking-tight gradient-text">
+        <div className="mx-auto max-w-4xl">
+          <h1 className="gradient-text mb-4 font-display text-5xl font-bold tracking-tight">
             Support
           </h1>
-          <p className="text-muted-foreground text-lg mb-12">
+          <p className="mb-12 text-lg text-muted-foreground">
             Need help? Choose the best way to get support.
           </p>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
             <Link
               href="/contact"
-              className="glass rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow group"
+              className="glass group rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow"
             >
               <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border transition-transform group-hover:scale-105">
-                <Mail className="w-7 h-7 text-primary" />
+                <Mail className="h-7 w-7 text-primary" />
               </span>
-              <h3 className="font-display text-xl font-semibold mb-2">Contact Us</h3>
+              <h3 className="mb-2 font-display text-xl font-semibold">Contact Us</h3>
               <p className="text-sm text-muted-foreground">Send us a message.</p>
             </Link>
             <Link
               href="/terms"
-              className="glass rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow group"
+              className="glass group rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow"
             >
               <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border transition-transform group-hover:scale-105">
-                <Book className="w-7 h-7 text-primary" />
+                <Book className="h-7 w-7 text-primary" />
               </span>
-              <h3 className="font-display text-xl font-semibold mb-2">Terms</h3>
+              <h3 className="mb-2 font-display text-xl font-semibold">Terms</h3>
               <p className="text-sm text-muted-foreground">Read our terms of service.</p>
             </Link>
             <Link
               href="/privacy"
-              className="glass rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow group"
+              className="glass group rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-glow"
             >
               <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-border transition-transform group-hover:scale-105">
-                <MessageCircle className="w-7 h-7 text-primary" />
+                <MessageCircle className="h-7 w-7 text-primary" />
               </span>
-              <h3 className="font-display text-xl font-semibold mb-2">Privacy</h3>
+              <h3 className="mb-2 font-display text-xl font-semibold">Privacy</h3>
               <p className="text-sm text-muted-foreground">Our privacy policy.</p>
             </Link>
           </div>

@@ -28,7 +28,7 @@ export function AuthShell({
     <div className="relative flex min-h-screen items-center justify-center p-4">
       <Link
         href={backHref}
-        className="fixed left-6 top-6 z-10 flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-all hover:text-foreground group"
+        className="group fixed top-6 left-6 z-10 flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-all hover:text-foreground"
       >
         <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
         <span className="font-medium">{backLabel}</span>
@@ -36,7 +36,7 @@ export function AuthShell({
 
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="mb-6 inline-flex items-center gap-3 group">
+          <Link href="/" className="group mb-6 inline-flex items-center gap-3">
             <Image
               src="/logo.png"
               alt="Hybridized Logo"
@@ -114,7 +114,7 @@ export function AuthField({
       <div className="relative">
         {icon && (
           <span
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           >
             {icon}

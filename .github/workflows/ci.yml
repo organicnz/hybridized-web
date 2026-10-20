@@ -43,6 +43,8 @@ jobs:
         run: bun --revision
 
       - name: Cache Bun install cache
+        # The install cache holds the tarballs the isolated linker
+        # materialises from, so this one cache covers the whole install.
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
@@ -52,11 +54,30 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Setup Deno
+        # The Supabase edge functions run on Deno — the Supabase edge runtime
+        # is Deno — so they are type-checked and linted with the runtime that
+        # will actually execute them. Bun cannot resolve their `jsr:` imports.
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Edge functions (typecheck + lint)
+        run: |
+          bun run typecheck:edge
+          bun run lint:edge
+
       - name: Doctor (Bun environment invariants)
         run: bun run doctor
 
       - name: Verify (lint + typecheck + test)
         run: bun run verify
+
+      - name: Coverage
+        # `scripts/coverage.ts` runs the suite and enforces the floor declared
+        # in bunfig.toml, so this step fails when a new module lands without
+        # tests.
+        run: bun run test:coverage
 
       - name: Build
         # The build prerenders pages that read Supabase, so it needs the
@@ -71,6 +92,61 @@ jobs:
         # Reporting only — advisories should not block a deploy on their own.
         continue-on-error: true
         run: bun audit --audit-level=high
+
+  secrets:
+    name: Secret Audit
+    runs-on: ubuntu-latest
+
+    # A credential that was committed is in the history forever. The working
+    # tree is checked by the doctor on every change; this walks every object
+    # the repository has ever held, so a secret that was committed and later
+    # removed cannot be forgotten.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # The whole history — a shallow clone has nothing to audit.
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+
+      - name: Install pinned Bun
+        run: bun scripts/install-bun.ts --output-dir "$HOME/.bun/bin"
+
+      - name: Audit the history for credentials
+        run: bun run audit:secrets
+
+  migrations:
+    name: Migration Chain
+    runs-on: ubuntu-latest
+    needs: verify
+
+    # The Supabase migrations are the schema, and the generated types are the
+    # contract the application reads. This applies the whole chain to a
+    # throwaway Postgres and compares the result with the contract, so a
+    # migration that assumes a table or a column nobody creates cannot pass.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: canary
+
+      - name: Install pinned Bun
+        run: bun scripts/install-bun.ts --output-dir "$HOME/.bun/bin"
+
+      - name: Setup Postgres
+        uses: shogo82148/actions-setup-postgresql@v2
+        with:
+          postgresql-version: "18"
+
+      - name: Check the migration chain
+        run: bun run check:migrations
 
   shaders:
     name: Shader Validation

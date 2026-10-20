@@ -1,0 +1,54 @@
+#!/usr/bin/env bun
+/**
+ * Pre-commit hook — the fast gates, on the staged files.
+ *
+ *   1. `bun fmt`   — format the staged source, config and style files
+ *   2. `bun lint`  — lint the staged source files
+ *   3. `tsrs`      — type-check the project
+ *   4. `bun check` — type-check the project again, with Bun's own checker
+ *
+ * Steps 3 and 4 are both sub-second and both are gates, so running both here
+ * means a broken type never reaches a commit. `bun run verify` runs exactly
+ * the same pair.
+ *
+ * The formatter rewrites files in the working tree, so the reformatted files
+ * are re-staged before the commit continues — otherwise the commit would
+ * record the pre-format content.
+ */
+import { gate, restage, stagedFiles, bun } from "../scripts/hooks/lib";
+
+/** Files the formatter should touch. */
+const FORMATTABLE = /\.(ts|tsx|js|jsx|mjs|cjs|json|css|md|mdx|yml|yaml|toml)$/;
+
+/** Files the linter should look at. */
+const LINTABLE = /\.(ts|tsx|js|jsx|mjs|cjs)$/;
+
+const staged = stagedFiles();
+if (staged.length === 0) {
+  process.exit(0);
+}
+
+const formattable = staged.filter((file) => FORMATTABLE.test(file));
+const lintable = staged.filter((file) => LINTABLE.test(file));
+
+if (formattable.length > 0) {
+  const formatted = gate("format", [bun, "fmt", "--no-error-on-unmatched-pattern", ...formattable]);
+  if (!formatted) process.exit(1);
+  restage(formattable);
+}
+
+if (lintable.length > 0) {
+  const linted = gate("lint", [
+    bun,
+    "lint",
+    "--no-script",
+    "-c",
+    "oxlint.json",
+    "--no-error-on-unmatched-pattern",
+    ...lintable,
+  ]);
+  if (!linted) process.exit(1);
+}
+
+if (!gate("typecheck", [bun, "x", "--bun", "tsrs", "--noEmit"])) process.exit(1);
+if (!gate("typecheck:fast", [bun, "check"])) process.exit(1);

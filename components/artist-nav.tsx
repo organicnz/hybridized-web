@@ -63,7 +63,7 @@ export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
     <nav
       ref={navRef}
       className={cn(
-        "surface-shell flex h-14 items-center gap-7 overflow-x-auto border-b px-6 scrollbar-hide",
+        "surface-shell scrollbar-hide flex h-14 items-center gap-7 overflow-x-auto border-b px-6",
         className,
       )}
       aria-label="Artist navigation"
@@ -79,7 +79,7 @@ export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
             href={`/home/${getArtistSlug(artist)}`}
             onClick={(e) => handleClick(e, artist)}
             className={cn(
-              "shrink-0 whitespace-nowrap border-b-2 pb-4 font-display text-sm font-semibold transition-all",
+              "shrink-0 border-b-2 pb-4 font-display text-sm font-semibold whitespace-nowrap transition-all",
               isActive
                 ? "cursor-default border-primary text-foreground"
                 : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",

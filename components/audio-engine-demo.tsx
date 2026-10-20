@@ -23,7 +23,7 @@ export function AudioEngineDemo() {
   if (!src) {
     return (
       <div
-        className="w-full h-24 rounded-lg bg-white/5 border border-white/10 animate-pulse"
+        className="h-24 w-full animate-pulse rounded-lg border border-white/10 bg-white/5"
         aria-hidden="true"
       />
     );

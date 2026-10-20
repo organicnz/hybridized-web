@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 
 export default function AudioDemoPage() {
   return (
-    <div className={cn("min-h-screen p-8 bg-gradient-hero")}>
-      <div className="max-w-4xl mx-auto space-y-8">
-        <ScrollReveal variant="fade-up" delay={100} className="text-center mb-12">
-          <h1 className="text-fluid-xl font-bold bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent mb-4">
+    <div className={cn("bg-gradient-hero min-h-screen p-8")}>
+      <div className="mx-auto max-w-4xl space-y-8">
+        <ScrollReveal variant="fade-up" delay={100} className="mb-12 text-center">
+          <h1 className="mb-4 bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-fluid-xl font-bold text-transparent">
             Hardware-Accelerated Audio Engine
           </h1>
           <p className="text-muted-foreground">
@@ -23,18 +23,18 @@ export default function AudioDemoPage() {
           </p>
         </ScrollReveal>
 
-        <ScrollReveal variant="scale-up" delay={200} className="max-w-2xl mx-auto">
+        <ScrollReveal variant="scale-up" delay={200} className="mx-auto max-w-2xl">
           <AudioEngineDemo />
-          <p className="text-muted-foreground/60 text-xs text-center mt-2">
+          <p className="mt-2 text-center text-xs text-muted-foreground/60">
             Frequency visualisation renders on the GPU via WebGPU, with an automatic Canvas 2D
             fallback.
           </p>
         </ScrollReveal>
 
-        <ScrollReveal variant="fade-up" delay={300} className="grid md:grid-cols-2 gap-6">
+        <ScrollReveal variant="fade-up" delay={300} className="grid gap-6 md:grid-cols-2">
           <section className={cn("card-raised p-6")}>
-            <h2 className="text-xl font-semibold text-foreground mb-4">Features</h2>
-            <ul className="space-y-2 text-muted-foreground text-sm">
+            <h2 className="mb-4 text-xl font-semibold text-foreground">Features</h2>
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li>✓ 48kHz sample rate for studio quality</li>
               <li>✓ 10-band parametric equalizer</li>
               <li>✓ HRTF-based 3D spatial audio</li>
@@ -46,8 +46,8 @@ export default function AudioDemoPage() {
           </section>
 
           <section className={cn("card-raised p-6")}>
-            <h2 className="text-xl font-semibold text-foreground mb-4">Technical Details</h2>
-            <ul className="space-y-2 text-muted-foreground text-sm">
+            <h2 className="mb-4 text-xl font-semibold text-foreground">Technical Details</h2>
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li>• Web Audio API with AudioContext</li>
               <li>• BiquadFilter nodes for EQ bands</li>
               <li>• PannerNode with HRTF panning model</li>

@@ -186,7 +186,7 @@ export function CustomAudioPlayer({
         <button
           type="button"
           onClick={() => skip(-10)}
-          className="rounded-lg px-1.5 py-1 font-mono text-[11px] font-medium tabular-nums text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="rounded-lg px-1.5 py-1 font-mono text-[11px] font-medium text-muted-foreground tabular-nums transition-colors hover:bg-accent hover:text-accent-foreground"
           aria-label="Rewind 10 seconds"
         >
           -10s
@@ -208,7 +208,7 @@ export function CustomAudioPlayer({
         <button
           type="button"
           onClick={() => skip(10)}
-          className="rounded-lg px-1.5 py-1 font-mono text-[11px] font-medium tabular-nums text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="rounded-lg px-1.5 py-1 font-mono text-[11px] font-medium text-muted-foreground tabular-nums transition-colors hover:bg-accent hover:text-accent-foreground"
           aria-label="Forward 10 seconds"
         >
           +10s
@@ -227,7 +227,7 @@ export function CustomAudioPlayer({
       </div>
 
       {/* Time */}
-      <span className="hidden font-mono text-[11px] tabular-nums text-muted-foreground sm:inline">
+      <span className="hidden font-mono text-[11px] text-muted-foreground tabular-nums sm:inline">
         {formatTime(currentTime)}
       </span>
 
@@ -249,7 +249,7 @@ export function CustomAudioPlayer({
       </div>
 
       {/* Duration */}
-      <span className="hidden font-mono text-[11px] tabular-nums text-muted-foreground sm:inline">
+      <span className="hidden font-mono text-[11px] text-muted-foreground tabular-nums sm:inline">
         {formatTime(duration)}
       </span>
     </div>

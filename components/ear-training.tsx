@@ -137,7 +137,7 @@ export function EarTraining() {
     const percent = Math.round(summary.accuracy * 100);
     return (
       <div className="rounded-2xl border border-white/15 bg-white/5 p-8 text-center backdrop-blur-sm">
-        <div className="text-6xl font-black bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <div className="bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-6xl font-black text-transparent">
           {percent}%
         </div>
         <p className="mt-2 text-sm text-white/60">
@@ -172,10 +172,10 @@ export function EarTraining() {
   return (
     <div className="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur-sm sm:p-8">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">
+        <h3 className="text-sm font-semibold tracking-wide text-white/50 uppercase">
           {MODES.find((m) => m.id === mode)?.label}
         </h3>
-        <span className="text-sm tabular-nums text-white/50">
+        <span className="text-sm text-white/50 tabular-nums">
           {answers.length + 1} / {QUESTION_COUNT}
         </span>
       </div>

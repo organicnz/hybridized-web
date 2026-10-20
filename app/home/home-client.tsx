@@ -131,12 +131,12 @@ export function HomeClient({
         {!showSoundCloudOnly && allEpisodes.length > 0 && (
           <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                 Latest episodes
               </p>
               <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground">
                 {currentArtist}
-                <span className="ml-2 rounded-full border border-border bg-muted px-2.5 py-0.5 align-middle text-xs font-semibold tabular-nums text-muted-foreground">
+                <span className="ml-2 rounded-full border border-border bg-muted px-2.5 py-0.5 align-middle text-xs font-semibold text-muted-foreground tabular-nums">
                   {allEpisodes.length}
                 </span>
               </h2>
@@ -148,7 +148,7 @@ export function HomeClient({
             {/* SoundCloud frame header */}
             <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                   SoundCloud
                 </p>
                 <p className="truncate font-display text-sm font-bold text-foreground">
@@ -220,7 +220,7 @@ export function HomeClient({
       </div>
 
       {/* Sidebar Panel - 35% */}
-      <aside className="scrollbar-thin w-full overflow-y-auto lg:sticky lg:top-20 lg:w-[35%] lg:self-start">
+      <aside className="w-full scrollbar-thin overflow-y-auto lg:sticky lg:top-20 lg:w-[35%] lg:self-start">
         <ArtistProfile
           artist={{
             name: currentArtist ?? "",

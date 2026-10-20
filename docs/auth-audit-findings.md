@@ -1,5 +1,9 @@
 # Authentication Audit Findings
 
+> **Historical record.** The issues listed here were found and fixed. For how
+> the auth flow works now, see `docs/AUTH.md`; for what is still missing, see
+> `docs/auth-flows-implementation.md`.
+
 ## Issues Found & Fixed
 
 ### 1. ✅ Password Reset Flow (FIXED)
@@ -8,8 +12,8 @@
 
 **Solution:**
 
-- Updated `/auth/reset-password/page.tsx` to detect and exchange recovery tokens
-- Created `/auth/handle-recovery/page.tsx` as dedicated landing page
+- Updated `app/auth/reset-password/page.tsx` to detect and exchange recovery tokens
+- Created `app/auth/handle-recovery/page.tsx` as dedicated landing page
 - Updated forgot password redirect URL
 
 ### 2. ⚠️ Logout Route Issue

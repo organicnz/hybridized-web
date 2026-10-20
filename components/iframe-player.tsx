@@ -110,7 +110,7 @@ export function IframePlayer({ episode, artist, index }: IframePlayerProps) {
           {/* Index / cover */}
           {typeof index === "number" ? (
             <span
-              className="hidden w-7 shrink-0 text-center font-display text-sm font-bold tabular-nums text-muted-foreground/60 sm:block"
+              className="hidden w-7 shrink-0 text-center font-display text-sm font-bold text-muted-foreground/60 tabular-nums sm:block"
               aria-hidden="true"
             >
               {String(index + 1).padStart(2, "0")}
@@ -167,7 +167,7 @@ export function IframePlayer({ episode, artist, index }: IframePlayerProps) {
               "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
               "bg-[#1DB954] text-black shadow-lg shadow-[#1DB954]/25",
               "transition-all duration-200 hover:scale-105 hover:bg-[#1ed760] hover:shadow-xl hover:shadow-[#1DB954]/35",
-              "active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1DB954] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "focus-visible:ring-2 focus-visible:ring-[#1DB954] focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-hidden active:scale-95",
             )}
             aria-label={`Play ${episode.title || "episode"}`}
           >

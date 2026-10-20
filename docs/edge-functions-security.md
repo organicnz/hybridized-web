@@ -1,8 +1,14 @@
 # Edge Functions Security Configuration
 
+> **Historical record.** Written when the functions were first secured. For
+> how they work now, see `docs/edge-functions.md`. The one thing to carry
+> forward is the fail-closed check below.
+
 ## JWT Verification Issue
 
-**Current Status:** All functions have `verify_jwt: true` enabled in Supabase.
+**Current Status:** JWT verification is **off** for every function.
+`bun run deploy:functions` deploys with `--no-verify-jwt`, so a dashboard
+toggle left on by hand is overwritten on the next deploy.
 
 **Problem:** When JWT verification is enabled, the function accepts the easily-obtained anon key, which defeats the purpose of custom authorization.
 
@@ -10,7 +16,16 @@
 
 ## How to Disable JWT Verification
 
-### Via Supabase Dashboard (Recommended)
+### Via the deploy script (recommended)
+
+```bash
+bun run deploy:functions
+```
+
+It passes `--no-verify-jwt` for every function, so the setting is applied
+from the repository rather than by hand.
+
+### Via the Supabase Dashboard
 
 For each function:
 
@@ -37,17 +52,22 @@ For each function:
 All protected functions now check for `FUNCTION_SECRET`:
 
 ```typescript
-// Authorization check using custom secret
+// Authorization check using custom secret — fails closed
 const authHeader = req.headers.get("Authorization");
 const functionSecret = Deno.env.get("FUNCTION_SECRET");
 
-if (functionSecret && authHeader !== `Bearer ${functionSecret}`) {
+if (!functionSecret || authHeader !== `Bearer ${functionSecret}`) {
   return new Response(JSON.stringify({ error: "Unauthorized" }), {
     status: 401,
     headers: { "Content-Type": "application/json" },
   });
 }
 ```
+
+> The check is **fail-closed**: a missing `FUNCTION_SECRET` rejects every
+> request. The original form recorded here — `if (functionSecret && …)` —
+> failed _open_, which meant an unset secret left the function unprotected.
+> It was tightened afterwards.
 
 ## Why This Matters
 
@@ -73,7 +93,7 @@ curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/sync-firstory
 
 # This should succeed
 curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/sync-firstory \
-  -H "Authorization: Bearer REDACTED_FUNCTION_SECRET="
+  -H "Authorization: Bearer $FUNCTION_SECRET"
 ```
 
 ## Summary

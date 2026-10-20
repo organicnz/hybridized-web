@@ -20,6 +20,21 @@
 [env]
 _.path = ["./.bun/bin"]
 
+# Deno is pinned here, because it can be. It is the runtime the Supabase edge
+# functions execute on, and mise's `deno` backend resolves stable release
+# lines against real releases — none of the canary problems above apply.
+#
+# The Supabase edge functions are type-checked and linted with it
+# (`bun run typecheck:edge`, `bun run lint:edge`), so its version is part of
+# the project's toolchain, not an optional extra.
+[tools]
+deno = "2"
+# Postgres is only used by `bun run check:migrations`, which applies the
+# Supabase migration chain to a throwaway cluster and compares the result
+# with the generated types. It is optional: without it, that check reports
+# that it was skipped.
+postgres = "18"
+
 [tasks.setup-bun]
 description = "Install the exact Bun build pinned by .bun-version"
 run = "bun scripts/install-bun.ts"

@@ -55,7 +55,7 @@ export function NavLink({ href, label, highlight, variant = "desktop", onClick }
         onClick={handleClick}
         className={cn(
           "inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-semibold text-emerald-500 transition-all duration-200 hover:border-emerald-500/50 hover:bg-emerald-500/15 hover:text-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]",
-          isActive && "border-emerald-500/60 bg-emerald-500/20 cursor-default",
+          isActive && "cursor-default border-emerald-500/60 bg-emerald-500/20",
         )}
         aria-current={isActive ? "page" : undefined}
         aria-disabled={isActive}

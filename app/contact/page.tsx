@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <AppShell>
       <div className="container mx-auto px-4 py-10 md:py-12">
-        <div className="max-w-3xl mx-auto">
+        <div className="mx-auto max-w-3xl">
           <ContactForm />
         </div>
       </div>

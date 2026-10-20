@@ -14,5 +14,5 @@ Premium dark glassmorphic. Deep blacks, refined purple/pink/blue gradient meshes
 - Header (`components/header.tsx`) — refined glass, glow, spacing
 - Footer (`components/footer.tsx`) — refined glass, spacing
 - Page backgrounds — gradient mesh, refined depth
-- Design docs (`CLAUDE.md`, `.kiro/steering/development.md`, `.kiro/steering/tech.md`)
+- Design docs (`CLAUDE.md`, `README.md`)
 - Skills updated to reflect direct-to-main prod delivery

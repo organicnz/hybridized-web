@@ -187,7 +187,7 @@ export function AudioPlayerBar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.16 }}
-                    className="card-overlay absolute bottom-full right-0 mb-2 w-44 p-3"
+                    className="card-overlay absolute right-0 bottom-full mb-2 w-44 p-3"
                   >
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <button
@@ -282,7 +282,7 @@ export function AudioPlayerBar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 32 }}
-              className="surface-shell fixed bottom-0 left-auto right-0 top-0 z-50 m-0 flex h-full max-h-none w-full max-w-md flex-col border-l p-0 shadow-overlay"
+              className="surface-shell fixed top-0 right-0 bottom-0 left-auto z-50 m-0 flex h-full max-h-none w-full max-w-md flex-col border-l p-0 shadow-overlay"
               aria-label="Play queue"
             >
               {/* Drawer Header */}
@@ -290,7 +290,7 @@ export function AudioPlayerBar() {
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <ListMusic className="h-4 w-4 text-primary" />
                   Up Next
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums text-muted-foreground">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
                     {playlist.length}
                   </span>
                 </h3>
@@ -305,7 +305,7 @@ export function AudioPlayerBar() {
               </div>
 
               {/* Queue List */}
-              <div className="scrollbar-thin flex-1 overflow-y-auto p-2">
+              <div className="flex-1 scrollbar-thin overflow-y-auto p-2">
                 {playlist.length === 0 ? (
                   <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
                     <ListMusic className="mb-4 h-12 w-12 text-muted-foreground/30" />
@@ -368,7 +368,7 @@ export function AudioPlayerBar() {
                         </button>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+                        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                           {index > 0 && (
                             <button
                               type="button"
@@ -392,7 +392,7 @@ export function AudioPlayerBar() {
                         {/* Current track indicator */}
                         {index === currentIndex && (
                           <span
-                            className="absolute -left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-primary"
+                            className="absolute top-1/2 -left-1 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-primary"
                             aria-hidden="true"
                           />
                         )}

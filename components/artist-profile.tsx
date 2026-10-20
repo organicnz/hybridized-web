@@ -84,7 +84,7 @@ export function ArtistProfile({ artist, className }: ArtistProfileProps) {
 
       {/* Bio Content */}
       <div className="p-6">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="mb-3 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
           About the artist
         </p>
         <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">

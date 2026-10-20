@@ -1,40 +1,37 @@
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const emails = [
-  "matias@matias.com",
-  "dia.ben@outlook.com",
-  "test@gmail.com",
-  "teste@teste.com.br",
-  "srikanth3199@gmail.com",
-  "test@email.com",
-  "dantetest@test.com",
-  "dhtdghdhdg@gmail.com",
-  "dante.grippaldi@codingit.io",
-  "mangss52@gmail.com",
-  "fernando@coutinhosp.com.br",
-  "bashar@gmail.com",
-  "cjrob@protonmail.com",
-  "nicolas.pineda97@hotmail.com",
-  "callu@gmail.com",
-  "callucatoo6@gmail.com",
-  "ssupawas@gmail.com",
-  "rafael@gmail.com",
-  "tamerlanium@gmail.com",
-  "luissantiagoospinocaceres@gmail.com",
-  "geheim@gmail.com",
-  "ellinglien@gmail.com",
-  "gghj@gmail.com",
-  "dsad@dasd.sk",
-  "taxtapp@gmail.com",
-  "oscarmijael7w7@gmail.com",
-  "al@gmail.com",
-  "martinwestlake75@gmail.com",
-  "firebase@flutterflow.io",
-  "test@test.com",
-];
+/**
+ * Invite a list of users by email.
+ *
+ * The list comes from the request body — `{ "emails": ["a@b.c"] }` — so the
+ * addresses that are invited are the caller's choice and not a copy baked
+ * into the deployed function.
+ *
+ * Authenticated with `FUNCTION_SECRET`, the same as the other edge functions.
+ */
 
-serve(async (req) => {
+const REDIRECT_TO = "https://hybridized.online/auth/callback";
+
+/** The pause between invites, so the provider's rate limit is not hit. */
+const INVITE_DELAY_MS = 1000;
+
+interface InviteBody {
+  emails?: unknown;
+}
+
+/** The request's email list, if it is a non-empty list of strings. */
+function parseEmails(body: InviteBody): string[] | null {
+  if (!Array.isArray(body.emails)) return null;
+
+  const emails = body.emails.filter(
+    (email): email is string => typeof email === "string" && email.includes("@"),
+  );
+
+  return emails.length > 0 ? emails : null;
+}
+
+Deno.serve(async (req) => {
   try {
     // Authorization check (fail-closed: missing secret config rejects all requests)
     const authHeader = req.headers.get("Authorization");
@@ -45,6 +42,25 @@ serve(async (req) => {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const emails = parseEmails((await req.json()) as InviteBody);
+
+    if (!emails) {
+      return new Response(
+        JSON.stringify({ error: 'Expected a body of { "emails": ["someone@example.com"] }' }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const supabase = createClient(
@@ -83,7 +99,7 @@ serve(async (req) => {
       }
 
       const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-        redirectTo: "https://yourapp.com/set-password",
+        redirectTo: REDIRECT_TO,
       });
 
       if (error) {
@@ -100,7 +116,7 @@ serve(async (req) => {
         });
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, INVITE_DELAY_MS));
     }
 
     return new Response(
@@ -116,7 +132,7 @@ serve(async (req) => {
   } catch (err) {
     return new Response(
       JSON.stringify({
-        error: `Unexpected error: ${err.message}`,
+        error: `Unexpected error: ${err instanceof Error ? err.message : String(err)}`,
       }),
       {
         status: 500,

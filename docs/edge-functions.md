@@ -117,6 +117,26 @@ curl -X POST \
 - **Purpose**: Health check for keeping functions warm
 - **Returns**: Timestamp message
 
+### invite-users
+
+- **Method**: POST
+- **Auth**: Required
+- **Body**: `{ "emails": ["someone@example.com"] }` — the list of addresses to
+  invite. It comes from the request, so the addresses invited are the
+  caller's choice rather than a copy baked into the deployed function.
+- **Purpose**: Sends an invitation email to each address that has no account
+  yet
+- **Returns**: One result per address — `invited`, `skipped` (the user already
+  exists) or `failed`
+
+```bash
+curl -X POST \
+  https://your-project.supabase.co/functions/v1/invite-users \
+  -H "Authorization: Bearer YOUR_FUNCTION_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"emails":["someone@example.com"]}'
+```
+
 ## Deployment Status
 
 All functions deployed successfully:

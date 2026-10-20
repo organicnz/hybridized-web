@@ -10,7 +10,7 @@ export function DonationClient() {
       <div className="mx-auto max-w-4xl">
         {/* Hero Section */}
         <div className="mb-12 text-center md:mb-16">
-          <Heart className="mx-auto mb-6 h-20 w-20 fill-pink-500/15 text-pink-500 gpu-opacity" />
+          <Heart className="gpu-opacity mx-auto mb-6 h-20 w-20 fill-pink-500/15 text-pink-500" />
           <h1 className="gradient-text mb-6 font-display text-fluid-2xl font-bold tracking-tight">
             Support Hybridized
           </h1>

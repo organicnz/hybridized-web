@@ -180,7 +180,7 @@ export function ProfileContent() {
         <div className="mb-8">
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-colors hover:text-foreground group"
+            className="group inline-flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-colors hover:text-foreground"
           >
             <ArrowLeft
               className="h-4 w-4 transition-transform group-hover:-translate-x-1"
@@ -221,7 +221,7 @@ export function ProfileContent() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Avatar Upload */}
             <div className="mb-8 flex flex-col items-center">
-              <div className="relative group">
+              <div className="group relative">
                 <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-purple-500/20 to-pink-500/20 ring-2 ring-border">
                   {avatarUrl ? (
                     <Image
@@ -241,7 +241,7 @@ export function ProfileContent() {
                   type="button"
                   onClick={handleAvatarClick}
                   disabled={uploadingAvatar}
-                  className="btn btn-primary absolute bottom-0 right-0 h-10 w-10 rounded-full p-0 shadow-glow"
+                  className="btn btn-primary absolute right-0 bottom-0 h-10 w-10 rounded-full p-0 shadow-glow"
                   aria-label="Upload avatar"
                 >
                   {uploadingAvatar ? (
@@ -272,7 +272,7 @@ export function ProfileContent() {
               </label>
               <div className="relative">
                 <Mail
-                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                  className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
                 />
                 <input
@@ -284,7 +284,7 @@ export function ProfileContent() {
                 />
                 {emailVerified && (
                   <CheckCircle
-                    className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-500"
+                    className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-emerald-500"
                     aria-hidden="true"
                   />
                 )}
@@ -317,7 +317,7 @@ export function ProfileContent() {
               </label>
               <div className="relative">
                 <User
-                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                  className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
                 />
                 <input

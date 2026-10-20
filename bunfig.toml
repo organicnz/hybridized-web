@@ -8,6 +8,39 @@ auto = "disable"
 # installed version is pinned in package.json.
 exact = true
 
+# pnpm-style isolated installs: every package only sees the dependencies it
+# declares. A phantom dependency stops resolving instead of quietly working
+# on one machine and breaking on another, so `bun install` is the thing that
+# catches it, not a failing build three weeks later.
+linker = "isolated"
+
+# `globalStore` is deliberately NOT enabled.
+#
+# It materialises the store once into a global virtual store, which makes a
+# warm install much faster — but it adds a second symlink hop, and Turbopack
+# then cannot statically resolve the re-exports of `@sentry/react`
+# (`export * from "@sentry/browser"`). The build fails with
+# "Export startBrowserTracingPageLoadSpan doesn't exist in target module".
+# The isolated linker on its own is fine; the global store is what breaks it.
+
+# Install peer dependencies rather than only warning about them.
+peer = true
+
+# Keep the lockfile in the text format, so it diffs and reviews cleanly.
+saveTextLockfile = true
+
+# Supply-chain hardening: only resolve a package version that has been
+# published for at least three days. A compromised release cannot be pulled
+# in during the window where it is still being discovered and revoked.
+minimumReleaseAge = 259200
+
+# The exceptions, and only the exceptions: the three prerelease channels this
+# project deliberately tracks day to day. They are canary and dev builds from
+# publishers the project already trusts, pinned to an exact version with a
+# recorded integrity hash, so waiting three days for them would mean never
+# moving forward.
+minimumReleaseAgeExcludes = ["next", "bun-types", "tsrs"]
+
 # The install cache is deliberately NOT overridden here. Bun's default is
 # already the shared per-user cache at `~/.bun/install/cache`, and it expands
 # `~` correctly. Setting `dir = "~/.bun/install/cache"` here does NOT expand
@@ -28,6 +61,52 @@ shell = "bun"
 [test]
 timeout = 10000
 
+# The test files themselves are not part of what the suite covers.
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = ["tests/**"]
+
+# The coverage floor, enforced by `bun scripts/coverage.ts`.
+#
+# It is NOT Bun's own `coverageThreshold`: that key is broken in the Bun build
+# this project pins (`1.4.4-canary.1` exits non-zero for every threshold
+# value and prints no diagnostic). `scripts/doctor.ts` fails if
+# `coverageThreshold` is ever added back.
+#
+# The suite sits at ~98.7% lines and ~98.8% functions, so this floor leaves
+# headroom while still failing a real regression.
+coverageFloor = { lines = 0.95, functions = 0.95 }
+
+# `text` for the terminal, `lcov` for the gate and for coverage tooling.
+coverageReporter = ["text", "lcov"]
+
+# Run the tests in a random order, so a test that quietly depends on another
+# one fails instead of passing by luck. Bun prints the seed it used, so a
+# failure is reproducible. The suite is order-independent — it passes on
+# every seed.
+randomize = true
+
+# Run every test file twice. The second run sees the module state the first
+# one left behind, so a test that depends on a clean module — a cached value,
+# a mocked global — fails instead of passing by luck.
+rerunEach = 2
+
+# ── Lint ─────────────────────────────────────────────────────────────────────
+[lint]
+# Type-aware rules: the ones that need the type information to be useful,
+# such as `@typescript-eslint/no-floating-promises`. The codebase is clean
+# under them.
+typeAware = true
+
+# A ratchet on the React Compiler findings, which are warnings rather than
+# errors on purpose — making the codebase React-Compiler-shaped is a
+# deliberate refactor of its own. The current count is 16, and they are
+# listed in `oxlint.json` and in CLAUDE.md.
+#
+# The point of the number is that it does not move up: a new warning fails
+# the lint, and the fix is to resolve it or to raise the count deliberately.
+# Lowering it as warnings are fixed is the other half of the ratchet.
+maxWarnings = 16
+
 # ── Format ───────────────────────────────────────────────────────────────────
 # `bun fmt` is the project's formatter. These settings mirror the house style
 # that Biome used before it was replaced.
@@ -42,3 +121,9 @@ trailingComma = "all"
 # `bun fmt` also reads `.gitignore`, so `bun.lock` (which it cannot parse)
 # and the other ignored paths are left alone.
 
+# Sort the Tailwind classes in every `className`, into the order the
+# framework's own guide uses — layout, then typography, then the visual
+# properties. Consistent ordering means a class list can be scanned, and two
+# people editing the same list produce the same result.
+[fmt.sortTailwindcss]
+stylesheet = "./app/globals.css"

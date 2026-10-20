@@ -17,6 +17,7 @@
 - **Components:** shadcn/ui
 - **Linting & Formatting:** Bun's built-ins — `bun lint` (oxlint engine) and
   `bun fmt`
+- **Git hooks:** Bun scripts in `.githooks/` — no hook-runner dependency
 - **Deployment:** Vercel (Bun runtime via `bunVersion` in `vercel.json`)
 - **Domain:** hybridized.online (via Cloudflare DNS)
 
@@ -30,6 +31,7 @@ public/       → Static assets (favicon, images)
 scripts/      → Bun automation (TypeScript, executed with `bun`)
 tests/        → `bun test` suites
 types/        → Ambient type declarations (e.g. `bun:fs` / `bun:path`)
+.githooks/    → Git hooks, as Bun scripts
 supabase/     → Supabase migrations, edge functions and config
 ```
 
@@ -65,10 +67,13 @@ bun run fix        # lint --fix + format
 bun run typecheck  # tsrs --noEmit (Rust port of the TypeScript compiler)
 bun run typecheck:fast # bun check (Bun's own multi-core checker)
 bun test           # unit tests
+bun run test:coverage # unit tests with the coverage floor
 bun run verify     # lint + both type checkers + test
 bun run doctor     # assert the Bun environment invariants
 bun run setup:bun  # install the exact Bun build pinned by .bun-version
 bun run setup:tsdk # wire tsrs up as the editor's language server
+bun run hooks:install # point Git at the Bun-native hooks in .githooks/
+bun run hooks:run    # run a hook by hand (default: pre-commit)
 bun x <pkg>        # one-off package execution (replaces npx)
 ```
 
@@ -124,15 +129,65 @@ scripts, not the runtime, not production.
   `~` in that path — it creates a literal `~` directory inside the project
   root and fills it with the whole cache. The default is already
   `~/.bun/install/cache`; `bun pm cache` reports the effective path.
+- **The install is isolated.** `bunfig.toml` sets `linker = "isolated"`, so
+  `node_modules` is pnpm-shaped and a package only sees the dependencies it
+  declares. A _phantom dependency_ — importing something that was never
+  declared, and only resolving because something else installed it — now
+  fails at install time instead of on someone else's machine. When one turns
+  up, declare the package as a direct dependency; do not reach for
+  `publicHoistPattern` to hide it. Adopting the isolated linker is what
+  surfaced `@vgpu/wgsl` as an undeclared direct dependency of this project.
+- **Never enable `globalStore`.** It makes warm installs much faster, but it
+  adds a second symlink hop, and Turbopack then cannot statically resolve the
+  re-exports of `@sentry/react` (`export * from "@sentry/browser"`). The build
+  fails with _"Export startBrowserTracingPageLoadSpan doesn't exist in target
+  module"_. The isolated linker on its own is fine. `bun run doctor` fails if
+  it is ever turned on.
+- **The Supabase edge functions are Deno, and are checked with Deno.** The
+  Supabase edge runtime is Deno, so `supabase/functions/**` is excluded from
+  the root `tsconfig.json` — and Bun cannot check it either, because the
+  `jsr:` specifiers do not resolve in Bun. `supabase/functions/deno.json`
+  holds the configuration, and `bun run typecheck:edge` / `bun run lint:edge`
+  run `deno check` and `deno lint` against it. CI installs Deno for this.
+  - `supabase/functions/deno.json`'s `fmt` settings are tuned so `deno fmt`
+    and `bun fmt` agree exactly (`trailingCommas: "onlyMultiLine"`,
+    `proseWrap: "never"`). `bun fmt` is the project's formatter; the two
+    must not fight.
+  - `nodeModulesDir: "auto"` puts Deno's npm tree in
+    `supabase/functions/node_modules/`, so it does not collide with Bun's.
+  - `deno lint` requires a version on every JSR import, so
+    `jsr:@supabase/functions-js@2/edge-runtime.d.ts` is pinned.
+  - A `catch` clause value is `unknown` under `strict`; narrow it with
+    `err instanceof Error ? err.message : String(err)`.
+  - `noUncheckedIndexedAccess` is on, so a regex capture group is
+    `string | undefined` — read it with `?.[1]` and narrow it.
+- **Clear `.next` when the install layout changes.** Turbopack caches module
+  identities, so a cache built against a different `node_modules` layout
+  produces baffling errors — a null where a string is expected, in the middle
+  of a PostCSS transform. `rm -rf .next` after changing the linker.
+- **`minimumReleaseAge = 259200` (three days).** Bun will not resolve a
+  version published less than three days ago, so a compromised release cannot
+  be pulled in during the window where it is still being discovered. The only
+  exemptions are `next`, `bun-types` and `tsrs` — the prerelease channels
+  this project deliberately follows, pinned to an exact version with a
+  recorded integrity hash. **Adding a prerelease dependency means adding it
+  to `minimumReleaseAgeExcludes`**, or it can never be updated; `bun run
+doctor` fails when the exemption list rots.
 - Automation lives in `scripts/**/*.ts` and is executed with `bun`. Use Bun
   Shell (`import { $ } from "bun"`) instead of shelling out to `sh -c`.
 - Use `bun:fs`, `bun:fs/promises`, `bun:path`, `Bun.file()`, `Bun.Glob`,
   `Bun.XML` and `Bun.sleep` rather than their `node:` equivalents or a
   third-party library. `types/bun-modules.d.ts` supplies the ambient types
-  `bun-types` does not ship; it is the **only** file allowed to name a `node:`
-  module, and only in type position. `bun run doctor` fails otherwise.
+  `bun-types` does not ship, written against Bun's own API — **no file in
+  this project may name a `node:` module, not even in type position**, and
+  `bun run doctor` fails if one does.
   - `bun:fs` re-exports the _callback_ API; use `bun:fs/promises` for
     promises.
+  - `@types/node` **is** a direct dependency: Next.js refuses to build without
+    it and says so explicitly. It is types only, so nothing about it puts a
+    Node.js runtime in the project, and no file re-exports its typings the
+    way the old `types/bun-modules.d.ts` did. `bun run doctor` fails if it is
+    dropped, and fails if any _other_ Node.js package is added.
 - Prefer a Bun built-in over a dependency. `lib/api/rss.ts` uses `Bun.XML`
   instead of `xml2js`; do not reintroduce an XML/feed library.
 - Use `Bun.env` in `scripts/**`.
@@ -143,6 +198,48 @@ scripts, not the runtime, not production.
 - Run tools through `bun x --bun <tool>` so they never pick up a Node
   installation if one is present on the machine. `tsrs` ships a
   `#!/usr/bin/env node` launcher, so `--bun` is what keeps it on Bun.
+- **The test suite runs with `--isolate`.** `bun test --isolate` gives every
+  test file a fresh global _and_ a fresh module registry. Bun runs the whole
+  suite in one process, so without isolation a `mock.module` in one file
+  replaces the module for every other file, and a polyfill installed by one
+  file is visible to all of them. A file that needs a `localStorage` polyfill
+  must install its own (`tests/helpers/local-storage.ts`).
+  - `bun run test` is the entry point, not a bare `bun test` — the flag is
+    the point. `verify` and the coverage script both call `bun run test`.
+- **`bunfig.toml` sets `[test] randomize = true`.** The tests run in a random
+  order and Bun prints the seed, so a test that quietly depends on another
+  one fails instead of passing by luck. Do not make a test order-dependent.
+  - A module-level cache needs a cold registry to be observed. `--isolate`
+    gives that per _file_, so a test that needs a cold cache gets a file of
+    its own (`tests/user-storage-lookup.test.ts`).
+- **`bunfig.toml` sets `[test] rerunEach = 2`.** Every test file runs twice,
+  and the second run sees the module state the first one left behind. A test
+  that needs a _clean_ module — a cached value, a mocked global — fails
+  instead of passing. This is the class of bug that hides in a suite that
+  only ever runs once.
+- **`bunfig.toml` sets `[lint] maxWarnings = 16`.** The React Compiler
+  findings are warnings rather than errors on purpose, so the count is
+  _capped_ instead. The number does not move up: a new warning fails the
+  lint, and the fix is to resolve it or to raise the count deliberately.
+  Lowering it as warnings are fixed is the other half of the ratchet.
+- **`bun fmt` sorts the Tailwind classes** (`[fmt.sortTailwindcss]`). It needs
+  no plugin, and it means a `className` can be scanned and two people editing
+  the same list produce the same result.
+- **Mock modules with `bun:test`'s `mock.module`**, not with a seam in the
+  production code. Two rules:
+  - **A mock factory replaces the module's whole export set.** Every named
+    export the real module has has to be in the factory, or the missing ones
+    cannot be added back to an existing import — the failure is a
+    `SyntaxError: Export named '...' not found`.
+  - **Register the mock once, in a shared helper** (`tests/helpers/supabase.ts`).
+    A `mock.module` call is global to the process, so registering it in each
+    file lets them clobber each other.
+- **`bunfig.toml` sets `[lint] typeAware = true`.** The type-aware rules —
+  `@typescript-eslint/no-floating-promises` and friends — are the ones that
+  need the type information to be useful. The codebase is clean under them.
+- **Every configuration file is TypeScript.** `postcss.config.ts`, not
+  `.mjs` — a `.mjs` config is a file the type checker never sees.
+  `bun run doctor` fails if a `.js`, `.mjs` or `.cjs` config reappears.
 - **Two type checkers run in `verify` and must agree:** `tsrs` (the Rust
   port — the primary gate) and `bun check` (multi-core, ~150 ms). Run
   `bun run verify`, not just one of them.
@@ -156,7 +253,7 @@ scripts, not the runtime, not production.
   - `noUncheckedSideEffectImports: true` is on, so an unresolvable
     side-effect import is an error in both.
   - `types/css.d.ts` declares `*.css`; `types/bun-modules.d.ts` declares
-    `bun:fs` / `bun:path`.
+    `bun:fs` / `bun:fs/promises` / `bun:path`.
   - Do **not** augment the global `Navigator` (or other DOM interfaces) for
     APIs that a newer toolchain already declares. `lib/webgpu.ts` reads
     `navigator.gpu` through a local type for exactly this reason — Bun's
@@ -173,10 +270,31 @@ scripts, not the runtime, not production.
     `check` and `fmt` — **do not add a `check` script** to `package.json`.
   - `jsx-a11y/media-has-caption` is off on purpose: music has no spoken
     dialogue, so the players' `<audio>` elements have no caption track.
+- **The git hooks are Bun scripts**, in `.githooks/`, with `core.hooksPath`
+  pointing at them. `scripts/hooks/install.ts` does that and is wired to the
+  `prepare` lifecycle script, so `bun install` keeps the hooks in place. Do
+  not reintroduce a hook-runner dependency: `lefthook` was an npm package
+  that downloaded a Go binary at install time and shelled out to
+  `bun x lefthook` on every hook run.
+  - `pre-commit` formats and lints the staged files, then runs both type
+    checkers over the project. It re-stages whatever the formatter rewrote,
+    so the commit records the formatted content.
+  - `pre-push` runs the test suite and the production build.
+  - The hooks spawn `process.execPath`, so they always use the same Bun that
+    is running them, whatever is on `PATH`.
+- **The coverage gate is `bun scripts/coverage.ts`**, not Bun's own
+  `coverageThreshold`. That key is broken in the pinned build
+  (`1.4.4-canary.1` exits non-zero for every threshold value and prints no
+  diagnostic), so the floor is declared as `[test] coverageFloor` in
+  `bunfig.toml` and enforced by the script against the lcov report.
+  `bun run doctor` fails if `coverageThreshold` is added back. The floor is
+  currently ~92% lines and ~91% functions, against a floor of 80%.
 - `trustedDependencies` must list every package whose install script is
-  needed (`sharp`, `webgpu`, `@vgpu/adapter-node`, `lefthook`). Bun blocks the
-  rest, and their scripts would never run. Re-check with `bun pm trust --all`
-  after adding a dependency.
+  needed (`webgpu`, `@vgpu/adapter-node`). Bun blocks the rest, and their
+  scripts would never run. Re-check with `bun pm trust --all` after adding a
+  dependency. Under the isolated linker the packages live in
+  `node_modules/.bun/`, so `bun prune` is what clears a removed dependency's
+  store entry.
 - **React Compiler rule triage.** `oxlint.json` enables the React Compiler
   rules (`react/set-state-in-effect`, `react/refs`, `react/purity`,
   `react/immutability`) as `warn`, not `error`: making the codebase
@@ -232,8 +350,72 @@ fragment.
 - Run `bun run doctor` after any toolchain or dependency change. It is the
   executable form of the rules above — version pin, pinned build running, no
   Node.js on `PATH`, lockfile in sync, install scripts trusted, `bunfig.toml`
-  intact, no install cache inside the project, no `node:` imports, `tsrs` as
-  the type gate, no `setup-node` in CI. It must pass before committing.
+  intact, no install cache inside the project, isolated linker, release-age
+  guard, no `node:` specifier, no Node.js package, `tsrs` as the type gate,
+  Bun-native git hooks, the edge functions checked, every direct dependency
+  imported, the documentation pointing at files that exist, the environment
+  documented, no `setup-node` in CI, and every workflow using the pinned
+  build. It must pass before committing.
+- **No credential is committed, and none is in the history.** The rules live
+  in `scripts/lib/secrets.ts`, shared by the doctor and
+  `bun run audit:secrets`. A credential-shaped value is a `Bearer` token, or
+  an assignment to a `*_SECRET` / `*_TOKEN` / `*_PASSWORD` / `*_PRIVATE_KEY` /
+  `*_KEY` name, that is long, mixed and not a placeholder. `NEXT_PUBLIC_*` is
+  exempt: it is in the browser bundle by definition. The value is never
+  printed — only where it was.
+  - The doctor scans the working tree and the **reachable** history.
+  - `bun run audit:secrets` scans **every object the repository has ever
+    held**, including the ones no ref points at any more — which is where a
+    secret in an amended commit ends up. It runs in CI, with `fetch-depth: 0`.
+  - A credential that is already known is recorded by **digest** in
+    `scripts/known-secret-digests.json`, so acknowledging a leak does not put
+    it back into the repository. A finding whose digest is not listed fails
+    the run; a listed one is reported until the credential is rotated and the
+    history rewritten.
+  - **A secret that reaches the repository has to be rotated**, because
+    removing it from the file does not remove it from the history.
+- **The migrations have to create the tables and the columns the application
+  reads.** `bun run doctor` compares what the migrations create with what
+  `lib/types/database.types.ts` declares, offline, and reports any column
+  that no migration creates. The types are the contract: they are generated
+  from the live database, and the application reads them. A column the types
+  declare but no migration creates is a column a _fresh_ database does not
+  have — and the failure is silent, because a query for a missing column
+  throws and the error is swallowed. `profiles.admin` was exactly that: the
+  authorization path selects it, so on a database without it nobody would
+  ever be an admin.
+- **`bun run check:migrations` applies the whole chain to a throwaway
+  Postgres** and compares the result with the contract: every migration
+  applies in order to an empty database, every declared column exists, the
+  signup triggers fire, the search function finds rows, and row level
+  security is on every table. Postgres is pinned in `.mise.toml` for it, and
+  the check skips itself cleanly when Postgres is absent. It runs in CI.
+  - `20240101000001_core_tables.sql` sorts _before_ migrations that have
+    already been applied, so the deploy workflow needs `supabase db push
+--include-all`. The migration is idempotent, so on the production
+    database it is a no-op.
+- **The documentation has to point at files that exist.** The doctor checks
+  every backticked path in `docs/*.md`, `README.md` and `CLAUDE.md`. A
+  reference that is a plan, or a name the project used to have, is skipped —
+  the words `create`, `renamed`, `used to be`, `gone` and the rest mark it —
+  but a path that is simply wrong is reported. The `middleware.ts` →
+  `proxy.ts` rename left four documents pointing at a file that had not
+  existed for a release.
+- **`.env.example` and the code have to agree.** The doctor checks both
+  directions: a variable the code reads but the example does not list, and a
+  variable the example lists that nothing reads. The platform sets `CI`,
+  `NODE_ENV`, and the `SUPABASE_URL` and `SUPABASE_ANON_KEY` that the edge
+  runtime injects, so those are exempt.
+- **Every workflow that runs Bun must install the pinned build** with
+  `bun scripts/install-bun.ts --output-dir "$HOME/.bun/bin"`. The installer
+  replaces `oven-sh/setup-bun`'s binary in place, in the same directory, so
+  every later step in that job runs the build `.bun-version` names. A
+  workflow that skips it runs on whatever the canary channel served that day.
+  `bun run doctor` fails if any workflow does not.
+- **Deno is pinned in `.mise.toml`** (`[tools] deno = "2"`), because it can be:
+  mise's `deno` backend resolves stable release lines against real releases,
+  and none of the canary problems that keep Bun out of `[tools]` apply. The
+  edge functions run on it, so its version is part of the toolchain.
 - `Bun.Glob` does **not** support brace expansion (`{a,b}` matches nothing).
   Use one pattern per shape, e.g. `node_modules/*/package.json` and
   `node_modules/@*/*/package.json`.
@@ -241,7 +423,7 @@ fragment.
 ## Tailwind CSS 4 Rules
 
 The theme is CSS-first: `tailwind.config.ts` is gone and `app/globals.css`
-carries an `@theme` block. `postcss.config.mjs` uses `@tailwindcss/postcss`
+carries an `@theme` block. `postcss.config.ts` uses `@tailwindcss/postcss`
 (no `autoprefixer` — v4 prefixes on its own).
 
 - **Theme colours must be complete values.** `:root` holds `hsl(0 0% 100%)`,

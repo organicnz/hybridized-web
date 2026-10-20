@@ -77,7 +77,7 @@ async function SearchContent({ searchParams }: { searchParams: Promise<{ q?: str
     <div className="min-h-screen bg-background">
       <Link
         href="/home"
-        className="fixed left-6 top-6 z-10 flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground backdrop-blur-md ring-1 ring-border transition-all hover:text-foreground group"
+        className="group fixed top-6 left-6 z-10 flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-all hover:text-foreground"
       >
         <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
         <span className="font-medium">Back to Home</span>
