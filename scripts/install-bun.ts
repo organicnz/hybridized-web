@@ -25,7 +25,7 @@
  *   bun scripts/install-bun.ts --check            # verify only, install nothing
  *   bun scripts/install-bun.ts --pin-all         # record every platform's hash
  */
-import { mkdirSync, chmodSync, existsSync, writeFileSync } from "bun:fs";
+import { chmodSync, existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from "bun:fs";
 import { join, resolve } from "bun:path";
 
 const REGISTRY = "https://registry.npmjs.org";
@@ -243,13 +243,26 @@ const tarball = new Uint8Array(await tarballResponse.arrayBuffer());
 verifyIntegrity(tarball, integrity);
 
 const binary = extractFromTarGz(tarball, TARBALL_BINARY);
-const target = join(outputDir ?? join(projectRoot, ".bun", "bin"), "bun");
+const binDir = outputDir ?? join(projectRoot, ".bun", "bin");
+const target = join(binDir, "bun");
 
-mkdirSync(join(outputDir ?? join(projectRoot, ".bun", "bin")), {
-  recursive: true,
-});
-writeFileSync(target, binary);
-chmodSync(target, 0o755);
+mkdirSync(binDir, { recursive: true });
+
+// Write to a sibling and rename into place. Opening the target for writing
+// fails with ETXTBSY when the target is the binary currently running this
+// script — which is exactly what happens in CI, where the installer
+// replaces the bootstrap Bun that invoked it. A rename is atomic and
+// replaces the directory entry, so the running process keeps its own
+// (now unlinked) inode and the new binary is in place for the next exec.
+const staging = join(binDir, `.bun.${process.pid}.staging`);
+try {
+  writeFileSync(staging, binary);
+  chmodSync(staging, 0o755);
+  renameSync(staging, target);
+} catch (error) {
+  rmSync(staging, { force: true });
+  throw error;
+}
 
 // Ask the binary what it actually is. The npm publish version and the
 // revision the binary reports are different strings — Bun's release pipeline
