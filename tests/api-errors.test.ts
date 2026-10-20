@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
+import { readdir } from "bun:fs/promises";
+import { join } from "bun:path";
 
 const API_DIR = "app/api";
 
 /** Recursively collect every route.ts under app/api. */
 async function routeFiles(dir: string): Promise<string[]> {
-  const { readdir } = await import("node:fs/promises");
-  const { join } = await import("node:path");
   const entries = await readdir(dir, { withFileTypes: true });
   const out: string[] = [];
 

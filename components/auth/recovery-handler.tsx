@@ -1,5 +1,6 @@
 "use client";
 
+import { withHash } from "@/lib/utils/route";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -33,7 +34,7 @@ export function RecoveryHandler() {
 
     // If this is a recovery link, redirect to reset password page
     if (type === "recovery" && accessToken) {
-      router.replace(`/auth/reset-password${hash}`);
+      router.replace(withHash("/auth/reset-password", hash));
     }
   }, [pathname, router]);
 

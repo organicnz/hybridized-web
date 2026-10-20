@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthShell } from "@/components/auth/auth-shell";
+import { withHash } from "@/lib/utils/route";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -13,7 +14,7 @@ export function HandleRecoveryPage() {
     const hash = window.location.hash;
 
     // Redirect to reset password page with the hash
-    router.replace(`/auth/reset-password${hash}`);
+    router.replace(withHash("/auth/reset-password", hash));
   }, [router]);
 
   return (

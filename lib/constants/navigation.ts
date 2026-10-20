@@ -1,3 +1,5 @@
+import type { Route } from "next";
+
 /**
  * Navigation link configuration
  * @property href - Route path
@@ -5,7 +7,7 @@
  * @property highlight - Whether to apply accent styling (e.g., donation button)
  */
 export type NavLink = {
-  href: string;
+  href: Route;
   label: string;
   highlight?: boolean;
 };

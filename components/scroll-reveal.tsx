@@ -106,7 +106,12 @@ export function StaggerContainer({
   stagger = 0.1,
   delayChildren = 0,
   className = "",
-}: { children: React.ReactNode; stagger?: number; delayChildren?: number; className?: string }) {
+}: {
+  children: React.ReactNode;
+  stagger?: number;
+  delayChildren?: number;
+  className?: string;
+}) {
   const intersectionRef = useRef<HTMLDivElement | null>(null);
   const [isInView, setIsInView] = useState(false);
   useEffect(() => {
@@ -143,7 +148,11 @@ export function StaggerItem({
   children,
   className = "",
   variants,
-}: { children: React.ReactNode; className?: string; variants?: Variants }) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+  variants?: Variants;
+}) {
   const defaultVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },

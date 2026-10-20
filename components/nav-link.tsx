@@ -1,11 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 type NavLinkProps = {
-  href: string;
+  href: Route;
   label: string;
   highlight?: boolean;
   variant?: "desktop" | "mobile";

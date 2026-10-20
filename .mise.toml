@@ -1,0 +1,25 @@
+# Repo-local toolchain configuration.
+#
+# Bun is pinned by `.bun-version` (the npm publish version) and installed by
+# `scripts/install-bun.ts` into `.bun/bin/`, which is verified against the
+# sha512 hashes in `.bun-lock.json`.
+#
+# Why Bun is not pinned through `[tools]`:
+#
+#   - mise's `bun` backend resolves *canary* version strings against Bun's
+#     GitHub "canary" release channel, whose assets are unversioned and are
+#     replaced every day. The pin would be a fiction.
+#   - mise's `npm:bun` backend rejects prerelease versions outright.
+#   - `path:` pinning fails hard when the target is missing, so a fresh clone
+#     could not run `bun run setup:bun` in the first place.
+#
+# Instead, `.bun/bin` is prepended to PATH. It is harmless when absent and
+# takes precedence over any globally installed Bun once `bun run setup:bun`
+# has run. `scripts/doctor.ts` fails if the Bun actually on PATH is not the
+# pinned build, so drift cannot go unnoticed.
+[env]
+_.path = ["./.bun/bin"]
+
+[tasks.setup-bun]
+description = "Install the exact Bun build pinned by .bun-version"
+run = "bun scripts/install-bun.ts"

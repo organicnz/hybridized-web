@@ -24,13 +24,7 @@ const itemVariants = {
   },
 };
 
-export function SearchResults({
-  results,
-  query,
-}: {
-  results: EpisodeRow[];
-  query: string;
-}) {
+export function SearchResults({ results, query }: { results: EpisodeRow[]; query: string }) {
   if (results.length === 0) {
     return (
       <motion.div

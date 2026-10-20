@@ -4,11 +4,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Suspense } from "react";
 
-export default function HomeLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />

@@ -203,11 +203,7 @@ export function useReducedMotion() {
   return mediaQuery.matches;
 }
 
-export function MotionConfigWrapper({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function MotionConfigWrapper({ children }: { children: ReactNode }) {
   return <motion.div style={{ willChange: "transform, opacity" }}>{children}</motion.div>;
 }
 

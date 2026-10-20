@@ -62,16 +62,13 @@ FUNCTION_SECRET=your-generated-secret-here
 ### From Next.js API Routes
 
 ```typescript
-const response = await fetch(
-  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/sync-firstory`,
-  {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.FUNCTION_SECRET}`,
-      "Content-Type": "application/json",
-    },
+const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/sync-firstory`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.FUNCTION_SECRET}`,
+    "Content-Type": "application/json",
   },
-);
+});
 ```
 
 ### From Command Line

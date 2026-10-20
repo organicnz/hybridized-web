@@ -57,8 +57,7 @@ interface EpisodeData {
 }
 
 type PlaylistResult =
-  | { band: string; found: number; updated: number }
-  | { band: string; error: string };
+  { band: string; found: number; updated: number } | { band: string; error: string };
 
 // Helper to extract text from CDATA or regular tags
 function extractText(xml: string, tag: string): string {

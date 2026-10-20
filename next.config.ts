@@ -13,6 +13,21 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Type-safe `next/link` hrefs: a typo in a route path is a type error.
+  typedRoutes: true,
+  experimental: {
+    // Type checking is `tsrs`' job, and TypeScript 7 ships no JavaScript
+    // compiler API — so Next must not look for the `typescript` package.
+    // With `useTypeScriptCli: false` and `@typescript/native-preview`
+    // installed, Next detects the native TypeScript compiler, skips the
+    // `typescript` dependency entirely, and only writes the route type
+    // declarations. Without the native preview, Next would try to install
+    // `typescript@^6` on every build.
+    useTypeScriptCli: false,
+    // Generate `.next/types` entries for the environment variables the app
+    // reads, so `process.env.NEXT_PUBLIC_*` is typed rather than `string`.
+    typedEnv: true,
+  },
   turbopack: {
     root: import.meta.dirname,
     rules: {

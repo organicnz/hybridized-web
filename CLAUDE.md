@@ -7,15 +7,16 @@
 ## Tech Stack
 
 - **Runtime & Package Manager:** Bun 1.4 **canary** — package manager, test
-  runner and JavaScript runtime. **Node.js is not used**; the lockfile is
-  `bun.lock`, the test runner is `bun test`, and Next.js runs on the Bun
-  runtime.
+  runner, linter, formatter and JavaScript runtime. **Node.js is not used**;
+  the lockfile is `bun.lock`, the test runner is `bun test`, and Next.js runs
+  on the Bun runtime.
 - **Framework:** Next.js 16.5 canary with App Router, Cache Components
-- **Language:** TypeScript 7.1 beta, type-checked with `tsrs` (Rust port)
+- **Language:** TypeScript 7.1, type-checked with `tsrs` (Rust port)
 - **Database & Auth:** Supabase
 - **Styling:** Tailwind CSS 4 (CSS-first `@theme`)
 - **Components:** shadcn/ui
-- **Linting:** oxlint 1.89 + Biome 2.5
+- **Linting & Formatting:** Bun's built-ins — `bun lint` (oxlint engine) and
+  `bun fmt`
 - **Deployment:** Vercel (Bun runtime via `bunVersion` in `vercel.json`)
 - **Domain:** hybridized.online (via Cloudflare DNS)
 
@@ -42,6 +43,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
 Optional:
+
 - `SUPABASE_SECRET_KEY` - service-role key. Required by the mutating sync
   endpoints (`/api/v1/sync-*`, `/api/v1/match-*`) so their writes bypass RLS.
   Without it those routes fall back to a cookie session and are denied by RLS
@@ -57,13 +59,16 @@ bun install        # Install dependencies (bun.lock)
 bun run dev        # Start dev server (Next.js on the Bun runtime)
 bun run build      # Production build
 bun run start      # Serve the production build
-bun run lint       # oxlint + biome
+bun run lint       # bun lint (Bun's built-in oxlint engine)
+bun run format     # bun fmt (Bun's built-in formatter)
+bun run fix        # lint --fix + format
 bun run typecheck  # tsrs --noEmit (Rust port of the TypeScript compiler)
-bun run typecheck:tsc  # tsc --noEmit (TypeScript 7.1 beta, Go port)
 bun run typecheck:fast # bun check (Bun's own multi-core checker)
 bun test           # unit tests
-bun run verify     # lint + all three type checkers + test
+bun run verify     # lint + both type checkers + test
 bun run doctor     # assert the Bun environment invariants
+bun run setup:bun  # install the exact Bun build pinned by .bun-version
+bun run setup:tsdk # wire tsrs up as the editor's language server
 bun x <pkg>        # one-off package execution (replaces npx)
 ```
 
@@ -72,6 +77,8 @@ Bun-native extras:
 ```bash
 bun check              # Bun's own multi-core type checker (whole project)
 bun run typecheck:fast # alias for `bun check`
+bun lint               # built-in linter (oxlint engine, no extra binary)
+bun fmt                # built-in formatter
 bun audit              # vulnerability scan
 bun outdated           # outdated dependencies
 bun pm why <pkg>       # dependency explanation
@@ -86,20 +93,46 @@ Node.js, npm and npx are not part of this project. Use `bun`, `bun run` and
 This project has **no Node.js at any layer** — not the toolchain, not the
 scripts, not the runtime, not production.
 
-- The toolchain tracks the Bun **canary** channel: `.bun-version`
-  (`1.4.3-canary.20261019.1`), `package.json` (`packageManager`) and
-  `vercel.json` (`bunVersion: "1.4.x"`). **Change the first two together** —
-  `packageManager` makes Bun download and re-exec that exact build for
-  `bun install`. `vercel.json` can only name a release line, so it stays
-  `1.4.x` (the Rust rewrite) and must never be left outside the 1.4 line.
+- The Bun build is pinned **once**, in `.bun-version`, as the npm publish
+  version (`1.4.3-canary.20261019.1`). Three things must agree with it:
+  `package.json`'s `packageManager`, the generated `.bun-lock.json`, and the
+  build that is actually running.
+  - **`packageManager` does not pin the runtime.** Bun 1.4 never re-execs the
+    named build — not on `bun install`, not on any subcommand. The pin is
+    enforced by `scripts/install-bun.ts`, which resolves the immutable npm
+    artifact `@oven/bun-<platform>@<version>`, verifies its sha512 against
+    `.bun-lock.json`, and installs it to `.bun/bin/bun`.
+  - **Canaries are not GitHub releases.** Bun's `canary` tag serves unversioned
+    assets that are replaced every day, and canaries have no git tags, so
+    `oven-sh/setup-bun` cannot resolve a pinned canary at all. The npm
+    publish version is the only immutable handle — npm forbids republishing a
+    version. CI therefore bootstraps with `bun-version: canary` and then
+    replaces it with the pinned build.
+  - `.mise.toml` prepends `./.bun/bin` to `PATH`, so the pinned build wins
+    locally. It deliberately does **not** pin bun in `[tools]`: mise's `bun`
+    backend resolves canary strings against the moving channel, and a `path:`
+    pin hard-fails on a fresh clone before `bun run setup:bun` can run.
+  - `vercel.json` can only name a release line, so it stays `1.4.x` (the Rust
+    rewrite) and must never be left outside the 1.4 line.
+  - To bump: edit `.bun-version`, run `bun run setup:bun --pin-all`, and
+    commit `.bun-lock.json`. `bun run doctor` warns when a newer canary has
+    been published.
 - `bunfig.toml` sets `[run] bun = true`, so every `package.json` script runs on
   the Bun runtime, and `[run] shell = "bun"`, so `&&`/`||` chains run in Bun's
   own shell instead of bash/zsh.
+- **Never set an install-cache `dir` in `bunfig.toml`.** Bun does not expand
+  `~` in that path — it creates a literal `~` directory inside the project
+  root and fills it with the whole cache. The default is already
+  `~/.bun/install/cache`; `bun pm cache` reports the effective path.
 - Automation lives in `scripts/**/*.ts` and is executed with `bun`. Use Bun
   Shell (`import { $ } from "bun"`) instead of shelling out to `sh -c`.
-- Use `bun:fs`, `bun:path`, `Bun.file()`, `Bun.Glob`, `Bun.XML` and
-  `Bun.sleep` rather than their `node:` equivalents or a third-party library.
-  `types/bun-modules.d.ts` supplies the ambient types `bun-types` does not ship.
+- Use `bun:fs`, `bun:fs/promises`, `bun:path`, `Bun.file()`, `Bun.Glob`,
+  `Bun.XML` and `Bun.sleep` rather than their `node:` equivalents or a
+  third-party library. `types/bun-modules.d.ts` supplies the ambient types
+  `bun-types` does not ship; it is the **only** file allowed to name a `node:`
+  module, and only in type position. `bun run doctor` fails otherwise.
+  - `bun:fs` re-exports the _callback_ API; use `bun:fs/promises` for
+    promises.
 - Prefer a Bun built-in over a dependency. `lib/api/rss.ts` uses `Bun.XML`
   instead of `xml2js`; do not reintroduce an XML/feed library.
 - Use `Bun.env` in `scripts/**`.
@@ -108,31 +141,47 @@ scripts, not the runtime, not production.
   can run on the Edge runtime where `Bun` is undefined. `Bun.env` is only safe
   in standalone Bun scripts.
 - Run tools through `bun x --bun <tool>` so they never pick up a Node
-  installation if one is present on the machine. `tsrs` and `tsc` both ship a
-  `#!/usr/bin/env node` launcher, so `--bun` is what keeps them on Bun.
-- **Three type checkers run in `verify` and must agree:** `tsrs` (the Rust
-  port — the primary gate), `tsc` (TypeScript 7.1 beta, the Go port — the
-  upstream cross-check) and `bun check` (multi-core, ~200 ms). Run
+  installation if one is present on the machine. `tsrs` ships a
+  `#!/usr/bin/env node` launcher, so `--bun` is what keeps it on Bun.
+- **Two type checkers run in `verify` and must agree:** `tsrs` (the Rust
+  port — the primary gate) and `bun check` (multi-core, ~150 ms). Run
   `bun run verify`, not just one of them.
+  - The `typescript` npm package is **not** installed. TypeScript 7 ships no
+    JavaScript compiler API, so it cannot serve as a gate here, and its
+    `#!/usr/bin/env node` launcher would be the last Node-flavoured entry in
+    the dependency tree. Next.js is told about this with
+    `experimental.useTypeScriptCli: false` plus
+    `@typescript/native-preview`; without the native preview, Next would try
+    to install `typescript@^6` on every build.
   - `noUncheckedSideEffectImports: true` is on, so an unresolvable
-    side-effect import is an error in all three.
+    side-effect import is an error in both.
   - `types/css.d.ts` declares `*.css`; `types/bun-modules.d.ts` declares
     `bun:fs` / `bun:path`.
   - Do **not** augment the global `Navigator` (or other DOM interfaces) for
     APIs that a newer toolchain already declares. `lib/webgpu.ts` reads
     `navigator.gpu` through a local type for exactly this reason — Bun's
     checker ships `NavigatorGPU`, and a global augmentation collides with it.
-- Do not add a `check` script to `package.json` — the name shadows Bun's
-  built-in `bun check` type checker.
+- **Linting and formatting are Bun built-ins.** `bun lint` runs the same
+  oxlint engine as the standalone binary, and `bun fmt` replaces Biome.
+  - `oxlint.json` stays the rule config: `bun lint -c oxlint.json` is the
+    supported invocation. The `jsx-a11y` plugin is enabled explicitly, and
+    `typescript/no-explicit-any`, `eqeqeq` and `typescript/ban-ts-comment`
+    are listed by hand because they were Biome rules with no default-on
+    oxlint equivalent.
+  - The `lint` script name shadows the built-in, so every invocation passes
+    `--no-script` to avoid recursing into the script. The same applies to
+    `check` and `fmt` — **do not add a `check` script** to `package.json`.
+  - `jsx-a11y/media-has-caption` is off on purpose: music has no spoken
+    dialogue, so the players' `<audio>` elements have no caption track.
 - `trustedDependencies` must list every package whose install script is
-  needed (`sharp`, `webgpu`, `@vgpu/adapter-node`, `@biomejs/biome`,
-  `lefthook`). Bun blocks the rest, and their scripts would never run.
-  Re-check with `bun pm trust --all` after adding a dependency.
-- **oxlint 1.x / Biome 2 triage.** Both majors enable a much larger rule set.
-  The React Compiler rules (`react/set-state-in-effect`, `react/refs`,
-  `react/purity`, `react/immutability`) are set to `warn`, not `error`:
-  making the codebase React-Compiler-shaped is a deliberate refactor of its
-  own. The findings are real and are listed in `oxlint.json`:
+  needed (`sharp`, `webgpu`, `@vgpu/adapter-node`, `lefthook`). Bun blocks the
+  rest, and their scripts would never run. Re-check with `bun pm trust --all`
+  after adding a dependency.
+- **React Compiler rule triage.** `oxlint.json` enables the React Compiler
+  rules (`react/set-state-in-effect`, `react/refs`, `react/purity`,
+  `react/immutability`) as `warn`, not `error`: making the codebase
+  React-Compiler-shaped is a deliberate refactor of its own. The findings are
+  real and are listed in `oxlint.json`:
   - `set-state-in-effect` — the mount effects read localStorage, the session
     and the loaded profile; they are the SSR-safe way to do it.
   - `refs` — lazy `useRef` initialisation and passing a ref's current value
@@ -142,12 +191,12 @@ scripts, not the runtime, not production.
 - **Do not "fix" `react/purity` in a client component by hoisting `new Date()`
   to module scope.** Next 16.5's Instant Navigation validation fails the
   prerender with `CLIENT_HOOK_DYNAMIC` when a client module reads the clock
-  at import time — the build then reports the *first* URL-data reader it
+  at import time — the build then reports the _first_ URL-data reader it
   finds (`SpeedInsights`), which points at the wrong file. Keep
   `new Date()` in the render and leave the rule as a warning.
 - `bun dedupe` is **not** safe here: it downgrades `magic-string` 1.4.3 →
   0.30.21 for `@sentry/bundler-plugins`, a major-version downgrade.
-  `bun audit fix` *is* safe — it only upgrades within existing ranges.
+  `bun audit fix` _is_ safe — it only upgrades within existing ranges.
 
 ## Next.js 16.5 Notes
 
@@ -173,10 +222,18 @@ catch these — the error names the exact component.
 faster. **That makes `bun run verify` the only type gate**, so it must pass
 before a build is trusted.
 
+`next.config.ts` also sets `typedRoutes: true` (a typo in a `next/link` href
+is a type error) and `experimental.typedEnv: true` (typed
+`process.env.NEXT_PUBLIC_*`). A route prop must be typed `Route`, not
+`string`; `lib/utils/route.ts` holds `withQuery` / `withHash` for the one
+case the type system cannot express — a route plus a search string or
+fragment.
+
 - Run `bun run doctor` after any toolchain or dependency change. It is the
-  executable form of the rules above — version pin, no Node.js on `PATH`,
-  lockfile in sync, install scripts trusted, `bunfig.toml` intact, no
-  `setup-node` in CI. It must pass before committing.
+  executable form of the rules above — version pin, pinned build running, no
+  Node.js on `PATH`, lockfile in sync, install scripts trusted, `bunfig.toml`
+  intact, no install cache inside the project, no `node:` imports, `tsrs` as
+  the type gate, no `setup-node` in CI. It must pass before committing.
 - `Bun.Glob` does **not** support brace expansion (`{a,b}` matches nothing).
   Use one pattern per shape, e.g. `node_modules/*/package.json` and
   `node_modules/@*/*/package.json`.

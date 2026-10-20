@@ -27,11 +27,7 @@ type EpisodeRow = Database["public"]["Tables"]["episodes"]["Row"] & {
 // server client is untyped, so the mapping is annotated explicitly.
 type SearchEpisodeRow = Database["public"]["Functions"]["search_episodes"]["Returns"][number];
 
-async function SearchContent({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
+async function SearchContent({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const params = await searchParams;
   const query = params.q || "";
   const supabase = await createClient();
@@ -47,35 +43,33 @@ async function SearchContent({
       result_limit: SEARCH_RESULT_LIMIT,
     });
 
-    results = (data ?? []).map(
-      (row: SearchEpisodeRow): EpisodeRow => ({
-        id: row.id,
-        episode_id: row.episode_id,
-        title: row.title,
-        description: row.description,
-        audio_url: row.audio_url,
-        cover_url: row.cover_url,
-        duration: row.duration,
-        pub_date: row.pub_date,
-        band_id: row.band_id,
-        link: row.link,
-        audio_length: row.audio_length,
-        creator: row.creator,
-        explicit: row.explicit,
-        guid: row.guid,
-        enclosure_type: row.enclosure_type,
-        created_at: row.created_at,
-        bands:
-          row.band_id === null
-            ? null
-            : {
-                id: row.band_id,
-                name: row.band_name ?? "",
-                cover_url: row.band_cover_url ?? undefined,
-                firstory_user_id: row.band_firstory_user_id ?? undefined,
-              },
-      }),
-    );
+    results = (data ?? []).map((row: SearchEpisodeRow): EpisodeRow => ({
+      id: row.id,
+      episode_id: row.episode_id,
+      title: row.title,
+      description: row.description,
+      audio_url: row.audio_url,
+      cover_url: row.cover_url,
+      duration: row.duration,
+      pub_date: row.pub_date,
+      band_id: row.band_id,
+      link: row.link,
+      audio_length: row.audio_length,
+      creator: row.creator,
+      explicit: row.explicit,
+      guid: row.guid,
+      enclosure_type: row.enclosure_type,
+      created_at: row.created_at,
+      bands:
+        row.band_id === null
+          ? null
+          : {
+              id: row.band_id,
+              name: row.band_name ?? "",
+              cover_url: row.band_cover_url ?? undefined,
+              firstory_user_id: row.band_firstory_user_id ?? undefined,
+            },
+    }));
     error = fetchError;
   }
 

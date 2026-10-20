@@ -1,12 +1,14 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
+import { withQuery } from "@/lib/utils/route";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  redirectTo?: string;
+  redirectTo?: Route;
 }
 
 export function ProtectedRoute({ children, redirectTo = "/auth/login" }: ProtectedRouteProps) {
@@ -16,8 +18,7 @@ export function ProtectedRoute({ children, redirectTo = "/auth/login" }: Protect
   useEffect(() => {
     if (!loading && !user) {
       const currentPath = window.location.pathname;
-      const redirectUrl = `${redirectTo}?redirectTo=${encodeURIComponent(currentPath)}`;
-      router.push(redirectUrl);
+      router.push(withQuery(redirectTo, { redirectTo: currentPath }));
     }
   }, [user, loading, router, redirectTo]);
 

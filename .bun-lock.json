@@ -1,0 +1,14 @@
+{
+  "version": "1.4.3-canary.20261019.1",
+  "revision": "1.4.4-canary.1+6bb5dc195",
+  "integrity": {
+    "bun-darwin-aarch64": "sha512-1pqJJ9DCBZ/5u0g0HSLDQbEeUUYit4fstVZM3W5pCu0x79QeP7UXLX72MUuss1cOiRW17LqnznjkWxe+dG4JVw==",
+    "bun-darwin-x64": "sha512-AVcqo48dNpGassU9zafBkJAlcdis6JPDyb67jrqDBNAogTSA3MNIUu3spguZP2JWmJS+n5Jc8ilrwmGGWi79FA==",
+    "bun-linux-aarch64": "sha512-rz1fMeaM9m8FqCyom/A0g3N42BTYxJ+lGZ2+QhmaLWGygz8LYcFatxi2fYOlwYJueSjf6VtTzWdjFuesJs6Nxw==",
+    "bun-linux-aarch64-musl": "sha512-634WL6mMtxxVcIsTYIMCuEZqPeWPIftSZ8h38NUFN87FObEvGWyJ5J0Kj4lssRwlIcD/x80b6iRu+fr43nXqTA==",
+    "bun-linux-x64": "sha512-sCvV4dCwRYWTeGqDNYsPntfJyb7Pp9wGbvRXF/UVBqcG9bGaDv3YdLHfxLy+DM3J+FjnC11M+ukisEp0J145Hg==",
+    "bun-linux-x64-musl": "sha512-otlTx3yxVnfnwBft3/+/R6R0gGPTkv/daJ6AfVoIRw18hWNY95dh3dmrYvQvKeEuNRCMl7cyAVGjPTX4i2VXYg==",
+    "bun-windows-x64": "sha512-K2oyVHAXDRVE4DEiwZMY/Faqx4BwSxHE6Kv9foUJcqxWhWQmkTtB2R4XuieO3zMcvvR2Q/VQIYGkWmCfa/Ythg==",
+    "bun-windows-x64-baseline": "sha512-8kTMddI5jwVHeHSZUkjT85vElr3/7W/IfR0wLUloMbMN1h/xqn72eHxLUFIej9VKB0w14tbVQeStKqCBCbAwMA=="
+  }
+}

@@ -104,7 +104,9 @@ export function createSettingsSaver() {
    */
   async function performSave(userId: string, updates: SettingsUpdate): Promise<boolean> {
     // Check if row exists
-    const { data: existing } = await (await supabase())
+    const { data: existing } = await (
+      await supabase()
+    )
       .from("settings")
       .select("id")
       .eq("user_id", userId)
@@ -129,7 +131,9 @@ export function createSettingsSaver() {
 
     if (existing) {
       // UPDATE only the changed fields (doesn't overwrite other fields)
-      const { error } = await (await supabase())
+      const { error } = await (
+        await supabase()
+      )
         .from("settings")
         .update(payload)
         .eq("user_id", userId);

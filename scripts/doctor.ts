@@ -7,15 +7,20 @@
  *     bun run doctor
  *
  * Checks:
- *   1. the running Bun matches every version declaration,
- *   2. no Node.js toolchain is reachable on PATH,
- *   3. bun.lock still satisfies package.json,
- *   4. every declared dependency is present in the lockfile,
- *   5. every package that needs an install script is trusted,
- *   6. bunfig.toml keeps scripts on the Bun runtime and Bun's own shell,
- *   7. CI never pulls in Node.js.
+ *   1. the Bun version pin is stated once and agrees everywhere,
+ *   2. the running Bun is the pinned build,
+ *   3. no newer canary has been published,
+ *   4. no Node.js toolchain is reachable on PATH,
+ *   5. bun.lock still satisfies package.json,
+ *   6. every declared dependency is present in the lockfile,
+ *   7. every package that needs an install script is trusted,
+ *   8. bunfig.toml keeps scripts on the Bun runtime and Bun's own shell,
+ *   9. no install cache directory was created inside the project,
+ *  10. no source file imports a `node:` module,
+ *  11. the type gate is `tsrs` and not the `typescript` package,
+ *  12. CI never pulls in Node.js and installs the pinned Bun.
  */
-import { realpathSync } from "bun:fs";
+import { existsSync, realpathSync } from "bun:fs";
 
 type Status = "ok" | "warn" | "fail";
 
@@ -41,6 +46,12 @@ interface Lockfile {
   trustedDependencies?: string[];
 }
 
+interface BunLock {
+  version: string;
+  revision: string;
+  integrity: Record<string, string>;
+}
+
 const checks: Check[] = [];
 const pass = (name: string, detail: string) => void checks.push({ name, status: "ok", detail });
 const warn = (name: string, detail: string) => void checks.push({ name, status: "warn", detail });
@@ -53,24 +64,43 @@ function releaseLine(version: string): string {
 
 // ── 1. Version pin ───────────────────────────────────────────────────────────
 //
-// The project tracks the Bun *canary* channel:
-//   - `.bun-version` is the channel mise resolves locally ("latest"),
-//   - `package.json` pins the exact npm canary so CI is reproducible,
-//   - `vercel.json` can only name a release line ("1.4.x"); Vercel manages
-//     the patch versions itself.
+// The Bun build is pinned once, in `.bun-version`, as the npm publish
+// version. Three places must agree:
+//   - `.bun-version` — what `scripts/install-bun.ts` installs,
+//   - `package.json`'s `packageManager` — what the lockfile layer records,
+//   - `.bun-lock.json` — the generated lock (integrity hashes + revision).
+//
+// `packageManager` alone does NOT pin the runtime: Bun 1.4 never re-execs
+// the named build, so the pin is enforced by `scripts/install-bun.ts` and
+// checked here instead.
 
 const pinned = (await Bun.file(".bun-version").text()).trim();
 const pkg = (await Bun.file("package.json").json()) as PackageJson;
 const vercel = (await Bun.file("vercel.json").json()) as VercelConfig;
 
 const manager = pkg.packageManager ?? "";
-if (/^bun@\d+\.\d+\.\d+-canary\./.test(manager)) {
-  pass("package.json packageManager pins a Bun canary", manager);
-} else {
+const managerVersion = manager.startsWith("bun@") ? manager.slice(4) : "";
+
+if (!/^\d+\.\d+\.\d+-canary\./.test(pinned)) {
+  fail("Bun version pin is a canary", `.bun-version names "${pinned}"`);
+} else if (managerVersion !== pinned) {
   fail(
-    "package.json packageManager pins a Bun canary",
-    `${manager || "(unset)"} is not a bun@<version>-canary.<date> specifier`,
+    "Bun version pin agrees everywhere",
+    `package.json packageManager is "bun@${managerVersion}" but .bun-version is "${pinned}"`,
   );
+} else {
+  const bunLock = (await Bun.file(".bun-lock.json").json()) as BunLock;
+  if (bunLock.version !== pinned) {
+    fail(
+      "Bun version pin agrees everywhere",
+      `.bun-lock.json records "${bunLock.version}" but .bun-version is "${pinned}"`,
+    );
+  } else {
+    pass(
+      "Bun version pin agrees everywhere",
+      `${pinned} in .bun-version, package.json and .bun-lock.json`,
+    );
+  }
 }
 
 // `Bun.version` drops the pre-release tag and `Bun.revision` is a bare
@@ -79,18 +109,22 @@ if (/^bun@\d+\.\d+\.\d+-canary\./.test(manager)) {
 const fullVersion = Bun.spawnSync([process.execPath, "--revision"], {
   stdout: "pipe",
   stderr: "pipe",
-}).stdout.toString().trim();
+})
+  .stdout.toString()
+  .trim();
 
-if (fullVersion.includes("canary")) {
-  pass("running Bun is a canary build", fullVersion);
-} else {
+if (!fullVersion.includes("canary")) {
   fail("running Bun is a canary build", `${fullVersion || "(unknown)"} is not a canary`);
-}
-
-if (pinned === "latest" || /-canary\./.test(pinned)) {
-  pass(".bun-version tracks the canary channel", pinned);
 } else {
-  warn(".bun-version tracks the canary channel", `pinned to ${pinned} instead of a channel`);
+  const bunLock = (await Bun.file(".bun-lock.json").json()) as BunLock;
+  if (fullVersion === bunLock.revision) {
+    pass("running Bun is the pinned build", fullVersion);
+  } else {
+    fail(
+      "running Bun is the pinned build",
+      `running ${fullVersion}, pinned ${bunLock.revision} — run "bun run setup:bun" and put .bun/bin on PATH`,
+    );
+  }
 }
 
 // Vercel pins a range ("1.4.x") and manages patch versions itself.
@@ -100,10 +134,38 @@ const runtimeLine = releaseLine(Bun.version);
 if (vercelLine && releaseLine(vercelLine) === runtimeLine) {
   pass("vercel.json bunVersion", `${vercelVersion} (same ${runtimeLine} line as the runtime)`);
 } else {
-  fail("vercel.json bunVersion", `${vercelVersion || "(unset)"} is outside the ${runtimeLine} line`);
+  fail(
+    "vercel.json bunVersion",
+    `${vercelVersion || "(unset)"} is outside the ${runtimeLine} line`,
+  );
 }
 
-// ── 2. No Node.js on PATH ────────────────────────────────────────────────────
+// ── 2. A newer canary may be available ───────────────────────────────────────
+//
+// The npm `canary` dist-tag is the channel the pin tracks. When it moves,
+// the local build is stale — worth a nudge, never a failure.
+
+try {
+  const registry = (await fetch("https://registry.npmjs.org/bun").then((response) =>
+    response.ok ? response.json() : undefined,
+  )) as { "dist-tags"?: { canary?: string } } | undefined;
+  const latestCanary = registry?.["dist-tags"]?.canary;
+
+  if (!latestCanary) {
+    warn("a newer Bun canary is published", "the registry did not report a canary tag");
+  } else if (latestCanary === pinned) {
+    pass("a newer Bun canary is published", `${pinned} is the latest canary`);
+  } else {
+    warn(
+      "a newer Bun canary is published",
+      `${latestCanary} is available (pinned ${pinned}) — bump .bun-version and run "bun run setup:bun"`,
+    );
+  }
+} catch {
+  warn("a newer Bun canary is published", "the npm registry could not be reached");
+}
+
+// ── 3. No Node.js on PATH ────────────────────────────────────────────────────
 
 /**
  * True when `path` is Bun's own `node` shim.
@@ -115,29 +177,24 @@ if (vercelLine && releaseLine(vercelLine) === runtimeLine) {
  */
 function isBunShim(path: string): boolean {
   try {
-    if (realpathSync(path) === realpathSync(process.execPath)) return true;
+    return realpathSync(path) === realpathSync(process.execPath);
   } catch {
-    /* fall through to the version probe */
+    return false;
   }
-  // Bun also installs its own `npx`/`npm` compatibility shims, which report
-  // Bun's version rather than Node's.
-  const probe = Bun.spawnSync([path, "--version"], { stdout: "pipe", stderr: "pipe" });
-  const version = probe.stdout.toString().trim();
-  return version.startsWith("v") === false && version.length > 0;
 }
 
 const nodeish = ["node", "npm", "npx"]
   .map((name) => [name, Bun.which(name)] as const)
   .filter((entry): entry is readonly [string, string] => Boolean(entry[1]));
 
-const realNode = nodeish.filter(([, path]) => !isBunShim(path));
+const realNode = nodeish.filter(([name, path]) => !(name === "node" && isBunShim(path)));
 
 if (nodeish.length === 0) {
   pass("no Node.js toolchain on PATH", "node, npm and npx are all absent");
 } else if (realNode.length === 0) {
   pass(
     "no Node.js toolchain on PATH",
-    `${nodeish.map(([name]) => name).join(", ")} resolve to Bun's own shims — nothing runs on Node.js`,
+    `node resolves to Bun's own shim (${nodeish[0]?.[1]}) — nothing runs on Node.js`,
   );
 } else {
   warn(
@@ -146,7 +203,7 @@ if (nodeish.length === 0) {
   );
 }
 
-// ── 3. Lockfile in sync ──────────────────────────────────────────────────────
+// ── 4. Lockfile in sync ──────────────────────────────────────────────────────
 
 const install = Bun.spawnSync(["bun", "install", "--frozen-lockfile", "--dry-run"], {
   stdout: "pipe",
@@ -159,7 +216,7 @@ if (install.exitCode === 0) {
   fail("bun.lock satisfies package.json", message || "bun install --frozen-lockfile failed");
 }
 
-// ── 4. Every declared dependency is locked ───────────────────────────────────
+// ── 5. Every declared dependency is locked ───────────────────────────────────
 
 const lock = Bun.JSONC.parse(await Bun.file("bun.lock").text()) as Lockfile;
 const declared = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
@@ -170,7 +227,7 @@ if (unlocked.length === 0) {
   fail("all declared dependencies are in bun.lock", unlocked.join(", "));
 }
 
-// ── 5. Install scripts are trusted ───────────────────────────────────────────
+// ── 6. Install scripts are trusted ───────────────────────────────────────────
 
 const trusted = new Set(pkg.trustedDependencies ?? []);
 const needingTrust = new Set<string>();
@@ -200,7 +257,7 @@ if (untrusted.length === 0) {
   );
 }
 
-// ── 6. bunfig.toml keeps scripts on Bun ──────────────────────────────────────
+// ── 7. bunfig.toml keeps scripts on Bun ──────────────────────────────────────
 
 const bunfig = await Bun.file("bunfig.toml").text();
 if (/^\s*bun\s*=\s*true\s*$/m.test(bunfig)) {
@@ -212,10 +269,107 @@ if (/^\s*bun\s*=\s*true\s*$/m.test(bunfig)) {
 if (/^\s*shell\s*=\s*"bun"\s*$/m.test(bunfig)) {
   pass("bunfig.toml uses Bun's shell", '[run] shell = "bun"');
 } else {
-  warn("bunfig.toml uses Bun's shell", '[run] shell = "bun" is missing — scripts fall back to the system shell');
+  warn(
+    "bunfig.toml uses Bun's shell",
+    '[run] shell = "bun" is missing — scripts fall back to the system shell',
+  );
 }
 
-// ── 7. CI never pulls in Node.js ─────────────────────────────────────────────
+// The install cache must never be redirected into the project: Bun does not
+// expand "~" in a bunfig path, so it would create a literal "~" directory
+// here and fill it with the whole cache.
+if (/^\s*dir\s*=\s*["'][^"']*~/m.test(bunfig)) {
+  fail(
+    "bunfig.toml does not redirect the install cache",
+    'a cache "dir" containing "~" is set — Bun does not expand it',
+  );
+} else {
+  pass(
+    "bunfig.toml does not redirect the install cache",
+    "the default ~/.bun/install/cache is used",
+  );
+}
+
+// ── 8. No install cache inside the project ───────────────────────────────────
+
+if (existsSync("~")) {
+  fail(
+    "no install cache inside the project",
+    'a literal "~" directory exists in the project root — delete it and remove any cache "dir" from bunfig.toml',
+  );
+} else {
+  pass("no install cache inside the project", 'no literal "~" directory');
+}
+
+// ── 9. No source file imports a `node:` module ───────────────────────────────
+//
+// `types/bun-modules.d.ts` is the single exception: it re-exports Node's
+// *type* declarations so Bun's own `bun:fs` / `bun:path` specifiers are
+// typed. Nothing is imported at runtime.
+
+const nodePrefix = `${"node"}:`;
+const nodeImport = new RegExp(`(?:from\\s*|import\\s*\\(|require\\s*\\()\\s*["']${nodePrefix}`);
+const nodeImporters: string[] = [];
+
+for (const pattern of [
+  "app/**/*.{ts,tsx}",
+  "components/**/*.{ts,tsx}",
+  "context/**/*.{ts,tsx}",
+  "hooks/**/*.{ts,tsx}",
+  "lib/**/*.{ts,tsx}",
+  "scripts/**/*.{ts,tsx}",
+  "tests/**/*.{ts,tsx}",
+  "types/**/*.{ts,tsx}",
+  "*.{ts,tsx,mjs,js}",
+]) {
+  for await (const file of new Bun.Glob(pattern).scan({ cwd: "." })) {
+    if (file === "types/bun-modules.d.ts") continue;
+    if (nodeImport.test(await Bun.file(file).text())) nodeImporters.push(file);
+  }
+}
+
+if (nodeImporters.length === 0) {
+  pass(
+    "no source file imports a node: module",
+    "only types/bun-modules.d.ts names them, and only as types",
+  );
+} else {
+  fail("no source file imports a node: module", nodeImporters.join(", "));
+}
+
+// ── 10. The type gate is tsrs ────────────────────────────────────────────────
+
+const devDependencies = pkg.devDependencies ?? {};
+if (devDependencies.tsrs) {
+  pass("the type gate is tsrs", `tsrs ${devDependencies.tsrs}`);
+} else {
+  fail("the type gate is tsrs", "tsrs is not a devDependency");
+}
+
+if (!devDependencies.typescript && !pkg.dependencies?.typescript) {
+  pass(
+    "the typescript package is not installed",
+    "TypeScript 7 ships no JS API; tsrs covers the type gate",
+  );
+} else {
+  fail(
+    "the typescript package is not installed",
+    "the typescript package re-enters a Node.js launcher into the dependency tree",
+  );
+}
+
+// Next.js resolves `@types/react` and `@types/node` from the project root,
+// so `@types/node` has to be a direct dependency rather than a transitive one.
+if (devDependencies["@types/node"]) {
+  pass("@types/node is a direct dependency", devDependencies["@types/node"]);
+} else {
+  fail(
+    "@types/node is a direct dependency",
+    "Next.js requires @types/node; it must not be left to arrive transitively",
+  );
+}
+
+// ── 11. CI never pulls in Node.js ────────────────────────────────────────────
 
 const workflows: string[] = [];
 for (const pattern of [".github/workflows/*.yml", ".github/workflows/*.yaml"]) {
@@ -238,6 +392,23 @@ if (workflows.length === 0) {
   fail("CI never pulls in Node.js", `setup-node in ${nodeStepping.join(", ")}`);
 }
 
+// CI must install the *pinned* Bun, not whatever the canary channel serves
+// that day, or local and CI would run different builds.
+const installsPinnedBun = await Promise.all(
+  workflows.map(async (file) => {
+    const text = await Bun.file(file).text();
+    return /scripts\/install-bun\.ts/.test(text);
+  }),
+);
+
+if (workflows.length === 0) {
+  warn("CI installs the pinned Bun", "no workflow files found");
+} else if (installsPinnedBun.some(Boolean)) {
+  pass("CI installs the pinned Bun", "scripts/install-bun.ts runs in CI");
+} else {
+  fail("CI installs the pinned Bun", "no workflow installs the build pinned by .bun-version");
+}
+
 // ── Report ───────────────────────────────────────────────────────────────────
 
 const icon: Record<Status, string> = { ok: "✓", warn: "!", fail: "✗" };
@@ -250,12 +421,10 @@ for (const check of checks) {
 }
 console.log("─".repeat(width + 40));
 
-const failures = checks.filter((check) => check.status === "fail").length;
-const warnings = checks.filter((check) => check.status === "warn").length;
-
-if (failures > 0) {
-  console.error(`${failures} check(s) failed, ${warnings} warning(s).`);
+const failures = checks.filter((check) => check.status === "fail");
+const warnings = checks.filter((check) => check.status === "warn");
+if (failures.length > 0) {
+  console.log(`${failures.length} check(s) failed, ${warnings.length} warning(s).`);
   process.exit(1);
 }
-
-console.log(`All ${checks.length} checks passed${warnings > 0 ? ` (${warnings} warning(s))` : ""}.`);
+console.log(`All ${checks.length} checks passed (${warnings.length} warning(s)).`);

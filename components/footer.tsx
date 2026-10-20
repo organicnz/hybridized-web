@@ -11,7 +11,6 @@ const FOOTER_LINKS = [
 
 const SUPPORT_LINKS = [{ href: "/support", label: "Support & Resources" }] as const;
 
-
 export function Footer() {
   return (
     <footer className="surface-shell border-t">

@@ -7,6 +7,7 @@ This is a music archive/streaming platform with a clean, professional design foc
 ---
 
 ## 1. **Header/Navigation Bar**
+
 - **Background**: Dark blue-grey (`~#4A5568`)
 - **Layout**: Horizontal flex container with space-between alignment
 - **Components**:
@@ -17,6 +18,7 @@ This is a music archive/streaming platform with a clean, professional design foc
 ---
 
 ## 2. **Artist/DJ Navigation Bar**
+
 - **Background**: Slightly darker blue-grey
 - **Layout**: Horizontal scrollable list
 - **Active state**: "Hybrid" tab has bottom border accent (cyan/teal)
@@ -28,6 +30,7 @@ This is a music archive/streaming platform with a clean, professional design foc
 ## 3. **Main Content Area (Left Panel)**
 
 ### **Currently Playing Card**
+
 - **Background**: White card with subtle shadow
 - **Components**:
   - **Artist Avatar**: Circular gradient logo (top-left)
@@ -37,7 +40,9 @@ This is a music archive/streaming platform with a clean, professional design foc
   - **Play Button**: Large circular blue button (right side)
 
 ### **Mix List Items**
+
 Each item follows this structure:
+
 - **Title**: Bold, includes show name and date
   - Example: "Mike Truman - Ministry Of Sound Radio 1 (2001-10-14)"
 - **Metadata Row**:
@@ -53,6 +58,7 @@ Each item follows this structure:
 ## 4. **Sidebar Panel (Right)**
 
 ### **Artist Profile Card**
+
 - **Background**: Dark card with image overlay
 - **Components**:
   - **Hero Image**: Large artist logo/artwork
@@ -64,6 +70,7 @@ Each item follows this structure:
 ---
 
 ## 5. **Footer**
+
 - **Background**: Same as main dark blue-grey
 - **Layout**: Horizontal flex with space-between
 - **Left Side**: Copyright "© 2025 Hybridized" + Privacy + Terms links
@@ -74,6 +81,7 @@ Each item follows this structure:
 ## Design Principles & UX Patterns
 
 ### **Color Palette**
+
 - **Primary Background**: `#5B6B7F` (slate blue-grey)
 - **Card Background**: White (`#FFFFFF`)
 - **Accent Orange**: `#FF6B35` (for logo, donation button)
@@ -82,23 +90,27 @@ Each item follows this structure:
 - **Interactive Blue**: `#3B82F6` (play buttons)
 
 ### **Typography**
+
 - **Headings**: Bold, slightly larger size
 - **Body**: Regular weight, good contrast
 - **Metadata**: Smaller, grey color for secondary info
 
 ### **Spacing & Layout**
+
 - Consistent padding (16-24px)
 - Card-based design with subtle shadows
 - Clear visual hierarchy
 - Breathing room between elements
 
 ### **Interactive Elements**
+
 - Hover states on buttons/links
 - Play buttons clearly visible
 - Menu options accessible via three-dot icons
 - Clickable list items
 
 ### **Responsive Considerations**
+
 - Horizontal scrolling for artist navigation
 - Fixed header/navigation
 - Sidebar could collapse on mobile
@@ -109,6 +121,7 @@ Each item follows this structure:
 ## Next.js 16 Implementation Notes
 
 ### **Recommended Structure**
+
 ```
 /app
   /layout.tsx          → Root layout with header/footer
@@ -125,6 +138,7 @@ Each item follows this structure:
 ```
 
 ### **Key Features to Implement**
+
 - Server Components for static content
 - Client Components for player, interactive elements
 - API Routes for mix data
@@ -134,6 +148,7 @@ Each item follows this structure:
 - LocalStorage for playback position (if needed)
 
 ### **Accessibility**
+
 - Semantic HTML elements
 - ARIA labels for player controls
 - Keyboard navigation support
@@ -229,22 +244,26 @@ Here's a detailed visual/spatial breakdown of the interface:
 ## **Dimensional Specifications**
 
 ### **Page Container**
+
 - **Full Width**: 100vw
 - **Max Width**: ~1920px (centered)
 - **Min Width**: 320px (mobile breakpoint)
 
 ### **Header**
+
 - **Height**: 60-64px
 - **Padding**: 16px 32px
 - **Z-index**: 1000 (sticky/fixed)
 
 ### **Artist Navigation**
+
 - **Height**: 48px
 - **Padding**: 8px 24px
 - **Overflow**: Horizontal scroll
 - **Active Indicator**: 3px bottom border
 
 ### **Main Content Area Split**
+
 ```
 ┌─────────────────────┬──────────────┐
 │   Main Panel        │   Sidebar    │
@@ -254,6 +273,7 @@ Here's a detailed visual/spatial breakdown of the interface:
 ```
 
 ### **Now Playing Card (Expanded)**
+
 ```
 ┌────────────────────────────────────────────┐
 │  Padding: 24px                             │
@@ -270,6 +290,7 @@ Height: ~180px when expanded
 ```
 
 ### **Mix List Item**
+
 ```
 ┌─────────────────────────────────────────────┐
 │  Padding: 16px 20px                         │
@@ -282,6 +303,7 @@ Gap between items: 1px border or 8px margin
 ```
 
 ### **Sidebar Artist Profile**
+
 ```
 ┌────────────────────────────────┐
 │  Image Container               │
@@ -307,6 +329,7 @@ Gap between items: 1px border or 8px margin
 ## **Spacing System**
 
 ### **Padding Scale**
+
 - `xs`: 4px
 - `sm`: 8px
 - `md`: 16px
@@ -315,6 +338,7 @@ Gap between items: 1px border or 8px margin
 - `2xl`: 48px
 
 ### **Gap/Margin Scale**
+
 - Between list items: 8-12px
 - Between sections: 24-32px
 - Card internal padding: 20-24px
@@ -325,6 +349,7 @@ Gap between items: 1px border or 8px margin
 ## **Grid Layout (Responsive)**
 
 ### **Desktop (>1200px)**
+
 ```
 [Header: 100%]
 [Artist Nav: 100%]
@@ -333,6 +358,7 @@ Gap between items: 1px border or 8px margin
 ```
 
 ### **Tablet (768px - 1200px)**
+
 ```
 [Header: 100%]
 [Artist Nav: 100%]
@@ -341,6 +367,7 @@ Gap between items: 1px border or 8px margin
 ```
 
 ### **Mobile (<768px)**
+
 ```
 [Header: 100%]
 [Artist Nav: 100%, horizontal scroll]
@@ -354,6 +381,7 @@ Gap between items: 1px border or 8px margin
 ## **Component Positioning Details**
 
 ### **Now Playing Card - Element Positions**
+
 ```
      0px    80px   100px              ...              calc(100%-92px)  100%
      ↓      ↓      ↓                                   ↓                ↓
@@ -369,6 +397,7 @@ Gap between items: 1px border or 8px margin
 ```
 
 ### **Mix List Item - Internal Layout**
+
 ```
      16px   ...                                            calc(100%-88px) 100%
      ↓                                                     ↓                ↓
@@ -386,6 +415,7 @@ Gap between items: 1px border or 8px margin
 ## **Visual Hierarchy Weights**
 
 ### **Z-Index Layers**
+
 ```
 Layer 5 (1000): Header (sticky)
 Layer 4 (100):  Modals/Dropdowns
@@ -396,6 +426,7 @@ Layer 0 (0):    Base content
 ```
 
 ### **Shadow Depths**
+
 ```
 Level 1: box-shadow: 0 1px 3px rgba(0,0,0,0.12)    // Subtle cards
 Level 2: box-shadow: 0 4px 6px rgba(0,0,0,0.15)    // Elevated cards
@@ -407,6 +438,7 @@ Level 3: box-shadow: 0 10px 20px rgba(0,0,0,0.2)   // Modals/Overlays
 ## **Interaction Zones**
 
 ### **Clickable Areas (Minimum Touch Target: 44x44px)**
+
 ```
 Play Button:        60x60px (large primary action)
 Menu Button:        32x32px (secondary action)

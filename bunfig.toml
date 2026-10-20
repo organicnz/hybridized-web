@@ -8,10 +8,12 @@ auto = "disable"
 # installed version is pinned in package.json.
 exact = true
 
-[install.cache]
-# Share the install cache across projects and machines.
-dir = "~/.bun/install/cache"
-disable = false
+# The install cache is deliberately NOT overridden here. Bun's default is
+# already the shared per-user cache at `~/.bun/install/cache`, and it expands
+# `~` correctly. Setting `dir = "~/.bun/install/cache"` here does NOT expand
+# the tilde: Bun creates a literal directory named `~` inside the project
+# root and fills it with the whole cache. `bun pm cache` reports the effective
+# path, and `scripts/doctor.ts` fails if a literal `~` directory reappears.
 
 # ── Run ──────────────────────────────────────────────────────────────────────
 [run]
@@ -25,3 +27,18 @@ shell = "bun"
 # ── Test ─────────────────────────────────────────────────────────────────────
 [test]
 timeout = 10000
+
+# ── Format ───────────────────────────────────────────────────────────────────
+# `bun fmt` is the project's formatter. These settings mirror the house style
+# that Biome used before it was replaced.
+[fmt]
+# 100 columns, matching the previous Biome `lineWidth`.
+printWidth = 100
+# Double quotes, semicolons, trailing commas everywhere.
+singleQuote = false
+semi = true
+trailingComma = "all"
+# Two-space indentation is the default. Files that must not be reformatted
+# (lockfiles, generated output) are listed in `.prettierignore`, which
+# `bun fmt` reads.
+

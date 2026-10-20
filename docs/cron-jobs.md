@@ -2,12 +2,10 @@
 
 ## Active Cron Jobs
 
-| Job ID | Name | Schedule | Function | Status |
-|--------|------|----------|----------|--------|
-| 4 | sync-profiles-every-6h | `0 */6 * * *` | sync-profile-data | ✅ Active |
-| 5 | generate-stats-hourly | `0 * * * *` | generate-band-stats | ✅ Active |
-
-
+| Job ID | Name                   | Schedule      | Function            | Status    |
+| ------ | ---------------------- | ------------- | ------------------- | --------- |
+| 4      | sync-profiles-every-6h | `0 */6 * * *` | sync-profile-data   | ✅ Active |
+| 5      | generate-stats-hourly  | `0 * * * *`   | generate-band-stats | ✅ Active |
 
 ## Schedule Explanation
 
@@ -29,6 +27,7 @@
 ## Management Commands
 
 ### View all cron jobs
+
 ```sql
 SELECT jobid, jobname, schedule, active 
 FROM cron.job 
@@ -36,6 +35,7 @@ ORDER BY jobname;
 ```
 
 ### View cron job execution history
+
 ```sql
 SELECT 
     jobid,
@@ -51,6 +51,7 @@ LIMIT 20;
 ```
 
 ### Disable a cron job
+
 ```sql
 UPDATE cron.job 
 SET active = false 
@@ -58,6 +59,7 @@ WHERE jobname = 'cleanup-old-bands-daily';
 ```
 
 ### Enable a cron job
+
 ```sql
 UPDATE cron.job 
 SET active = true 
@@ -65,11 +67,13 @@ WHERE jobname = 'cleanup-old-bands-daily';
 ```
 
 ### Delete a cron job
+
 ```sql
 SELECT cron.unschedule('cleanup-old-bands-daily');
 ```
 
 ### Manually trigger a job (via edge function)
+
 ```bash
 curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/cleanup-old-bands \
   -H "Authorization: Bearer YOUR_ANON_KEY"
@@ -78,6 +82,7 @@ curl -X POST https://neslxchdtibzhxijxcbg.supabase.co/functions/v1/cleanup-old-b
 ## Monitoring
 
 Check the Supabase dashboard:
+
 1. Go to Database → Cron Jobs
 2. View execution history and logs
 3. Monitor success/failure rates
@@ -85,6 +90,7 @@ Check the Supabase dashboard:
 ## Troubleshooting
 
 If a cron job fails:
+
 1. Check `cron.job_run_details` for error messages
 2. Verify edge function is deployed and active
 3. Check edge function logs in Supabase dashboard

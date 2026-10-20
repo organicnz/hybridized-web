@@ -23,19 +23,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        # The project tracks the Bun canary channel: `.bun-version` is
-        # "latest" for mise locally, and CI installs the canary channel.
-        # `package.json` pins the exact canary build for the lockfile layer.
+      - name: Setup Bun (bootstrap)
+        # This step only provides a Bun capable of running the installer below.
+        # The "canary" channel serves unversioned assets that are replaced
+        # daily, and canaries have no git tags, so setup-bun cannot resolve a
+        # pinned canary — it is replaced immediately by the exact build.
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: canary
+
+      - name: Install pinned Bun
+        # `.bun-version` names the npm publish version of the Bun build this
+        # project pins. npm forbids republishing a version, so the tarball is
+        # immutable, and `.bun-lock.json` carries its sha512 for every
+        # platform. The installer verifies the hash before writing the binary.
+        run: bun scripts/install-bun.ts --output-dir "$HOME/.bun/bin"
+
+      - name: Verify Bun revision
+        run: bun --revision
 
       - name: Cache Bun install cache
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ hashFiles('.bun-lock.json') }}
           restore-keys: bun-${{ runner.os }}-
 
       - name: Install dependencies

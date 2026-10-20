@@ -90,11 +90,7 @@ import { useAuth } from "@/hooks/use-auth";
 export function MyComponent() {
   const { user, isAuthenticated } = useAuth();
 
-  return isAuthenticated ? (
-    <div>Hello {user.email}</div>
-  ) : (
-    <div>Please login</div>
-  );
+  return isAuthenticated ? <div>Hello {user.email}</div> : <div>Please login</div>;
 }
 ```
 
@@ -110,9 +106,7 @@ export function ProfileDisplay() {
   return (
     <div>
       <h1>{profile?.full_name}</h1>
-      <button onClick={() => updateProfile({ full_name: "New Name" })}>
-        Update
-      </button>
+      <button onClick={() => updateProfile({ full_name: "New Name" })}>Update</button>
     </div>
   );
 }

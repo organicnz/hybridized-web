@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { AlertCircle, ArrowLeft, CheckCircle } from "lucide-react";
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -9,7 +10,7 @@ import type { ReactNode } from "react";
 interface AuthShellProps {
   title: string;
   subtitle?: string;
-  backHref?: string;
+  backHref?: Route;
   backLabel?: string;
   children: ReactNode;
   footer?: ReactNode;
