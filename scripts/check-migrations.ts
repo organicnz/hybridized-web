@@ -48,10 +48,6 @@ function findPostgres(): { bin: string; psql: string } | null {
     // Where a distribution installs it, versioned.
     ...["16", "17", "18", "19"].map((version) => `/usr/lib/postgresql/${version}/bin`),
     "/usr/local/pgsql/bin",
-    "/opt/homebrew/opt/postgresql@18/bin",
-    "/opt/homebrew/opt/postgresql@17/bin",
-    "/opt/homebrew/opt/postgresql@16/bin",
-    "/usr/local/opt/postgresql@18/bin",
     // Whatever is on PATH.
     ...(Bun.env.PATH ?? "").split(":"),
   ];
