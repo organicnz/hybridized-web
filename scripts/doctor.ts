@@ -20,7 +20,7 @@
  *  11. the type gate is `tsrs` and not the `typescript` package,
  *  12. CI never pulls in Node.js and installs the pinned Bun.
  */
-import { existsSync, realpathSync } from "bun:fs";
+import { closeSync, existsSync, openSync, readSync, realpathSync } from "bun:fs";
 
 type Status = "ok" | "warn" | "fail";
 
@@ -168,16 +168,43 @@ try {
 // ── 3. No Node.js on PATH ────────────────────────────────────────────────────
 
 /**
- * True when `path` is Bun's own `node` shim.
+ * True when `path` is Bun's own `node` shim, or a script that runs on Bun.
  *
  * While a package.json script runs, Bun puts a `node` symlink to itself on
  * PATH so that third-party install scripts calling `node` still execute on
  * Bun. That is the whole point — but a genuine Node.js install would be a
  * footgun, so the two cases are reported differently.
+ *
+ * A shim is recognised in either of two ways: it resolves to the running Bun
+ * (a symlink), or it is a script whose shebang runs Bun (`#!/usr/bin/env bun`).
+ * The second form covers hand-written shims, such as an `npx` that forwards to
+ * `bun x` — those carry no Node.js at all and must not be reported.
  */
 function isBunShim(path: string): boolean {
   try {
-    return realpathSync(path) === realpathSync(process.execPath);
+    if (realpathSync(path) === realpathSync(process.execPath)) return true;
+  } catch {
+    // Not resolvable — fall through to the shebang check.
+  }
+
+  try {
+    const handle = openSync(path, "r");
+    try {
+      const buffer = Buffer.alloc(64);
+      const read = readSync(handle, buffer, 0, buffer.length, 0);
+      const firstLine = buffer.subarray(0, read).toString("utf8").split("\n")[0] ?? "";
+      if (!firstLine.startsWith("#!")) return false;
+      // The interpreter is the last token of the shebang, e.g.
+      // "#!/usr/bin/env bun" or "#!/usr/local/bin/bun".
+      const tokens = firstLine
+        .replace(/^#!\s*/, "")
+        .split(/\s+/)
+        .filter(Boolean);
+      const interpreter = tokens.at(-1) ?? "";
+      return interpreter === "bun" || interpreter.endsWith("/bun");
+    } finally {
+      closeSync(handle);
+    }
   } catch {
     return false;
   }
@@ -187,14 +214,14 @@ const nodeish = ["node", "npm", "npx"]
   .map((name) => [name, Bun.which(name)] as const)
   .filter((entry): entry is readonly [string, string] => Boolean(entry[1]));
 
-const realNode = nodeish.filter(([name, path]) => !(name === "node" && isBunShim(path)));
+const realNode = nodeish.filter(([, path]) => !isBunShim(path));
 
 if (nodeish.length === 0) {
   pass("no Node.js toolchain on PATH", "node, npm and npx are all absent");
 } else if (realNode.length === 0) {
   pass(
     "no Node.js toolchain on PATH",
-    `node resolves to Bun's own shim (${nodeish[0]?.[1]}) — nothing runs on Node.js`,
+    `node, npm and npx are all Bun shims or absent — nothing runs on Node.js`,
   );
 } else {
   warn(

@@ -38,7 +38,7 @@ printWidth = 100
 singleQuote = false
 semi = true
 trailingComma = "all"
-# Two-space indentation is the default. Files that must not be reformatted
-# (lockfiles, generated output) are listed in `.prettierignore`, which
-# `bun fmt` reads.
+# Two-space indentation is the default.
+# `bun fmt` also reads `.gitignore`, so `bun.lock` (which it cannot parse)
+# and the other ignored paths are left alone.
 
