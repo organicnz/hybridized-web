@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { NextRequest } from "next/server";
-import { setCurrentUser } from "./helpers/supabase";
+import { setCurrentUser, setRefreshesSession } from "./helpers/supabase";
 
 /**
  * The proxy: the rate limit and the auth guards.
@@ -34,6 +34,7 @@ function request(path: string, ip = address(0)): NextRequest {
 
 beforeEach(() => {
   setCurrentUser(null);
+  setRefreshesSession(true);
 });
 
 describe("the rate limit", () => {
@@ -120,5 +121,14 @@ describe("the auth guards", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
+  });
+
+  it("refreshes the session and writes the new cookie back", async () => {
+    // `@supabase/ssr` renews the access token when it is expired, and the
+    // proxy has to put the new cookie on the response — otherwise the visitor
+    // is signed out on the next request.
+    const response = await proxy(request("/about", address(60)));
+
+    expect(response.cookies.get("sb-access-token")?.value).toBe("refreshed");
   });
 });

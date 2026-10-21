@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { encodeWav, midiToFreq, renderDemoLoop } from "@/lib/audio/demo-track";
+import { createDemoTrackUrl, encodeWav, midiToFreq, renderDemoLoop } from "@/lib/audio/demo-track";
 
 const SAMPLE_RATE = 8000;
 
@@ -153,5 +153,26 @@ describe("encodeWav", () => {
 
     expect(view.getInt16(44, true)).toBe(32767);
     expect(view.getInt16(46, true)).toBe(-32767);
+  });
+});
+
+describe("createDemoTrackUrl", () => {
+  it("is an object URL for a WAV", async () => {
+    const url = createDemoTrackUrl({ sampleRate: 8000, bpm: 120 });
+
+    expect(url.startsWith("blob:")).toBe(true);
+
+    const body = new Uint8Array(await (await fetch(url)).arrayBuffer());
+    const header = new TextDecoder().decode(body.subarray(0, 12));
+
+    expect(header.startsWith("RIFF")).toBe(true);
+    expect(header).toContain("WAVE");
+  });
+
+  it("is a different track for a different tempo", () => {
+    const slow = createDemoTrackUrl({ sampleRate: 8000, bpm: 100 });
+    const fast = createDemoTrackUrl({ sampleRate: 8000, bpm: 120 });
+
+    expect(slow).not.toBe(fast);
   });
 });

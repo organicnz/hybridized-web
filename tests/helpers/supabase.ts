@@ -30,10 +30,52 @@ export const createBrowserClient = mock((_url: string, _key: string) => ({
   auth: { getUser },
 }));
 
-export const createServerClient = mock((_url: string, _key: string, _options: unknown) => ({
-  id: "fake-server-client",
-  auth: { getUser },
-}));
+interface Cookie {
+  name: string;
+  value: string;
+  options?: Record<string, unknown>;
+}
+
+interface CookieAdapter {
+  getAll(): Cookie[];
+  setAll(cookiesToSet: Cookie[]): void;
+}
+
+/**
+ * Whether the server client renews the session.
+ *
+ * `@supabase/ssr` reads the request's cookies and writes the refreshed ones
+ * back when the access token has expired. The fake does the same when this
+ * is on; a test that is about the cookie plumbing itself turns it off.
+ */
+let refreshesSession = false;
+
+/** Turn the session renewal on or off. */
+export function setRefreshesSession(value: boolean): void {
+  refreshesSession = value;
+}
+
+/**
+ * The server client.
+ *
+ * It stands in for `@supabase/ssr`, which reads the request's cookies and
+ * writes the refreshed ones back when the session is renewed — so the fake
+ * does the same, and the code that handles the cookies is exercised.
+ */
+export const createServerClient = mock((_url: string, _key: string, options: unknown) => {
+  const adapter = (options as { cookies?: CookieAdapter } | undefined)?.cookies;
+
+  const current = adapter?.getAll() ?? [];
+  if (refreshesSession) {
+    adapter?.setAll([{ name: "sb-access-token", value: "refreshed", options: { path: "/" } }]);
+  }
+
+  return {
+    id: "fake-server-client",
+    auth: { getUser },
+    cookies: current,
+  };
+});
 
 /**
  * The plain SDK, used by the service and static clients.

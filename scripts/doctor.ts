@@ -25,7 +25,12 @@
  */
 import { closeSync, existsSync, openSync, readSync, readlinkSync, realpathSync } from "bun:fs";
 import { dirname, join } from "bun:path";
-import { findSecrets, findSecretsInHistory, type SecretFinding } from "./lib/secrets";
+import {
+  findSecrets,
+  findSecretsInHistory,
+  knownSecretDigests,
+  type SecretFinding,
+} from "./lib/secrets";
 
 type Status = "ok" | "warn" | "fail";
 
@@ -799,15 +804,7 @@ try {
 
 // A credential that was committed before the audit existed is recorded by
 // its digest, so the doctor can tell "known, being rotated" from "new".
-const knownDigests = new Set(
-  (
-    (await Bun.file("scripts/known-secret-digests.json")
-      .json()
-      .catch(() => ({ known: [] }))) as {
-      known?: { digest?: string }[];
-    }
-  ).known?.map((entry) => entry.digest ?? "") ?? [],
-);
+const knownDigests = await knownSecretDigests();
 
 if (historyError) {
   warn("no secret is in the git history", `could not walk the history: ${historyError}`);
