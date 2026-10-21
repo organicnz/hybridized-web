@@ -6,7 +6,7 @@ const WINDOW_MS = 60_000;
 
 const ipMap = new Map<string, { count: number; resetAt: number }>();
 
-function rateLimit(request: NextRequest): NextResponse | null {
+function rateLimit(request: NextRequest): NextResponse {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
@@ -17,7 +17,7 @@ function rateLimit(request: NextRequest): NextResponse | null {
 
   if (!record || now > record.resetAt) {
     ipMap.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return null;
+    return withQuota(NextResponse.next(), RATE_LIMIT - 1, now + WINDOW_MS);
   }
 
   if (record.count >= RATE_LIMIT) {
@@ -31,9 +31,16 @@ function rateLimit(request: NextRequest): NextResponse | null {
   }
 
   record.count++;
-  const response = NextResponse.next();
-  response.headers.set("X-RateLimit-Remaining", (RATE_LIMIT - record.count).toString());
-  response.headers.set("X-RateLimit-Reset", Math.ceil(record.resetAt / 1000).toString());
+  return withQuota(NextResponse.next(), RATE_LIMIT - record.count, record.resetAt);
+}
+
+/**
+ * The quota headers, on every answer — including the first one for an
+ * address, which is the one a client is most likely to look at.
+ */
+function withQuota(response: NextResponse, remaining: number, resetAt: number): NextResponse {
+  response.headers.set("X-RateLimit-Remaining", remaining.toString());
+  response.headers.set("X-RateLimit-Reset", Math.ceil(resetAt / 1000).toString());
   return response;
 }
 
@@ -42,8 +49,7 @@ export async function proxy(request: NextRequest) {
 
   // Per-IP rate limiting for the API.
   if (path.startsWith("/api/")) {
-    const limited = rateLimit(request);
-    if (limited) return limited;
+    return rateLimit(request);
   }
 
   // Session refresh + auth route guards for pages.

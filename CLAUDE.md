@@ -491,6 +491,19 @@ fragment.
   `bun run doctor` walks each route's imports and checks that something in
   the graph carries the id, `<AppShell` or `<AuthShell>`. A route that only
   redirects is exempt — it never renders its own content.
+- **The proxy is the boundary, and it has a test.** `proxy.ts` rate limits
+  the API per address and guards the protected pages. `tests/proxy.test.ts`
+  covers both: the quota headers are on every answer (including the first
+  one for an address, which is the one a client looks at), the hundredth
+  request in the window gets a 429 with a `Retry-After`, and a signed-out
+  visitor is sent to the login page with the page they wanted in
+  `redirectTo`.
+  - The address has to be fresh per test: the proxy keeps its map in the
+    module, and the module survives the file's second run, so an address
+    used twice would start that run one request down.
+- **The CSP report endpoint does not trust its body.** The body comes from
+  whoever posted it, so a body that is not JSON is a 400 and a body that is
+  larger than a report is a 413 — neither may take the handler down.
 - **The documentation has to point at files that exist.** The doctor checks
   every backticked path in `docs/*.md`, `README.md` and `CLAUDE.md`. A
   reference that is a plan, or a name the project used to have, is skipped —

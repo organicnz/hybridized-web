@@ -88,4 +88,29 @@ describe("POST /api/csp-report", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ received: true });
   });
+
+  it("rejects a body that is not JSON", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/csp-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "not json",
+      }) as never,
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ received: false });
+  });
+
+  it("rejects a body that is enormous", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/csp-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ padding: "x".repeat(17 * 1024) }),
+      }) as never,
+    );
+
+    expect(response.status).toBe(413);
+  });
 });

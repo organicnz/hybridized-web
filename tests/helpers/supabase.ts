@@ -32,6 +32,7 @@ export const createBrowserClient = mock((_url: string, _key: string) => ({
 
 export const createServerClient = mock((_url: string, _key: string, _options: unknown) => ({
   id: "fake-server-client",
+  auth: { getUser },
 }));
 
 /**
