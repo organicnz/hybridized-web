@@ -24,6 +24,7 @@
  *   15. the git hooks are Bun scripts, not a Node.js tool.
  */
 import { closeSync, existsSync, openSync, readSync, readlinkSync, realpathSync } from "bun:fs";
+import { dirname, join } from "bun:path";
 import { findSecrets, findSecretsInHistory, type SecretFinding } from "./lib/secrets";
 
 type Status = "ok" | "warn" | "fail";
@@ -928,6 +929,92 @@ if (!existsSync("scripts/check-migrations.ts")) {
   pass(
     "the migration chain is checked",
     "bun run check:migrations — applies the chain to a throwaway Postgres",
+  );
+}
+
+// ── Every route has a skip-link target ───────────────────────────────────────
+//
+// The root layout offers a "Skip to content" link that points at
+// `#main-content`. Only the pages that use <AppShell> had that id, so on the
+// rest of the site the link did nothing.
+//
+// The check walks a route's imports, because a route usually renders a client
+// component that carries the shell — the auth pages reach <AuthShell> that
+// way.
+
+const SKIP_TARGET = /id="main-content"|<AppShell\b|<AuthShell\b/;
+
+/**
+ * The source with its comments removed.
+ *
+ * A comment that mentions `<AppShell` — "this page does not use <AppShell>" —
+ * would otherwise satisfy the pattern, and the check would pass on a route
+ * that has no target at all.
+ */
+function withoutComments(text: string): string {
+  return (
+    text
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      // A `//` that is not part of `://`.
+      .replace(/(^|[^:])\/\/.*$/gm, "$1")
+  );
+}
+
+/** The sources a route renders, directly or through its imports. */
+async function routeSources(file: string): Promise<string> {
+  const seen = new Set<string>();
+  const queue = [file];
+  const parts: string[] = [];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (seen.has(current)) continue;
+    seen.add(current);
+
+    const text = await Bun.file(current)
+      .text()
+      .catch(() => "");
+    if (text === "") continue;
+    parts.push(text);
+
+    for (const match of text.matchAll(/from\s+"([^"]+)"/g)) {
+      const specifier = match[1];
+      if (!specifier.startsWith(".") && !specifier.startsWith("@/")) continue;
+
+      const base = specifier.startsWith("@/")
+        ? specifier.slice(2)
+        : join(dirname(current), specifier);
+
+      for (const candidate of [`${base}.tsx`, `${base}.ts`, join(base, "index.tsx")]) {
+        if (existsSync(candidate)) {
+          queue.push(candidate);
+          break;
+        }
+      }
+    }
+  }
+
+  return parts.join("\n");
+}
+
+const routesWithoutTarget: string[] = [];
+
+for await (const file of new Bun.Glob("app/**/page.tsx").scan({ cwd: "." })) {
+  const text = await Bun.file(file).text();
+
+  // A route that only redirects never renders its own content.
+  if (text.includes("redirect(") && !SKIP_TARGET.test(withoutComments(text))) continue;
+
+  const sources = await routeSources(file);
+  if (!SKIP_TARGET.test(withoutComments(sources))) routesWithoutTarget.push(file);
+}
+
+if (routesWithoutTarget.length === 0) {
+  pass("every route has a skip-link target", "no route renders without #main-content");
+} else {
+  fail(
+    "every route has a skip-link target",
+    `${routesWithoutTarget.join(", ")} — no #main-content, so "Skip to content" does nothing`,
   );
 }
 

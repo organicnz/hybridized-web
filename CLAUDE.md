@@ -409,6 +409,12 @@ fragment.
     already been applied, so the deploy workflow needs `supabase db push
 --include-all`. The migration is idempotent, so on the production
     database it is a no-op.
+- **Every route needs a skip-link target.** The root layout offers a "Skip to
+  content" link pointing at `#main-content`. Only the pages that use
+  `<AppShell>` had that id, so on the rest of the site the link did nothing.
+  `bun run doctor` walks each route's imports and checks that something in
+  the graph carries the id, `<AppShell` or `<AuthShell>`. A route that only
+  redirects is exempt — it never renders its own content.
 - **The documentation has to point at files that exist.** The doctor checks
   every backticked path in `docs/*.md`, `README.md` and `CLAUDE.md`. A
   reference that is a plan, or a name the project used to have, is skipped —
