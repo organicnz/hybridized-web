@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { readdir } from "bun:fs/promises";
 import { join } from "bun:path";
+import { toError } from "@/lib/api/errors";
 
 const API_DIR = "app/api";
 
@@ -80,5 +81,50 @@ describe("API error handling", () => {
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  it("normalises everything a route throws", async () => {
+    const offenders: string[] = [];
+
+    for (const file of files) {
+      const source = await Bun.file(file).text();
+
+      // Hono only hands an `Error` to the app's error handler; anything else
+      // is re-thrown and the request dies without the clean JSON the API
+      // promises. So a bare `throw someValue` is a crash, not a 500.
+      for (const match of source.matchAll(/throw\s+([A-Za-z_$][\w$]*)\s*;/g)) {
+        offenders.push(`${file} :: throw ${match[1]}`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+});
+
+describe("toError", () => {
+  it("keeps an Error as it is", () => {
+    const error = new Error("boom");
+    expect(toError(error)).toBe(error);
+  });
+
+  it("turns an object with a message into an Error", () => {
+    const error = toError({ message: "boom" });
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toBe("boom");
+  });
+
+  it("keeps the original as the cause", () => {
+    const original = { message: "boom", code: "42" };
+    expect(toError(original).cause).toBe(original);
+  });
+
+  it("copes with a thrown string", () => {
+    expect(toError("boom").message).toBe("boom");
+  });
+
+  it("copes with something that has no message", () => {
+    expect(toError({ code: "42" }).message).toBe("[object Object]");
+    expect(toError(null).message).toBe("null");
+    expect(toError(undefined).message).toBe("undefined");
   });
 });

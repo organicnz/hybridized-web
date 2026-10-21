@@ -39,3 +39,26 @@ export const logger = {
   warn: (message: string, context: LogContext = {}) => log("warn", message, context),
   error: (message: string, context: LogContext = {}) => log("error", message, context),
 };
+
+/**
+ * Turn whatever was thrown into an `Error`.
+ *
+ * Hono only hands an `Error` to the app's error handler; anything else is
+ * re-thrown and the request dies without the clean JSON the API promises. The
+ * database driver returns an `Error` subclass today, but a throw site should
+ * not depend on that.
+ */
+export function toError(thrown: unknown): Error {
+  if (thrown instanceof Error) return thrown;
+
+  if (typeof thrown === "object" && thrown !== null) {
+    const { message } = thrown as { message?: unknown };
+    if (typeof message === "string") {
+      const error = new Error(message);
+      error.cause = thrown;
+      return error;
+    }
+  }
+
+  return new Error(typeof thrown === "string" ? thrown : String(thrown));
+}

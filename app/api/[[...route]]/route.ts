@@ -7,7 +7,7 @@ import {
   RSS_ACCEPT,
   UPSTREAM_TIMEOUT_MS,
 } from "@/lib/api/constants";
-import { generateRequestId, logger } from "@/lib/api/errors";
+import { generateRequestId, logger, toError } from "@/lib/api/errors";
 import { findEpisodeById, parseFeed, parseFeedFull } from "@/lib/api/rss";
 import { isValidSlug } from "@/lib/api/validation";
 import { createClient } from "@/lib/supabase/server";
@@ -78,7 +78,7 @@ app.get("/v1/episodes", async (c) => {
   if (bandId) query = query.eq("band_id", Number(bandId));
 
   const { data, error, count } = await query;
-  if (error) throw error;
+  if (error) throw toError(error);
 
   return c.json({ episodes: data ?? [], pagination: { limit, offset, total: count ?? 0 } }, 200, {
     "Cache-Control": CACHE_SHORT,
@@ -220,7 +220,7 @@ app.post("/v1/sync-playlists", async (c) => {
     .select("id, name, iframe_url")
     .not("iframe_url", "is", null);
 
-  if (error) throw error;
+  if (error) throw toError(error);
 
   let totalMatched = 0;
   const results: Array<{ band: string; episodes?: number; error?: string }> = [];
@@ -295,12 +295,12 @@ app.post("/v1/match-episodes", async (c) => {
   const supabase = createServiceClient() ?? (await createClient());
 
   const { data: bands, error: bandsError } = await supabase.from("bands").select("id, name");
-  if (bandsError) throw bandsError;
+  if (bandsError) throw toError(bandsError);
 
   const { data: episodes, error: episodesError } = await supabase
     .from("episodes")
     .select("id, title, band_id");
-  if (episodesError) throw episodesError;
+  if (episodesError) throw toError(episodesError);
 
   const idsByBand = new Map<number, number[]>();
   for (const episode of episodes ?? []) {

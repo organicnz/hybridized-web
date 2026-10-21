@@ -234,6 +234,18 @@ doctor` fails when the exemption list rots.
   - **Register the mock once, in a shared helper** (`tests/helpers/supabase.ts`).
     A `mock.module` call is global to the process, so registering it in each
     file lets them clobber each other.
+- **The API's contract is tested, not only its helpers.**
+  `tests/api-routes.test.ts` calls the exported Vercel handler with a `Request`
+  and reads the response back, the way Next.js calls it. Only the database is
+  faked: the authorisation, the validation, the parsing and the error handling
+  are the real implementations. The fake is a proxy, because a query builder
+  is a thenable and a `then` member on a class is a thenable by accident.
+- **Anything thrown from a route is normalised first.** Hono only hands an
+  `Error` to the app's error handler; anything else is re-thrown and the
+  request dies without the clean JSON the API promises. So the throw sites use
+  `toError` from `lib/api/errors.ts`, and a test asserts that a driver
+  failing with a plain object still answers `500` with
+  `{ "error": "Internal server error" }`.
 - **`bunfig.toml` sets `[lint] typeAware = true`.** The type-aware rules —
   `@typescript-eslint/no-floating-promises` and friends — are the ones that
   need the type information to be useful. The codebase is clean under them.
