@@ -327,8 +327,12 @@ doctor` fails when the exemption list rots.
   - **Every module in the measured scope has to be in the report.** The floor
     only measures the files a test imported, so a module nothing imports
     never reaches the report and the floor cannot see it. The coverage script
-    closes that: every module under `lib/`, `app/api/` and `scripts/lib/` has
-    to be measured, or to be in the exemption list with a reason for it.
+    closes that: every module under `lib/`, `app/api/`, `scripts/lib/` and
+    `supabase/functions/` has to be measured, or to be in the exemption list
+    with a reason for it. The Deno entry points are exempt by their name:
+    they call `Deno.serve` at module scope, so a test cannot import one at
+    all — the logic that can be tested lives in a module beside them, and
+    that module is measured.
   - **A module nothing imports is dead code.** `bun run doctor` fails when a
     file under `lib/`, `components/` or `hooks/` is not imported by anything —
     statically or dynamically. Two were here and are gone: a design-token

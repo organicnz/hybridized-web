@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { parseLimit } from "./parse.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -8,7 +9,7 @@ Deno.serve(async (req) => {
 
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("q");
-    const limit = Number.parseInt(searchParams.get("limit") || "10", 10);
+    const limit = parseLimit(searchParams.get("limit"));
 
     if (!query) {
       return new Response(

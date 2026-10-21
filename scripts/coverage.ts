@@ -133,7 +133,7 @@ const functionPct = percent(coverage.functions.hit, coverage.functions.found);
  * that: the scope is every module under these roots, and each one has to be
  * measured or explicitly exempt.
  */
-const MEASURED_ROOTS = ["lib", "app/api", "scripts/lib"];
+const MEASURED_ROOTS = ["lib", "app/api", "scripts/lib", "supabase/functions"];
 
 /**
  * The modules that cannot be covered without a browser.
@@ -154,6 +154,17 @@ const EXEMPT = new Set([
   "lib/vgpu/audio-visualizer.ts",
 ]);
 
+/**
+ * The Deno entry points.
+ *
+ * They call `Deno.serve` at module scope, so importing one starts a
+ * listener: a test cannot reach the code inside them at all. The logic that
+ * *can* be tested lives in a module beside them, and that module is measured.
+ */
+function isDenoEntryPoint(file: string): boolean {
+  return /^supabase\/functions\/[^/]+\/index\.ts$/.test(file);
+}
+
 const measuredFiles = new Set(coverage.files.map((file) => file.path));
 const unmeasured: string[] = [];
 
@@ -162,6 +173,7 @@ for (const root of MEASURED_ROOTS) {
     const relative = file.replace(`${repoRoot}/`, "");
     if (relative.endsWith(".d.ts")) continue;
     if (EXEMPT.has(relative)) continue;
+    if (isDenoEntryPoint(relative)) continue;
     if (!measuredFiles.has(relative)) unmeasured.push(relative);
   }
 }
