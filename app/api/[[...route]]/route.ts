@@ -174,6 +174,8 @@ app.post("/v1/sync-episodes", async (c) => {
   const supabase = createServiceClient() ?? (await createClient());
 
   let synced = 0;
+  let failed = 0;
+
   for (const episode of episodes) {
     const { error } = await supabase.from("episodes").upsert(
       {
@@ -186,10 +188,25 @@ app.post("/v1/sync-episodes", async (c) => {
       },
       { onConflict: "episode_id" },
     );
-    if (!error) synced++;
+
+    if (error) {
+      failed++;
+      // The reason is logged, not returned: it is the database's message, and
+      // it can name columns and constraints.
+      logger.warn("sync-episodes.upsert-failed", {
+        requestId: c.get("requestId"),
+        episodeId: episode.episodeId,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+      continue;
+    }
+
+    synced++;
   }
 
-  return c.json({ success: true, synced, total: episodes.length });
+  // A sync that wrote nothing is not a success, even though nothing threw.
+  // Reporting it as one is how a broken upsert stays invisible.
+  return c.json({ success: failed === 0, synced, failed, total: episodes.length });
 });
 
 // ─── Sync Playlists (POST) ───────────────────────────────────────────────────

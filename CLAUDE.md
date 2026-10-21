@@ -421,6 +421,17 @@ fragment.
   throws and the error is swallowed. `profiles.admin` was exactly that: the
   authorization path selects it, so on a database without it nobody would
   ever be an admin.
+  - **A unique constraint the application relies on has to exist too.** The
+    doctor reads the `onConflict` targets out of the application and checks
+    that a migration makes those columns unique. `POST /api/v1/sync-episodes`
+    upserts on `episode_id`, and the chain had only a plain index on it — so
+    on a database built from the migrations the upsert raises 42P10 and the
+    endpoint syncs nothing. The live database may already have the index, so
+    the migration is a no-op there; a fresh one gets it.
+  - **A sync that wrote nothing is not a success.** The endpoint used to
+    answer `{ success: true, synced: 0 }` when every write failed, which is
+    how a broken upsert stays invisible. It now counts the failures, logs the
+    reason server-side, and answers `success: false`.
 - **`bun run check:migrations` applies the whole chain to a throwaway
   Postgres** and compares the result with the contract: every migration
   applies in order to an empty database, every declared column exists, the

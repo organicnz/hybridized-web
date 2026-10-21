@@ -916,6 +916,111 @@ if (missingColumns.length === 0) {
   );
 }
 
+// ── The migrations create the unique constraints the application assumes ─────
+//
+// `POST /api/v1/sync-episodes` upserts with `onConflict: "episode_id"`, and
+// PostgREST turns that into `INSERT ... ON CONFLICT (episode_id) DO UPDATE`.
+// Postgres needs a unique index on the column: without one it raises 42P10,
+// and the endpoint answers `success` while syncing nothing. The chain had
+// only a plain index, so a database built from the migrations could not serve
+// the endpoint.
+//
+// The conflict targets are read out of the application, so an upsert is
+// covered as soon as it is written.
+
+const conflictTargets: Array<{ table: string; columns: string[] }> = [];
+
+for await (const file of new Bun.Glob("{app,lib,components}/**/*.{ts,tsx}").scan({ cwd: "." })) {
+  const source = await Bun.file(file).text();
+
+  for (const match of source.matchAll(/onConflict:\s*["'`]([^"'`]+)["'`]/g)) {
+    // The table is the one the statement selected from, which is the closest
+    // `.from(…)` before the conflict target.
+    const before = source.slice(0, match.index);
+    const from = [...before.matchAll(/\.from\(["'`](\w+)["'`]\)/g)].pop();
+    if (!from) continue;
+
+    conflictTargets.push({
+      table: from[1].toLowerCase(),
+      columns: match[1].split(",").map((column) => column.trim().toLowerCase()),
+    });
+  }
+}
+
+// The unique column groups the migrations create, per table.
+const uniqueColumns = new Map<string, Set<string>>();
+
+const addUnique = (table: string, columns: string): void => {
+  const key = table.toLowerCase();
+  const set = uniqueColumns.get(key) ?? new Set<string>();
+  set.add(columns);
+  uniqueColumns.set(key, set);
+};
+
+const columnList = (body: string): string =>
+  body
+    .split(",")
+    .map((column) =>
+      column
+        .trim()
+        .replace(/^["'`]|["'`]$/g, "")
+        .toLowerCase(),
+    )
+    .join(",");
+
+for await (const file of new Bun.Glob("supabase/migrations/*.sql").scan({ cwd: "." })) {
+  const sql = await Bun.file(file).text();
+
+  // CREATE UNIQUE INDEX name ON public.table (columns)
+  for (const match of sql.matchAll(
+    /CREATE\s+UNIQUE\s+INDEX\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:"?\w+"?)\s+ON\s+(?:public\.)?"?(\w+)"?\s*(?:USING\s+\w+\s*)?\(([^)]+)\)/gi,
+  )) {
+    addUnique(match[1], columnList(match[2]));
+  }
+
+  // CREATE TABLE public.table ( ... CONSTRAINT name UNIQUE (columns) ... )
+  for (const match of sql.matchAll(
+    /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?"?(\w+)"?\s*\(([\s\S]*?)\n\);/gi,
+  )) {
+    const [, table, body] = match;
+    for (const constraint of body.matchAll(/UNIQUE\s*\(([^)]+)\)/gi)) {
+      addUnique(table, columnList(constraint[1]));
+    }
+  }
+
+  // ALTER TABLE public.table ADD CONSTRAINT name UNIQUE (columns)
+  for (const match of sql.matchAll(
+    /ALTER\s+TABLE\s+(?:public\.)?"?(\w+)"?\s+ADD\s+CONSTRAINT[^;]*?UNIQUE\s*\(([^)]+)\)/gi,
+  )) {
+    addUnique(match[1], columnList(match[2]));
+  }
+}
+
+const missingUniques: string[] = [];
+for (const target of conflictTargets) {
+  const created = uniqueColumns.get(target.table);
+  if (!created?.has(target.columns.join(","))) {
+    missingUniques.push(`${target.table}(${target.columns.join(",")})`);
+  }
+}
+
+if (conflictTargets.length === 0) {
+  pass(
+    "the migrations create the unique constraints the application assumes",
+    "the application upserts on nothing",
+  );
+} else if (missingUniques.length === 0) {
+  pass(
+    "the migrations create the unique constraints the application assumes",
+    `${conflictTargets.length} conflict target(s), every one created`,
+  );
+} else {
+  fail(
+    "the migrations create the unique constraints the application assumes",
+    `${[...new Set(missingUniques)].join(", ")} — no migration makes it unique, so the upsert raises 42P10 and syncs nothing`,
+  );
+}
+
 // The migration chain has to be checked against a real database, not just
 // read.
 if (!existsSync("scripts/check-migrations.ts")) {

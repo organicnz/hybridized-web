@@ -103,6 +103,44 @@ BEGIN
 END
 $$;
 
+-- ─── the upsert the sync endpoint performs ───────────────────────────────────
+-- `POST /api/v1/sync-episodes` upserts with `onConflict: "episode_id"`, and
+-- PostgREST turns that into `INSERT ... ON CONFLICT (episode_id) DO UPDATE`.
+-- Postgres needs a unique index on the column: without one it raises 42P10
+-- and the endpoint reports success while syncing nothing.
+DO $$
+DECLARE
+  episode_count int;
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_index i
+    JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+    WHERE i.indrelid = 'public.episodes'::regclass
+      AND i.indisunique
+      AND i.indnatts = 1
+      AND a.attname = 'episode_id'
+  ) THEN
+    RAISE EXCEPTION
+      'episodes.episode_id is not unique, so the sync endpoint cannot upsert';
+  END IF;
+
+  INSERT INTO public.episodes (episode_id, title, audio_url)
+  VALUES ('clupsert001', 'The first version', 'https://cdn.example/upsert.mp3')
+  ON CONFLICT (episode_id) DO UPDATE SET title = EXCLUDED.title;
+
+  INSERT INTO public.episodes (episode_id, title, audio_url)
+  VALUES ('clupsert001', 'The second version', 'https://cdn.example/upsert.mp3')
+  ON CONFLICT (episode_id) DO UPDATE SET title = EXCLUDED.title;
+
+  SELECT count(*) INTO episode_count
+  FROM public.episodes WHERE episode_id = 'clupsert001';
+
+  IF episode_count <> 1 THEN
+    RAISE EXCEPTION 'the upsert made % rows for one episode, not one', episode_count;
+  END IF;
+END
+$$;
+
 -- ─── the row level security policies ─────────────────────────────────────────
 DO $$
 DECLARE

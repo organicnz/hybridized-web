@@ -389,7 +389,31 @@ describe("POST /api/v1/sync-episodes", () => {
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
+    expect(body.synced).toBe(1);
+    expect(body.failed).toBe(0);
     expect(serviceClient.queries[0]?.calls).toContain("upsert");
+  });
+
+  it("does not call a sync that wrote nothing a success", async () => {
+    process.env.SYNC_SECRET = "test-secret";
+    serviceClient = fakeClient((table, calls) =>
+      calls.includes("upsert")
+        ? { data: null, error: new Error("there is no unique or exclusion constraint") }
+        : { data: [], error: null },
+    );
+
+    const response = await POST(
+      new Request("http://localhost/api/v1/sync-episodes", {
+        method: "POST",
+        headers: { Authorization: "Bearer test-secret" },
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(false);
+    expect(body.synced).toBe(0);
+    expect(body.failed).toBe(1);
   });
 
   it("falls back to the request-scoped client when there is no service key", async () => {
