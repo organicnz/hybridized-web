@@ -348,14 +348,29 @@ case the type system cannot express — a route plus a search string or
 fragment.
 
 - Run `bun run doctor` after any toolchain or dependency change. It is the
-  executable form of the rules above — version pin, pinned build running, no
-  Node.js on `PATH`, lockfile in sync, install scripts trusted, `bunfig.toml`
-  intact, no install cache inside the project, isolated linker, release-age
-  guard, no `node:` specifier, no Node.js package, `tsrs` as the type gate,
-  Bun-native git hooks, the edge functions checked, every direct dependency
-  imported, the documentation pointing at files that exist, the environment
-  documented, no `setup-node` in CI, and every workflow using the pinned
-  build. It must pass before committing.
+  executable form of the rules above, and it has 42 checks. In outline:
+  - the version pin agrees across `.bun-version`, `package.json` and
+    `.bun-lock.json`, and the running Bun is that build
+  - no Node.js toolchain is on `PATH`; the lockfile satisfies `package.json`;
+    every install script is trusted
+  - `bunfig.toml` keeps scripts on Bun and Bun's own shell, does not redirect
+    the install cache, uses the isolated linker, guards against fresh
+    releases, does not use the global virtual store, and does not use the
+    broken coverage threshold
+  - the coverage gate is wired, the test suite is isolated, randomised and
+    re-run, the lint warning count is ratcheted, the linter is type-aware
+  - every config file is TypeScript; every direct dependency is imported
+  - the edge functions are checked with Deno; the migration chain is checked
+    against a real Postgres, and the migrations create the tables and the
+    columns the application reads
+  - no source file names a `node:` module; `@types/node` is a direct
+    dependency because Next.js needs it, and no other Node.js package is
+  - `tsrs` is the type gate and the `typescript` package is not installed
+  - the git hooks are Bun scripts and no hook runner is a dependency
+  - no credential is committed or in the history; the documentation points at
+    files that exist; `.env.example` and the code agree
+  - CI never pulls in Node.js and every workflow uses the pinned build
+    It must pass before committing.
 - **No credential is committed, and none is in the history.** The rules live
   in `scripts/lib/secrets.ts`, shared by the doctor and
   `bun run audit:secrets`. A credential-shaped value is a `Bearer` token, or

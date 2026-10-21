@@ -120,6 +120,7 @@ bun test           # unit tests
 bun run test:coverage # unit tests with the coverage floor from bunfig.toml
 bun run verify     # lint + 2 type checkers + test (the full gate)
 bun run doctor     # assert the Bun environment invariants still hold
+bun run ci         # everything CI runs, in one command
 bun run setup:bun  # install the exact Bun build pinned by .bun-version
 bun run setup:tsdk # use tsrs as the editor's language server
 bun run hooks:install # point Git at the Bun-native hooks in .githooks/
@@ -150,26 +151,35 @@ repository is public. Removing it from the file does not remove it from the
 commits — the only fix is to rotate it. So the question is not "is the
 working tree clean" but "was a credential ever committed".
 
-`bun run audit:secrets` walks **every object the repository has ever
-held** — reachable commits and unreferenced leftovers alike — and reports the
+`bun run audit:secrets` walks the history — every commit a local branch
+reaches, and the objects no ref points at any more — and reports the
 credential-shaped strings in them. The value is never printed, only where it
 was. It runs in CI, with `fetch-depth: 0` so there is a history to audit.
 
 `bun run doctor` runs the same rules over the working tree and over the
 reachable history.
 
-Two leaks are known and are being rotated. They are recorded by **digest** in
-`scripts/known-secret-digests.json`, so the file that acknowledges a leak
-does not put the leak back into the repository:
+### The purge
 
-| Credential        | Where it was committed                                            | Fix                |
-| ----------------- | ----------------------------------------------------------------- | ------------------ |
-| `FUNCTION_SECRET` | `docs/edge-functions-security.md`, `docs/edge-functions-audit.md` | rotate in Supabase |
-| `VERCEL_API_KEY`  | `.kiro/settings/mcp.json`, since deleted                          | rotate in Vercel   |
+Three credentials were committed to this repository before the audit
+existed, and the repository is public. They were removed from the files, and
+then the **history was rewritten** so the values are not in any commit:
 
-A finding whose digest is **not** listed fails the run. A listed one is
-reported as a warning until the credential is rotated and the history is
-rewritten.
+| Credential              | Where it was committed                                            |
+| ----------------------- | ----------------------------------------------------------------- |
+| `FUNCTION_SECRET`       | `docs/edge-functions-security.md`, `docs/edge-functions-audit.md` |
+| `SUPABASE_ACCESS_TOKEN` | `.kiro/settings/mcp.json`, since deleted                          |
+| `VERCEL_API_KEY`        | `.kiro/settings/mcp.json`, since deleted                          |
+
+A fresh clone of the repository contains none of them. What the rewrite
+cannot do is invalidate a value that was public — **all three still have to
+be rotated** in the Supabase and Vercel dashboards.
+
+`scripts/known-secret-digests.json` is how a leak that is _known but still
+being rotated_ gets acknowledged: the entry is the **digest** of the value, so
+the file that admits to a leak does not put it back into the repository. A
+finding whose digest is listed is reported as a warning; one that is not
+listed fails the run. The list is empty now — the history is clean.
 
 ### Two type checkers, both in the gate
 
