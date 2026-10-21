@@ -16,6 +16,12 @@ const BEARER = /Bearer\s+([A-Za-z0-9+/=_-]{20,})/g;
 const ASSIGNMENT = /([A-Z][A-Z0-9_]*)\s*=\s*([^\s"'`#,)]{20,})/g;
 
 /**
+ * The same thing in JSON, where the separator is a colon:
+ * `"SUPABASE_ACCESS_TOKEN": "sbp_…"`.
+ */
+const JSON_FIELD = /"([A-Z][A-Z0-9_]*)"\s*:\s*"([^"]{20,})"/g;
+
+/**
  * The names whose value is a credential rather than a public setting.
  *
  * `_KEY` is in the list: an API key is a credential, and the names that use
@@ -58,12 +64,22 @@ function digestOf(value: string): string {
 /**
  * A credential-shaped value: long enough, not a placeholder, and mixed
  * enough that it is not prose.
+ *
+ * The test is *at least two* character classes, not three. A Supabase
+ * personal access token is entirely lowercase — a `sbp_` prefix followed by
+ * forty hex characters — and it would slip through a rule that wants mixed
+ * case, and it is a real credential.
  */
 function looksLikeSecret(value: string): boolean {
   const trimmed = value.trim().replace(/^["']|["']$/g, "");
   if (trimmed.length < 20) return false;
   if (PLACEHOLDERS.test(trimmed)) return false;
-  return /[a-z]/.test(trimmed) && /[A-Z]/.test(trimmed) && /\d/.test(trimmed);
+
+  const classes = [/[a-z]/.test(trimmed), /[A-Z]/.test(trimmed), /\d/.test(trimmed)].filter(
+    Boolean,
+  ).length;
+
+  return classes >= 2;
 }
 
 /**
@@ -86,6 +102,14 @@ export function findSecrets(path: string, text: string, reachable = true): Secre
   }
 
   for (const match of text.matchAll(ASSIGNMENT)) {
+    const [, name, value] = match;
+    if (name.startsWith("NEXT_PUBLIC_")) continue;
+    if (!SECRET_NAME.test(name)) continue;
+    if (!looksLikeSecret(value)) continue;
+    findings.push({ path, what: name, digest: digestOf(value.trim()), reachable });
+  }
+
+  for (const match of text.matchAll(JSON_FIELD)) {
     const [, name, value] = match;
     if (name.startsWith("NEXT_PUBLIC_")) continue;
     if (!SECRET_NAME.test(name)) continue;
