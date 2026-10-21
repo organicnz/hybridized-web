@@ -515,6 +515,19 @@ fragment.
     client is mocked), the app router (`next/navigation` is mocked, because
     the nav asks for the router), and the audio player context (the provider
     wraps the page, the way the root layout does).
+- **An artist page that does not exist answers 200.** The status was sent
+  with the first chunk of the stream, so `notFound()` inside the suspended
+  part can only change the body — Next.js's own rule, and the reason it is
+  not a bug to chase. Two things make it right instead:
+  - **`dynamicParams = false` is not the answer.** With Cache Components it
+    is not supported at all: the build fails with _"Route segment config
+    `dynamicParams` is not compatible with `nextConfig.cacheComponents`"_.
+  - **The metadata keeps the page out of an index.** The title is "Not
+    Found" and `robots` is `noindex` for an artist that does not exist, so
+    a crawler does not index a 404 that answers 200.
+- **A page title is a name, not a slug.** The slug is what the URL carries
+  — "alex-hall" — and the title is what a visitor reads, so the metadata
+  looks the artist up (`findArtistBySlug`) and uses the name.
 - **A number from a query string is clamped _and_ checked.** `Math.max(NaN, 1)`
   is `NaN`, so clamping alone does not make a limit safe: `?limit=abc` would
   reach the database as `NaN` and the query would be nonsense. `clampInteger`

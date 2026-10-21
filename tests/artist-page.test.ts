@@ -152,7 +152,7 @@ mock.module("next/navigation", () => ({
   },
 }));
 
-const { default: ArtistPage } = await import("@/app/home/[artist]/page");
+const { default: ArtistPage, generateMetadata } = await import("@/app/home/[artist]/page");
 
 /** The page's markup. */
 async function render(slug = "alex-hall"): Promise<string> {
@@ -194,6 +194,24 @@ describe("the artist page", () => {
     const html = await render();
 
     expect(html).toContain('id="main-content"');
+  });
+
+  it("has a title with the artist's name, not the slug", async () => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ artist: "alex-hall" }) });
+
+    expect(metadata.title).toBe("Alex Hall");
+    expect(metadata.description).toContain("Alex Hall");
+  });
+
+  it("keeps an artist that does not exist out of the index", async () => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ artist: "nobody-here" }),
+    });
+
+    // The page answers 404 in the body, but the status was sent with the
+    // first chunk, so this is what keeps the page out of an index.
+    expect(metadata.title).toBe("Not Found");
+    expect(metadata.robots).toEqual({ index: false });
   });
 
   it("is not found for an artist that does not exist", async () => {

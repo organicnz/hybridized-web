@@ -1,6 +1,7 @@
 import { ArtistNav } from "@/components/artist-nav";
+import { findArtistBySlug } from "@/lib/artists";
 import { createStaticClient } from "@/lib/supabase/static";
-import { slugify, slugifyEncoded } from "@/lib/utils/slug";
+import { slugifyEncoded } from "@/lib/utils/slug";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -27,15 +28,24 @@ export const cacheLife = "hours";
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { artist } = await params;
   const decodedArtist = decodeURIComponent(artist);
-  const title = decodedArtist;
+
+  // The name, not the slug: the slug is what the URL carries, and a title
+  // of "alex-hall" is not what a visitor should see.
+  const matched = await findArtistBySlug(decodedArtist);
+
+  if (!matched) {
+    // An artist that does not exist. The page answers 404 in the body, but
+    // the status was sent with the first chunk, so this is what keeps the
+    // page out of an index.
+    return { title: "Not Found", robots: { index: false } };
+  }
+
+  const description = `Stream ${matched.name} DJ mixes, radio shows and episodes on Hybridized.`;
 
   return {
-    title,
-    description: `Stream ${decodedArtist} DJ mixes, radio shows and episodes on Hybridized.`,
-    openGraph: {
-      title,
-      description: `Stream ${decodedArtist} DJ mixes, radio shows and episodes on Hybridized.`,
-    },
+    title: matched.name,
+    description,
+    openGraph: { title: matched.name, description },
   };
 }
 
@@ -45,21 +55,13 @@ async function ArtistContent({ params }: PageProps) {
 
   const supabase = createStaticClient();
 
-  const { data: allBands } = await supabase.from("bands").select("id, name");
-
-  const matchedBand = allBands?.find((band) => {
-    if (!band.name) return false;
-    return slugify(band.name) === decodedArtist;
-  });
+  const matchedBand = await findArtistBySlug(decodedArtist);
 
   if (!matchedBand) {
     notFound();
   }
 
   const artistName = matchedBand.name;
-  if (!artistName) {
-    notFound();
-  }
 
   const { data: artistBands, error } = await supabase
     .from("bands")
