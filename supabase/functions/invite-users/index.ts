@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { parseEmails } from "./parse.ts";
 
 /**
  * Invite a list of users by email.
@@ -15,21 +16,6 @@ const REDIRECT_TO = "https://hybridized.online/auth/callback";
 
 /** The pause between invites, so the provider's rate limit is not hit. */
 const INVITE_DELAY_MS = 1000;
-
-interface InviteBody {
-  emails?: unknown;
-}
-
-/** The request's email list, if it is a non-empty list of strings. */
-function parseEmails(body: InviteBody): string[] | null {
-  if (!Array.isArray(body.emails)) return null;
-
-  const emails = body.emails.filter(
-    (email): email is string => typeof email === "string" && email.includes("@"),
-  );
-
-  return emails.length > 0 ? emails : null;
-}
 
 Deno.serve(async (req) => {
   try {
@@ -51,7 +37,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const emails = parseEmails((await req.json()) as InviteBody);
+    const emails = parseEmails((await req.json()) as { emails?: unknown });
 
     if (!emails) {
       return new Response(

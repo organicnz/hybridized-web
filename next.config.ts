@@ -122,6 +122,9 @@ const nextConfig: NextConfig = {
               "connect-src 'self' https://*.supabase.co https://*.vercel.app https://feed.firstory.me https://open.firstory.me https://d3mww1g1pfq2pt.cloudfront.net https://i1.sndcdn.com https://vitals.vercel-insights.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io wss://*.supabase.co",
               "frame-src 'self' https://open.firstory.me",
               "media-src 'self' https://d3mww1g1pfq2pt.cloudfront.net https://i1.sndcdn.com",
+              // The framing protection is the header as well as this: a policy
+              // that is only reported does not stop anything on its own.
+              "frame-ancestors 'self'",
               "report-uri /api/csp-report",
             ].join("; "),
           },

@@ -495,6 +495,17 @@ fragment.
   `bun run doctor` walks each route's imports and checks that something in
   the graph carries the id, `<AppShell` or `<AuthShell>`. A route that only
   redirects is exempt — it never renders its own content.
+- **The security headers have a test.** They are the app's outermost
+  defence, and they live in `next.config.ts` — a file no test touched, so a
+  header that was dropped was invisible. `tests/security-headers.test.ts`
+  checks that they are set on every route and that their values are the
+  strict ones, and that the policy's `report-uri` points at a route that
+  exists.
+  - The policy is **report-only**: it has `unsafe-inline` in `script-src`,
+    which Next's inline scripts need, so enforcing it would break the app.
+    It reports, and the headers do the enforcing. `frame-ancestors 'self'`
+    is in the policy as well as `X-Frame-Options`, so the policy says the
+    same thing when it is enforced.
 - **The proxy is the boundary, and it has a test.** `proxy.ts` rate limits
   the API per address and guards the protected pages. `tests/proxy.test.ts`
   covers both: the quota headers are on every answer (including the first
