@@ -12,8 +12,15 @@ const PLACEHOLDERS = /^(your[-_]|xxx|<|changeme|example|placeholder|\.\.\.|todo|
 /** A `Bearer` header with a token in it. */
 const BEARER = /Bearer\s+([A-Za-z0-9+/=_-]{20,})/g;
 
-/** An assignment to a name that says it holds a credential. */
-const ASSIGNMENT = /([A-Z][A-Z0-9_]*)\s*=\s*([^\s"'`#,)]{20,})/g;
+/**
+ * An assignment to a name that says it holds a credential.
+ *
+ * The value may be quoted or bare: `const API_KEY = "…"` is how a credential
+ * is written in code, and `API_KEY=…` is how it is written in an env file.
+ * It does not run past the end of the line — the next statement is not part
+ * of the value.
+ */
+const ASSIGNMENT = /([A-Z][A-Z0-9_]*)\s*=\s*["'`]?([^"'`#,)\n\r]{20,})["'`]?/g;
 
 /**
  * The same thing in JSON, where the separator is a colon:
@@ -62,6 +69,19 @@ function digestOf(value: string): string {
 }
 
 /**
+ * The value itself, without the quotes or the punctuation around it.
+ *
+ * The same credential written as `KEY=value` and as `KEY = "value";` has to
+ * produce the same digest, or the list of known leaks stops matching.
+ */
+function normalise(value: string): string {
+  return value
+    .trim()
+    .replace(/^["'`]|["'`]$/g, "")
+    .replace(/[;,.]+$/, "");
+}
+
+/**
  * A credential-shaped value: long enough, not a placeholder, and mixed
  * enough that it is not prose.
  *
@@ -71,7 +91,7 @@ function digestOf(value: string): string {
  * case, and it is a real credential.
  */
 function looksLikeSecret(value: string): boolean {
-  const trimmed = value.trim().replace(/^["']|["']$/g, "");
+  const trimmed = normalise(value);
   if (trimmed.length < 20) return false;
   if (PLACEHOLDERS.test(trimmed)) return false;
 
@@ -81,6 +101,16 @@ function looksLikeSecret(value: string): boolean {
 
   return classes >= 2;
 }
+
+/**
+ * A read of an environment variable.
+ *
+ * The value is not in the source — it is looked up at run time — so this is
+ * never a credential. A test that saves the previous value of an env var to
+ * restore it afterwards is an ordinary thing to write, and the rule below
+ * would otherwise report it as a leak.
+ */
+const ENV_READ = /^(?:process|Bun)\.env(?:\.[A-Za-z_][A-Za-z0-9_]*|\[[^\]]+\])(?:\s*\?\?.*)?;?$/;
 
 /**
  * Every credential-shaped value in `text`.
@@ -96,7 +126,7 @@ export function findSecrets(path: string, text: string, reachable = true): Secre
     findings.push({
       path,
       what: "a bearer token",
-      digest: digestOf(match[1].trim()),
+      digest: digestOf(normalise(match[1])),
       reachable,
     });
   }
@@ -105,24 +135,26 @@ export function findSecrets(path: string, text: string, reachable = true): Secre
     const [, name, value] = match;
     if (name.startsWith("NEXT_PUBLIC_")) continue;
     if (!SECRET_NAME.test(name)) continue;
+    if (ENV_READ.test(value)) continue;
     if (!looksLikeSecret(value)) continue;
-    findings.push({ path, what: name, digest: digestOf(value.trim()), reachable });
+    findings.push({ path, what: name, digest: digestOf(normalise(value)), reachable });
   }
 
   for (const match of text.matchAll(JSON_FIELD)) {
     const [, name, value] = match;
     if (name.startsWith("NEXT_PUBLIC_")) continue;
     if (!SECRET_NAME.test(name)) continue;
+    if (ENV_READ.test(value)) continue;
     if (!looksLikeSecret(value)) continue;
-    findings.push({ path, what: name, digest: digestOf(value.trim()), reachable });
+    findings.push({ path, what: name, digest: digestOf(normalise(value)), reachable });
   }
 
   return findings;
 }
 
 /** Run a git command and return its stdout. */
-function git(args: string[]): string {
-  const result = Bun.spawnSync({ cmd: ["git", ...args], stdout: "pipe", stderr: "pipe" });
+function git(args: string[], cwd?: string): string {
+  const result = Bun.spawnSync({ cmd: ["git", ...args], cwd, stdout: "pipe", stderr: "pipe" });
   if (result.exitCode !== 0) {
     throw new Error(`git ${args.join(" ")} failed: ${result.stderr.toString().trim()}`);
   }
@@ -142,10 +174,12 @@ function git(args: string[]): string {
  * where a secret in an amended commit ends up.
  */
 export function blobObjects(
-  options: { includeUnreferenced?: boolean } = {},
+  options: { includeUnreferenced?: boolean; cwd?: string } = {},
 ): Map<string, { path: string; reachable: boolean }> {
   const paths = new Map<string, string>();
-  for (const line of git(["rev-list", "--objects", "--branches", "HEAD"]).split("\n")) {
+  for (const line of git(["rev-list", "--objects", "--branches", "HEAD"], options.cwd).split(
+    "\n",
+  )) {
     const space = line.indexOf(" ");
     if (space === -1) continue;
     paths.set(line.slice(0, space), line.slice(space + 1));
@@ -159,11 +193,10 @@ export function blobObjects(
   }
 
   if (options.includeUnreferenced) {
-    for (const line of git([
-      "cat-file",
-      "--batch-all-objects",
-      "--batch-check=%(objectname) %(objecttype)",
-    ]).split("\n")) {
+    for (const line of git(
+      ["cat-file", "--batch-all-objects", "--batch-check=%(objectname) %(objecttype)"],
+      options.cwd,
+    ).split("\n")) {
       const [sha, type] = line.split(" ");
       if (type !== "blob") continue;
       if (blobs.has(sha)) continue;
@@ -175,12 +208,13 @@ export function blobObjects(
 }
 
 /** The contents of every blob, keyed by sha. */
-export function blobContents(shas: string[]): Map<string, string> {
+export function blobContents(shas: string[], cwd?: string): Map<string, string> {
   const contents = new Map<string, string>();
   if (shas.length === 0) return contents;
 
   const result = Bun.spawnSync({
     cmd: ["git", "cat-file", "--batch"],
+    cwd,
     stdin: Buffer.from(`${shas.join("\n")}\n`),
     stdout: "pipe",
     stderr: "pipe",
@@ -217,10 +251,10 @@ export function blobContents(shas: string[]): Map<string, string> {
  * a file that was staged and then unstaged.
  */
 export function findSecretsInHistory(
-  options: { includeUnreferenced?: boolean } = {},
+  options: { includeUnreferenced?: boolean; cwd?: string } = {},
 ): SecretFinding[] {
   const blobs = blobObjects(options);
-  const contents = blobContents([...blobs.keys()]);
+  const contents = blobContents([...blobs.keys()], options.cwd);
 
   const findings: SecretFinding[] = [];
   const seen = new Set<string>();

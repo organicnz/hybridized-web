@@ -809,20 +809,20 @@ const knownDigests = new Set(
   ).known?.map((entry) => entry.digest ?? "") ?? [],
 );
 
-const unknownHistory = historyFindings.filter((finding) => !knownDigests.has(finding.digest));
-const knownHistory = historyFindings.filter((finding) => knownDigests.has(finding.digest));
-
 if (historyError) {
   warn("no secret is in the git history", `could not walk the history: ${historyError}`);
-} else if (unknownHistory.length > 0) {
+} else if (historyFindings.length > 0) {
+  // A known credential that is in a commit that could be pushed still fails:
+  // the history was rewritten to take it out, so putting it back is a live
+  // leak again, whether or not it is one the team is already rotating.
+  const known = historyFindings.filter((finding) => knownDigests.has(finding.digest));
+  const detail = historyFindings.map((f) => `${f.path} (${f.what})`).join(", ");
+
   fail(
     "no secret is in the git history",
-    `${unknownHistory.map((finding) => `${finding.path} (${finding.what})`).join(", ")} — rotate the credentials, then rewrite the history`,
-  );
-} else if (knownHistory.length > 0) {
-  warn(
-    "no secret is in the git history",
-    `${knownHistory.length} known leak(s) still in the history — rotate the credential, then rewrite it`,
+    known.length > 0
+      ? `${detail} — ${known.length} of these are known leaks that are being rotated, but they are in a commit that could be pushed: rewrite it`
+      : `${detail} — rotate the credentials, then rewrite the history`,
   );
 } else {
   pass("no secret is in the git history", "the reachable history is clean");

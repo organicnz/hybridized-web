@@ -392,8 +392,28 @@ declare module "bun:fs/promises" {
   /** Resolve a path to its canonical form, resolving symbolic links. */
   export function realpath(path: PathLike): Promise<string>;
 
+  /** Create a unique directory whose name starts with `prefix`. */
+  export function mkdtemp(prefix: string): Promise<string>;
+
   /** Check that a path is accessible. */
   export function access(path: PathLike, mode?: number): Promise<void>;
+}
+
+declare module "bun:os" {
+  /** The directory the operating system keeps temporary files in. */
+  export function tmpdir(): string;
+
+  /** The current user's home directory. */
+  export function homedir(): string;
+
+  /** The host name of the machine. */
+  export function hostname(): string;
+
+  /** The platform's end-of-line sequence. */
+  export const EOL: string;
+
+  /** The platform's null device — `/dev/null` on Unix, `NUL` on Windows. */
+  export const devNull: string;
 }
 
 declare module "bun:path" {

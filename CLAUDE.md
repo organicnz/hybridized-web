@@ -398,7 +398,17 @@ fragment.
     `scripts/known-secret-digests.json`, so acknowledging a leak does not put
     it back into the repository. A finding whose digest is not listed fails
     the run; a listed one is reported until the credential is rotated and the
-    history rewritten.
+    history rewritten. A **known** credential in a commit that could be pushed
+    still fails: the history was rewritten to take it out, so putting it back
+    makes it live again.
+  - The value may be quoted or bare, and the digest is the same either way —
+    `const API_KEY = "…"` and `API_KEY=…` are the same credential. A read of
+    an environment variable (`process.env.SYNC_SECRET`) is not a credential:
+    the value is not in the source.
+  - The rules have their own tests, in `tests/secrets.test.ts`, including a
+    throwaway git repository with a credential committed to it. The scanner is
+    the gate that stands between a leaked key and the repository, so it is
+    measured like the rest of the code.
   - **A secret that reaches the repository has to be rotated**, because
     removing it from the file does not remove it from the history.
 - **The migrations have to create the tables and the columns the application

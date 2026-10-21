@@ -35,10 +35,30 @@ console.log("▸ walking every object in the repository");
 // reachable history, because staging a file and unstaging it leaves a
 // dangling blob and a credential that was never committed.
 const findings = findSecretsInHistory({ includeUnreferenced: true });
-const { known, unknown } = partitionFindings(findings, await knownSecretDigests());
+const knownDigests = await knownSecretDigests();
+const { known, unknown } = partitionFindings(findings, knownDigests);
 
 const describe = (finding: { path: string; what: string }): string =>
   `${finding.path} (${finding.what})`;
+
+// A finding in a commit that could be pushed fails, whether it is known or
+// not: the history was rewritten to take it out, so putting it back makes it
+// live again.
+const committed = findings.filter((finding) => finding.reachable);
+const unreachable = unknown.filter((finding) => !finding.reachable);
+
+if (committed.length > 0) {
+  console.error(`\n✗ ${committed.length} credential-shaped value(s) in the history:`);
+  for (const finding of committed) {
+    const tag = knownDigests.has(finding.digest) ? " — a known leak, still being rotated" : "";
+    console.error(`  ${describe(finding)}${tag}`);
+  }
+  console.error(
+    "\n  Removing these from the files is not enough — the values are in the commits.\n" +
+      "  Rotate the credentials, then rewrite the history if the repository is public.",
+  );
+  process.exit(1);
+}
 
 if (known.length > 0) {
   console.log(`\n! ${known.length} known leak(s) still in the history:`);
@@ -48,9 +68,6 @@ if (known.length > 0) {
   console.log("  These are recorded in scripts/known-secret-digests.json and are being rotated.");
 }
 
-const committed = unknown.filter((finding) => finding.reachable);
-const unreachable = unknown.filter((finding) => !finding.reachable);
-
 if (unreachable.length > 0) {
   console.log(`\n! ${unreachable.length} credential-shaped value(s) in unreachable objects:`);
   for (const finding of unreachable) {
@@ -59,18 +76,4 @@ if (unreachable.length > 0) {
   console.log("  No commit points at these — git will prune them on its own.");
 }
 
-if (committed.length === 0) {
-  console.log("\n✓ no new credential in any commit that could be pushed");
-  process.exit(0);
-}
-
-console.error(`\n✗ ${committed.length} new credential-shaped value(s) in the history:`);
-for (const finding of committed) {
-  console.error(`  ${describe(finding)}`);
-}
-console.error(
-  "\n  Removing these from the files is not enough — the values are in the commits.\n" +
-    "  Rotate the credentials, then rewrite the history if the repository is public.",
-);
-
-process.exit(1);
+console.log("\n✓ no new credential in any commit that could be pushed");
