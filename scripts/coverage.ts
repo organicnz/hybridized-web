@@ -19,28 +19,15 @@
  */
 import { existsSync } from "bun:fs";
 import { join } from "bun:path";
+import { readFloor } from "./lib/coverage";
 
 const repoRoot = join(import.meta.dir, "..");
 const lcovPath = join(repoRoot, "coverage", "lcov.info");
-
-interface Floor {
-  lines: number;
-  functions: number;
-}
 
 interface Coverage {
   lines: { found: number; hit: number };
   functions: { found: number; hit: number };
   files: { path: string; lines: number; functions: number }[];
-}
-
-/** The floor declared in `bunfig.toml`, or the default when it is missing. */
-async function readFloor(): Promise<Floor> {
-  const config = Bun.TOML.parse(await Bun.file(join(repoRoot, "bunfig.toml")).text()) as {
-    test?: { coverageFloor?: Partial<Floor> };
-  };
-  const floor = config.test?.coverageFloor ?? {};
-  return { lines: floor.lines ?? 0.8, functions: floor.functions ?? 0.8 };
 }
 
 /** Parse an lcov report into totals. */
@@ -99,7 +86,7 @@ function percent(hit: number, found: number): number {
   return found === 0 ? 100 : (hit / found) * 100;
 }
 
-const floor = await readFloor();
+const floor = await readFloor(repoRoot);
 
 console.log("\n▸ test (with coverage)");
 // The same command the `test` script runs, so the suite is measured under

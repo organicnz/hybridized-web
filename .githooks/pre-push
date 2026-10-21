@@ -2,12 +2,13 @@
 /**
  * Pre-push hook — the full gates, on the whole project.
  *
- *   1. `bun test` — the unit suite
- *   2. `deno check` + `deno lint` — the Supabase edge functions
- *   3. `bun run check:migrations` — the migration chain, against a real
+ *   1. `bun run doctor` — the environment and the architecture
+ *   2. `bun test` — the unit suite
+ *   3. `deno check` + `deno lint` — the Supabase edge functions
+ *   4. `bun run check:migrations` — the migration chain, against a real
  *      Postgres, compared with the generated types
- *   4. `bun run audit:secrets` — every object the repository has ever held
- *   5. `bun run build` — the production build, which also prerenders every
+ *   5. `bun run audit:secrets` — every object the repository has ever held
+ *   6. `bun run build` — the production build, which also prerenders every
  *      route and so catches the Next.js 16.5 Instant Navigation failures
  *      that a type check cannot see
  *
@@ -15,6 +16,12 @@
  * stop a broken tree from reaching the remote.
  */
 import { gate, bun } from "../scripts/hooks/lib";
+
+// The doctor holds the checks about the code as well as about the
+// environment: a route with no skip-link target, a module nothing imports,
+// a migration that does not create what the application reads. CI runs it
+// too, but CI is after the push.
+if (!gate("doctor", [bun, "run", "doctor"])) process.exit(1);
 
 if (!gate("test", [bun, "run", "test"])) process.exit(1);
 

@@ -25,6 +25,7 @@
  */
 import { closeSync, existsSync, openSync, readSync, readlinkSync, realpathSync } from "bun:fs";
 import { dirname, join } from "bun:path";
+import { readFloor } from "./lib/coverage";
 import {
   findSecrets,
   findSecretsInHistory,
@@ -755,6 +756,40 @@ if (assumed.length === 0) {
     "the migrations create the tables they assume",
     `${assumed.join(", ")} — no migration creates ${assumed.length === 1 ? "it" : "them"}; a fresh database cannot be built from this chain`,
   );
+}
+
+// ── The documentation quotes the floor that is in force ──────────────────────
+//
+// The README shows the coverage floor in a TOML block, and a quoted number
+// that has drifted from the real one is worse than no number: a reader
+// trusts it.
+
+const floorInForce = await readFloor(".");
+const readme = await Bun.file("README.md").text();
+const quotedFloor =
+  /coverageFloor\s*=\s*\{\s*lines\s*=\s*([\d.]+)\s*,\s*functions\s*=\s*([\d.]+)\s*\}/.exec(readme);
+
+if (!quotedFloor) {
+  fail(
+    "the documentation quotes the coverage floor",
+    "README.md does not quote the floor declared in bunfig.toml",
+  );
+} else {
+  const quoted = { lines: Number(quotedFloor[1]), functions: Number(quotedFloor[2]) };
+  const matches =
+    quoted.lines === floorInForce.lines && quoted.functions === floorInForce.functions;
+
+  if (matches) {
+    pass(
+      "the documentation quotes the coverage floor",
+      `README.md and bunfig.toml agree: ${floorInForce.lines * 100}%`,
+    );
+  } else {
+    fail(
+      "the documentation quotes the coverage floor",
+      `README.md says ${quoted.lines * 100}%/${quoted.functions * 100}%, bunfig.toml says ${floorInForce.lines * 100}%/${floorInForce.functions * 100}%`,
+    );
+  }
 }
 
 // ── No secret is committed ───────────────────────────────────────────────────

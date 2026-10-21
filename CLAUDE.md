@@ -407,7 +407,7 @@ case the type system cannot express — a route plus a search string or
 fragment.
 
 - Run `bun run doctor` after any toolchain or dependency change. It is the
-  executable form of the rules above, and it has 42 checks. In outline:
+  executable form of the rules above. In outline:
   - the version pin agrees across `.bun-version`, `package.json` and
     `.bun-lock.json`, and the running Bun is that build
   - no Node.js toolchain is on `PATH`; the lockfile satisfies `package.json`;

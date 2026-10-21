@@ -127,7 +127,7 @@ bun run hooks:install # point Git at the Bun-native hooks in .githooks/
 bun run hooks:run    # run a hook by hand (default: pre-commit)
 ```
 
-`bun run doctor` is the migration's guard rail — 42 checks. Among them: the
+`bun run doctor` is the migration's guard rail. Among the checks: the
 version pin agrees across `.bun-version`, `package.json` and `.bun-lock.json`;
 the running Bun _is_ the pinned build; no Node.js toolchain is reachable on
 `PATH`; `bun.lock` still satisfies `package.json`; every package needing an
@@ -416,7 +416,7 @@ Bun writes, and fails when the totals fall below the floor declared in
 
 ```toml
 [test]
-coverageFloor = { lines = 0.8, functions = 0.8 }
+coverageFloor = { lines = 0.95, functions = 0.95 }
 ```
 
 The gate is a Bun script rather than Bun's built-in `coverageThreshold`,
@@ -425,7 +425,9 @@ because `coverageThreshold` is broken in the Bun build this project pins:
 0.001, and prints no diagnostic. `bun run doctor` fails if
 `coverageThreshold` is ever added back to `bunfig.toml`.
 
-The floor is currently well clear — about 92% of lines and 91% of functions.
+The floor is currently well clear. The gate also fails when a module in the
+measured scope is in no test at all: the floor only measures the files a test
+imported, so a module nothing imports never reaches the report.
 
 ## Git hooks without a hook runner
 
@@ -483,7 +485,7 @@ the runtime. Because a conforming parser rejects undeclared entities such as
 the HTML `&nbsp;`, the parser retries once with those neutralised — so a
 stray entity degrades to a sanitised parse rather than to zero episodes.
 
-## Next.js 16.4 configuration
+## Next.js 16.5 configuration
 
 `next.config.ts` enables Cache Components **and** Partial Prefetching
 together. Next 16.3+ treats them as a pair and warns when `cacheComponents`
