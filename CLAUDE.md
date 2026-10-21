@@ -314,7 +314,26 @@ doctor` fails when the exemption list rots.
   diagnostic), so the floor is declared as `[test] coverageFloor` in
   `bunfig.toml` and enforced by the script against the lcov report.
   `bun run doctor` fails if `coverageThreshold` is added back. The floor is
-  currently ~92% lines and ~91% functions, against a floor of 80%.
+  currently ~98% lines and ~98% functions, against a floor of 95%.
+  - **The floor measures the logic, not the React surface.** The components
+    need a browser to test their behaviour — the click handlers, the effects
+    and the media elements cannot run without one — so they are excluded from
+    the report in `bunfig.toml`. What they do have is the rendering tests
+    (`tests/home-client.test.ts`), which read the markup back and pin the
+    structure down: the sets list and the artist profile each scroll inside
+    their own panel, and neither is inside the other.
+  - A DOM test environment would cover the rest of the React surface. That
+    is a dependency decision, not a tooling one.
+- **A component renders on the server, so its markup can be read back.**
+  `renderToStaticMarkup` from `react-dom` — a dependency the project already
+  has — renders the client components without a browser. The rules:
+  - Render an _element_, never call the component: `createElement(HomeClient,
+props)`. Calling it directly runs the hooks outside a render, and React
+    says so.
+  - Wrap it in the providers it needs. `HomeClient` reads the audio player
+    context, so it needs `AudioPlayerProvider` around it.
+  - The elements that need the browser — the effects, the event handlers —
+    do not run, and that is the point: the _markup_ is what is under test.
 - `trustedDependencies` must list every package whose install script is
   needed (`webgpu`, `@vgpu/adapter-node`). Bun blocks the rest, and their
   scripts would never run. Re-check with `bun pm trust --all` after adding a
