@@ -17,7 +17,12 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col items-center justify-center bg-linear-to-br from-purple-900 via-black to-blue-900 px-4">
+      {/* `id` so the root layout's "Skip to content" link still has a target
+          when the page has failed. */}
+      <body
+        id="main-content"
+        className="flex min-h-screen flex-col items-center justify-center bg-linear-to-br from-purple-900 via-black to-blue-900 px-4"
+      >
         <div className="max-w-md text-center">
           <div className="mb-4 bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-7xl font-black text-transparent">
             Oops

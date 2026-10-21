@@ -110,9 +110,11 @@ async function ArtistContent({ params }: PageProps) {
           id="main-content"
           className="min-h-0 flex-1 overflow-y-auto px-4 py-8 md:px-8 md:py-10 lg:px-12"
         >
-          <div className="mx-auto max-w-6xl space-y-8">
+          {/* The column fills the pane, so the region below it has a definite
+              height to be sized against. */}
+          <div className="mx-auto max-w-6xl space-y-8 lg:flex lg:h-full lg:flex-col">
             {/* Hero header — glass card with gradient text */}
-            <section className="glass relative overflow-hidden rounded-3xl p-8 md:p-12">
+            <section className="glass relative flex-none overflow-hidden rounded-3xl p-8 md:p-12">
               <div
                 className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-purple-500/15 blur-[120px]"
                 aria-hidden="true"
@@ -132,8 +134,11 @@ async function ArtistContent({ params }: PageProps) {
               )}
             </section>
 
-            {/* Main content from home-client inside glass card */}
-            <section className="glass rounded-3xl p-4 sm:p-6 md:p-8">
+            {/* Main content from home-client inside glass card.
+                On a desktop this is a fixed-height region filling the pane,
+                so the sets list and the artist profile each scroll inside
+                it instead of being clipped by the pane. */}
+            <section className="glass flex rounded-3xl p-4 sm:p-6 md:p-8 lg:flex lg:h-full lg:shrink-0 lg:flex-col">
               <HomeClient
                 items={bandsWithEpisodes}
                 currentArtist={artistName}

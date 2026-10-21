@@ -20,7 +20,12 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
   }, [error]);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
+    // `id` so the root layout's "Skip to content" link still has a target
+    // when the page has failed.
+    <div
+      id="main-content"
+      className="relative flex min-h-screen flex-col items-center justify-center px-4"
+    >
       <div className="glass mx-auto w-full max-w-md rounded-3xl p-10 text-center">
         <div className="gradient-text mb-4 font-display text-7xl font-bold tracking-tight">
           Oops

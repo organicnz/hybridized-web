@@ -18,7 +18,16 @@ export function useHardwareAudio(config: AudioConfig = {}) {
 
   const initializeAudioContext = useCallback(
     (audioElement: HTMLAudioElement) => {
-      if (audioContextRef.current) return audioContextRef.current;
+      // Already initialised — reuse the context and the graph.
+      //
+      // An <audio> element can be connected to a MediaElementAudioSourceNode
+      // only once, for the life of the page: the Web Audio API has no way to
+      // unbind it. React's Strict Mode runs a mount effect twice, so a second
+      // call has to reuse the graph rather than build a new one.
+      if (audioContextRef.current) {
+        setIsInitialized(true);
+        return audioContextRef.current;
+      }
 
       // Create AudioContext with hardware acceleration hints
       const contextOptions: AudioContextOptions = {
@@ -31,7 +40,15 @@ export function useHardwareAudio(config: AudioConfig = {}) {
       audioContextRef.current = audioContext;
 
       // Create audio nodes for processing
-      const source = audioContext.createMediaElementSource(audioElement);
+      let source: MediaElementAudioSourceNode;
+      try {
+        source = audioContext.createMediaElementSource(audioElement);
+      } catch {
+        // The element is already bound to a source node — the graph cannot be
+        // attached to it, but the page must not break over it.
+        setIsInitialized(false);
+        return audioContext;
+      }
       const gainNode = audioContext.createGain();
       const analyser = audioContext.createAnalyser();
 
@@ -77,15 +94,14 @@ export function useHardwareAudio(config: AudioConfig = {}) {
   }, []);
 
   const cleanup = useCallback(() => {
-    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-      audioContextRef.current.close().catch((err) => {
-        console.warn("Error closing audio context:", err);
-      });
-      audioContextRef.current = null;
-    }
-    sourceNodeRef.current = null;
-    gainNodeRef.current = null;
-    analyserRef.current = null;
+    // The graph is deliberately kept. An <audio> element stays bound to the
+    // source node it was connected to, for the life of the page, so closing
+    // the context here would leave the element bound to a dead context — and
+    // React's Strict Mode, which runs a mount effect twice, would then build
+    // a second graph for the same element and throw "HTMLMediaElement
+    // already connected previously to a different MediaElementSourceNode".
+    //
+    // The browser releases the context when the page goes away.
     setIsInitialized(false);
   }, []);
 

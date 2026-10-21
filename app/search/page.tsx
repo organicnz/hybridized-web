@@ -74,7 +74,9 @@ async function SearchContent({ searchParams }: { searchParams: Promise<{ q?: str
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    // `id` so the root layout's "Skip to content" link has a target here —
+    // this page does not use <AppShell>.
+    <div id="main-content" className="min-h-screen bg-background">
       <Link
         href="/home"
         className="group fixed top-6 left-6 z-10 flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-all hover:text-foreground"

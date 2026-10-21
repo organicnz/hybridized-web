@@ -25,7 +25,9 @@ export function AuthShell({
   footer,
 }: AuthShellProps) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center p-4">
+    // `id` so the root layout's "Skip to content" link has a target on the
+    // auth pages, which do not use <AppShell>.
+    <div id="main-content" className="relative flex min-h-screen items-center justify-center p-4">
       <Link
         href={backHref}
         className="group fixed top-6 left-6 z-10 flex items-center gap-2 rounded-lg bg-card/70 px-3 py-2 text-sm text-muted-foreground ring-1 ring-border backdrop-blur-md transition-all hover:text-foreground"

@@ -11,7 +11,9 @@ export const metadata: Metadata = {
 
 export default function AudioDemoPage() {
   return (
-    <div className={cn("bg-gradient-hero min-h-screen p-8")}>
+    // `id` so the root layout's "Skip to content" link has a target here —
+    // this page does not use <AppShell>.
+    <div id="main-content" className={cn("bg-gradient-hero min-h-screen p-8")}>
       <div className="mx-auto max-w-4xl space-y-8">
         <ScrollReveal variant="fade-up" delay={100} className="mb-12 text-center">
           <h1 className="mb-4 bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-fluid-xl font-bold text-transparent">

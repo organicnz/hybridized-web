@@ -127,7 +127,7 @@ export function HomeClient({
   return (
     <div className="flex h-full min-h-0 flex-col gap-6 lg:flex-row">
       {/* Main Content Panel - 65% */}
-      <div className="flex min-h-0 w-full flex-col lg:w-[65%]">
+      <div className="flex min-h-0 w-full flex-col lg:w-[65%] lg:overflow-hidden">
         {!showSoundCloudOnly && allEpisodes.length > 0 && (
           <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
             <div>
@@ -182,11 +182,10 @@ export function HomeClient({
             </div>
           </div>
         ) : (
-          // The page is the scroll region — the <main> on the artist page.
-          // A second scroller in here would fight it, and because this is a
-          // flex child its `min-height: auto` would stop it shrinking
-          // anyway, so the overflow was being clipped rather than scrolled.
-          <div className="space-y-3 pr-1">
+          // The sets scroll in this panel, not with the page: on a desktop
+          // the panel is a fixed-height region, so the list needs
+          // `min-h-0` to be allowed to shrink and scroll inside it.
+          <div className="scrollbar-thin space-y-3 pr-1 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
             <StaggerContainer stagger={0.04} delayChildren={0.05} className="space-y-3">
               {allEpisodes.map((episode, index) => (
                 <StaggerItem key={episode.id} custom={index}>
@@ -224,9 +223,9 @@ export function HomeClient({
       </div>
 
       {/* Sidebar Panel - 35% */}
-      {/* `lg:max-h-*` so a long artist profile scrolls inside the sticky
-          panel instead of running past the bottom of the viewport. */}
-      <aside className="w-full scrollbar-thin lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:w-[35%] lg:self-start lg:overflow-y-auto">
+      {/* It fills the row and scrolls inside it, so a long artist profile is
+          never cut off by the bottom of the pane. */}
+      <aside className="w-full scrollbar-thin lg:h-full lg:w-[35%] lg:overflow-y-auto">
         <ArtistProfile
           artist={{
             name: currentArtist ?? "",
