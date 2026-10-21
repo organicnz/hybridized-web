@@ -35,6 +35,15 @@ next-env.d.ts
 # supabase temp
 supabase/.temp/
 
+# Backups of the database.
+#
+# A dump of the bands is public data, but a dump of the profiles carries
+# email addresses and phone numbers, and the credential scanner does not
+# recognise those as credentials. Keep backups out of the repository; the
+# database is the source of truth, and `bun run check:migrations` builds a
+# throwaway one when a schema change has to be proven.
+backups/
+
 # Deno's node_modules for the edge functions — the Supabase edge runtime is
 # Deno, so it resolves its own npm dependencies here.
 supabase/functions/node_modules/

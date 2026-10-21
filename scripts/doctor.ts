@@ -1184,6 +1184,30 @@ if (!existsSync("scripts/check-migrations.ts")) {
   );
 }
 
+// ── No database backup is tracked ─────────────────────────────────────────────
+//
+// A dump of the bands is public data, but a dump of the profiles carries
+// email addresses and phone numbers — and the credential scanner does not
+// recognise those as credentials, because they are not credentials. So a
+// backup that is committed once is a leak waiting for the next dump.
+//
+// The database is the source of truth. A schema change is proven against a
+// throwaway one: `bun run check:migrations` builds it from the migrations.
+
+const trackedBackups = Bun.spawnSync(["git", "ls-files", "backups/"], { stdout: "pipe" })
+  .stdout.toString()
+  .split("\n")
+  .filter(Boolean);
+
+if (trackedBackups.length === 0) {
+  pass("no database backup is tracked", "the repository holds no dump of the database");
+} else {
+  fail(
+    "no database backup is tracked",
+    `${trackedBackups.join(", ")} — a dump of the profiles would carry email addresses and phone numbers, and the credential scanner would not see them`,
+  );
+}
+
 // ── Every route has a skip-link target ───────────────────────────────────────
 //
 // The root layout offers a "Skip to content" link that points at

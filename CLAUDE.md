@@ -515,6 +515,13 @@ fragment.
     client is mocked), the app router (`next/navigation` is mocked, because
     the nav asks for the router), and the audio player context (the provider
     wraps the page, the way the root layout does).
+- **No database backup is tracked.** A dump of the bands is public data, but
+  a dump of the profiles carries email addresses and phone numbers — and the
+  credential scanner does not see those, because they are not credentials. So
+  a backup that is committed once is a leak waiting for the next dump. The
+  directory is in `.gitignore` and the doctor fails if anything under it is
+  tracked anyway. The database is the source of truth; a schema change is
+  proven against a throwaway one (`bun run check:migrations`).
 - **An artist page that does not exist answers 200.** The status was sent
   with the first chunk of the stream, so `notFound()` inside the suspended
   part can only change the body — Next.js's own rule, and the reason it is
