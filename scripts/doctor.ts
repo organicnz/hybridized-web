@@ -1184,6 +1184,35 @@ if (!existsSync("scripts/check-migrations.ts")) {
   );
 }
 
+// ── The service worker's opt-out key is the same in both places ─────────────
+//
+// The app reads the flag from a module and the static script that sets it
+// writes the same key out by hand, because a service worker script cannot
+// import anything. If the two drift, the opt-out silently does nothing.
+
+const serviceWorkerKey = await Bun.file("lib/service-worker.ts")
+  .text()
+  .then((source) => /SERVICE_WORKER_DISABLED_KEY\s*=\s*"([^"]+)"/.exec(source)?.[1])
+  .catch(() => undefined);
+
+const unregisterScript = await Bun.file("public/unregister-sw.js")
+  .text()
+  .catch(() => "");
+
+if (!serviceWorkerKey) {
+  fail(
+    "the service worker's opt-out key agrees",
+    "lib/service-worker.ts does not declare SERVICE_WORKER_DISABLED_KEY",
+  );
+} else if (!unregisterScript.includes(serviceWorkerKey)) {
+  fail(
+    "the service worker's opt-out key agrees",
+    `public/unregister-sw.js does not set "${serviceWorkerKey}", so the opt-out does nothing`,
+  );
+} else {
+  pass("the service worker's opt-out key agrees", `both use "${serviceWorkerKey}"`);
+}
+
 // ── No database backup is tracked ─────────────────────────────────────────────
 //
 // A dump of the bands is public data, but a dump of the profiles carries

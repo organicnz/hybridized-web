@@ -1,113 +1,98 @@
-// Service Worker for caching music assets
-const CACHE_NAME = "hybridized-v4";
-const AUDIO_CACHE_NAME = "hybridized-audio-v4";
-const CACHE_URLS = ["/home", "/logo.png", "/favicon.png"];
+// The service worker.
+//
+// It exists for one thing: a DJ set is tens of megabytes, and a visitor who
+// plays the same one twice should not download it twice. So it caches the
+// audio and lets everything else — the app's own data, the images, the
+// page — go to the network.
+//
+// That "everything else" is the part that has to be right. A worker that
+// answers a request from the cache when it should not does not show a stale
+// picture: it shows stale *data*. The previous version matched any URL
+// containing "cloudfront.net", which is the image CDN, and cached anything
+// from "supabase.co", which is the database. An artist's list came from the
+// cache and stayed there.
+//
+// The version is in the cache names. Bump it when the policy changes, so
+// the old caches are dropped on the next activation.
 
-// Install event - cache essential assets
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(CACHE_URLS);
-    }),
-  );
-  self.skipWaiting();
-});
+const CACHE_NAME = "hybridized-v5";
+const AUDIO_CACHE_NAME = "hybridized-audio-v5";
 
-// Activate event - clean up old caches
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME && name !== AUDIO_CACHE_NAME)
-          .map((name) => caches.delete(name)),
-      );
-    }),
-  );
-  self.clients.claim();
-});
+/** The files worth keeping a copy of. */
+const CACHE_URLS = ["/logo.png", "/favicon.png"];
 
-// Check if request is for audio
+/**
+ * How many sets to keep.
+ *
+ * A set is tens of megabytes, so this is a handful rather than a library.
+ * The oldest goes first.
+ */
+const MAX_AUDIO_ENTRIES = 6;
+
+/**
+ * Whether a request is for audio.
+ *
+ * The extension, not the host: the audio and the artwork are served from the
+ * same CDN, and only the file says which is which.
+ */
 function isAudioRequest(url) {
-  return (
-    url.includes(".mp3") ||
-    url.includes(".m4a") ||
-    url.includes(".wav") ||
-    url.includes(".ogg") ||
-    url.includes("audio") ||
-    url.includes("cloudfront.net")
-  );
+  return /\.(mp3|m4a|wav|ogg|oga|aac)(\?|$)/i.test(url);
 }
 
-// Fetch event - serve from cache, fallback to network
-self.addEventListener("fetch", (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== "GET") return;
-
-  // Skip chrome extensions and other protocols
-  if (!event.request.url.startsWith("http")) return;
-
-  const url = event.request.url;
-
-  // IMPORTANT: Don't intercept navigation requests - let them pass through
-  // This prevents issues with redirects
-  if (event.request.mode === "navigate") {
-    return;
-  }
-
-  // Handle audio files with cache-first strategy
-  if (isAudioRequest(url)) {
-    event.respondWith(
-      caches.open(AUDIO_CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            console.log("Serving audio from cache:", url);
-            return cachedResponse;
-          }
-
-          return fetch(event.request).then((response) => {
-            // Cache successful audio responses
-            if (response && response.status === 200) {
-              console.log("Caching audio:", url);
-              cache.put(event.request, response.clone());
-            }
-            return response;
-          });
-        });
-      }),
-    );
-    return;
-  }
-
-  // Handle other requests (images, static assets)
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        return response;
-      }
-
-      return fetch(event.request).then((response) => {
-        // Don't cache non-successful responses
-        if (!response || response.status !== 200 || response.type === "error") {
-          return response;
-        }
-
-        // Clone the response
-        const responseToCache = response.clone();
-
-        // Cache images and static assets
-        if (
-          url.includes("/logo.png") ||
-          url.includes("/favicon.png") ||
-          url.includes("supabase.co")
-        ) {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-
-        return response;
-      });
-    }),
+// Install — cache the few files that are always wanted.
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(CACHE_URLS))
+      .then(() => self.skipWaiting()),
   );
+});
+
+// Activate — drop the caches of every previous version.
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((names) =>
+        Promise.all(
+          names
+            .filter((name) => name !== CACHE_NAME && name !== AUDIO_CACHE_NAME)
+            .map((name) => caches.delete(name)),
+        ),
+      )
+      .then(() => self.clients.claim()),
+  );
+});
+
+/** Drop the oldest entries until the cache is within the limit. */
+async function trimCache(cache, limit) {
+  const keys = await cache.keys();
+  for (let i = 0; i < keys.length - limit; i++) {
+    await cache.delete(keys[i]);
+  }
+}
+
+/** The audio, from the cache if it is there and from the network if not. */
+async function audioResponse(request) {
+  const cache = await caches.open(AUDIO_CACHE_NAME);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (response && response.status === 200) {
+    await cache.put(request, response.clone());
+    await trimCache(cache, MAX_AUDIO_ENTRIES);
+  }
+
+  return response;
+}
+
+// Fetch — the audio is cached; everything else is the network's business.
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  if (!event.request.url.startsWith("http")) return;
+  if (!isAudioRequest(event.request.url)) return;
+
+  event.respondWith(audioResponse(event.request));
 });
