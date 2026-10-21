@@ -34,18 +34,30 @@ export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
     fetchArtists();
   }, []);
 
-  // Scroll active artist into view (only when artists list changes or on mount)
+  // Scroll the active artist into view, within the nav.
+  //
+  // The nav is scrolled directly rather than with `scrollIntoView`, because
+  // that scrolls *every* scrollable ancestor — including the page — which
+  // yanks the layout. The measurements are taken from the boxes, so they do
+  // not depend on the nav being a positioned element.
   useEffect(() => {
-    if (activeRef.current && navRef.current && artists.length > 0) {
-      // Use setTimeout to avoid layout thrashing
-      setTimeout(() => {
-        activeRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "center",
-        });
-      }, 100);
-    }
+    const nav = navRef.current;
+    const active = activeRef.current;
+    if (!nav || !active || artists.length === 0) return;
+
+    // Wait for the links to be laid out before measuring them.
+    const timer = setTimeout(() => {
+      const navBox = nav.getBoundingClientRect();
+      const activeBox = active.getBoundingClientRect();
+      const delta = activeBox.left - navBox.left - (nav.clientWidth - activeBox.width) / 2;
+
+      nav.scrollTo({
+        left: Math.max(0, nav.scrollLeft + delta),
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [artists.length]); // Only run when artists are loaded, not on every activeArtist change
 
   const getArtistSlug = (artist: string) => {

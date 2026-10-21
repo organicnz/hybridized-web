@@ -95,12 +95,21 @@ async function ArtistContent({ params }: PageProps) {
   const artistProfile = artistBands[0];
 
   return (
-    <div className="min-h-screen text-foreground">
+    // A definite, shrinkable height rather than `min-h-screen`: an
+    // indefinite height leaves the flex chain below it unable to scroll, and
+    // the content ends up clipped instead of reachable.
+    <div className="flex min-h-0 flex-1 flex-col text-foreground">
       {/* Content only — ambient mesh handled by root layout */}
 
-      <div className="relative z-10 flex min-h-screen flex-col overflow-hidden">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
         <ArtistNav activeArtist={artistName} />
-        <main className="flex-1 overflow-y-auto px-4 py-8 md:px-8 md:py-10 lg:px-12">
+        {/* `min-h-0` so this can shrink and scroll. `id` so the root
+            layout's "Skip to content" link has a target here, the way it
+            does on the pages that use <AppShell>. */}
+        <main
+          id="main-content"
+          className="min-h-0 flex-1 overflow-y-auto px-4 py-8 md:px-8 md:py-10 lg:px-12"
+        >
           <div className="mx-auto max-w-6xl space-y-8">
             {/* Hero header — glass card with gradient text */}
             <section className="glass relative overflow-hidden rounded-3xl p-8 md:p-12">

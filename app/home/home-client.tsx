@@ -182,7 +182,11 @@ export function HomeClient({
             </div>
           </div>
         ) : (
-          <div className="scrollbar-thin space-y-3 overflow-y-auto pr-1">
+          // The page is the scroll region — the <main> on the artist page.
+          // A second scroller in here would fight it, and because this is a
+          // flex child its `min-height: auto` would stop it shrinking
+          // anyway, so the overflow was being clipped rather than scrolled.
+          <div className="space-y-3 pr-1">
             <StaggerContainer stagger={0.04} delayChildren={0.05} className="space-y-3">
               {allEpisodes.map((episode, index) => (
                 <StaggerItem key={episode.id} custom={index}>
@@ -220,7 +224,9 @@ export function HomeClient({
       </div>
 
       {/* Sidebar Panel - 35% */}
-      <aside className="w-full scrollbar-thin overflow-y-auto lg:sticky lg:top-20 lg:w-[35%] lg:self-start">
+      {/* `lg:max-h-*` so a long artist profile scrolls inside the sticky
+          panel instead of running past the bottom of the viewport. */}
+      <aside className="w-full scrollbar-thin lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:w-[35%] lg:self-start lg:overflow-y-auto">
         <ArtistProfile
           artist={{
             name: currentArtist ?? "",
