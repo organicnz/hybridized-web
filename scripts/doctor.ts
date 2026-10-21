@@ -1021,6 +1021,53 @@ if (conflictTargets.length === 0) {
   );
 }
 
+// ── The migrations create the functions the application calls ─────────────────
+//
+// The generated types declare the database's functions, and the application
+// calls them by name — `supabase.rpc("search_episodes", …)`. A function the
+// types declare but no migration creates exists only on the database where it
+// was made out of band: a database built from the chain does not have it, and
+// the call fails at run time.
+//
+// This is a warning rather than a failure, like the tables check above: the
+// production database has the function, and writing the migration that creates
+// it is a schema decision rather than a tooling one.
+
+const migratedFunctions = new Set<string>();
+
+for await (const file of new Bun.Glob("supabase/migrations/*.sql").scan({ cwd: "." })) {
+  const sql = await Bun.file(file).text();
+  for (const match of sql.matchAll(
+    /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+(?:public\.)?"?(\w+)"?\s*\(/gi,
+  )) {
+    migratedFunctions.add(match[1].toLowerCase());
+  }
+}
+
+const declaredFunctions = new Set<string>();
+const functionsBlock = types.slice(
+  types.indexOf("Functions: {"),
+  types.indexOf("\n    Enums:") > 0 ? types.indexOf("\n    Enums:") : types.length,
+);
+
+for (const fn of functionsBlock.matchAll(/^ {6}(\w+): \{$/gm)) {
+  declaredFunctions.add(fn[1].toLowerCase());
+}
+
+const unmigratedFunctions = [...declaredFunctions].filter((name) => !migratedFunctions.has(name));
+
+if (unmigratedFunctions.length === 0) {
+  pass(
+    "the migrations create the functions the application calls",
+    `${declaredFunctions.size} function(s), every one created`,
+  );
+} else {
+  warn(
+    "the migrations create the functions the application calls",
+    `${unmigratedFunctions.join(", ")} — no migration creates ${unmigratedFunctions.length === 1 ? "it" : "them"}; a database built from this chain does not have ${unmigratedFunctions.length === 1 ? "it" : "them"}`,
+  );
+}
+
 // The migration chain has to be checked against a real database, not just
 // read.
 if (!existsSync("scripts/check-migrations.ts")) {
