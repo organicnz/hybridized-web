@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { extractAttr, extractText, matchBandFromTitle, validateEpisodeData } from "./parse.ts";
 
 const FIRSTORY_RSS_URL = "https://feed.firstory.me/rss/user/cl3ps0kge021i01y69qhnf36d";
 const BATCH_SIZE = 5; // Very small batches to avoid resource limits
@@ -34,118 +35,14 @@ const PLAYLIST_MAPPINGS: Record<string, string> = {
   Wayoutwest: "cl416c4kz09ze01w9fptndp5l",
 };
 
-interface Band {
-  id: number;
-  name: string;
-}
-
-interface EpisodeData {
-  episode_id: string;
-  guid: string;
-  title: string;
-  description: string;
-  link: string;
-  audio_url: string;
-  audio_length: number;
-  enclosure_type: string;
-  cover_url: string | null;
-  duration: number;
-  pub_date: string;
-  creator: string;
-  explicit: boolean;
-  band_id: number | null;
-}
-
 type BandSyncResult = { band: string; found: number; updated: number };
 type BandSyncError = { band: string; error: string };
 type PlaylistResult = BandSyncResult | BandSyncError;
 
 // Helper to extract text from CDATA or regular tags
-function extractText(xml: string, tag: string): string {
-  try {
-    const cdataMatch = xml.match(
-      new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`),
-    );
-    const cdata = cdataMatch?.[1];
-    if (cdata !== undefined) return cdata.trim();
-
-    const textMatch = xml.match(new RegExp(`<${tag}[^>]*>([^<]*)<\\/${tag}>`));
-    const text = textMatch?.[1];
-    return text !== undefined ? text.trim() : "";
-  } catch {
-    return "";
-  }
-}
-
 // Helper to extract attribute value
-function extractAttr(xml: string, tag: string, attr: string): string {
-  try {
-    const match = xml.match(new RegExp(`<${tag}[^>]*${attr}="([^"]*)"`));
-    const value = match?.[1];
-    return value !== undefined ? value : "";
-  } catch {
-    return "";
-  }
-}
-
 // Helper to match band from title
-function matchBandFromTitle(title: string, bands: Band[]): number | null {
-  if (!title || !bands || bands.length === 0) return null;
-
-  const titleLower = title.toLowerCase();
-
-  // Extract the artist name from title (format: "Artist Name - Show Title")
-  const artistMatch = title.match(/^([^-]+)\s*-/);
-  const artistName = artistMatch?.[1]?.trim().toLowerCase() ?? titleLower;
-
-  // Special case: Greg Benz belongs to Benz & MD
-  if (artistName.includes("greg benz")) {
-    const benzMdBand = bands.find((b) => b.name.toLowerCase() === "benz & md");
-    if (benzMdBand) return benzMdBand.id;
-  }
-
-  // Sort bands by name length (longest first) for better matching
-  const sortedBands = [...bands].sort((a, b) => b.name.length - a.name.length);
-
-  // First pass: exact match on artist name (before the dash)
-  for (const band of sortedBands) {
-    const bandNameLower = band.name.toLowerCase();
-    if (artistName === bandNameLower) {
-      return band.id;
-    }
-  }
-
-  // Second pass: check if band name appears at the start of title
-  for (const band of sortedBands) {
-    const bandNameLower = band.name.toLowerCase();
-    if (titleLower.startsWith(`${bandNameLower} -`) || titleLower.startsWith(`${bandNameLower}-`)) {
-      return band.id;
-    }
-  }
-
-  // Third pass: check if band name appears in artist name portion only
-  for (const band of sortedBands) {
-    const bandNameLower = band.name.toLowerCase();
-    if (artistName.includes(bandNameLower)) {
-      return band.id;
-    }
-  }
-
-  return null;
-}
-
 // Helper to validate episode data
-function validateEpisodeData(data: EpisodeData): boolean {
-  return !!(
-    data.episode_id &&
-    data.title &&
-    data.audio_url &&
-    data.episode_id.length > 0 &&
-    data.title.length > 0 &&
-    data.audio_url.startsWith("http")
-  );
-}
-
 // Helper to sleep
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

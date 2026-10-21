@@ -161,6 +161,20 @@ scripts, not the runtime, not production.
     `err instanceof Error ? err.message : String(err)`.
   - `noUncheckedIndexedAccess` is on, so a regex capture group is
     `string | undefined` — read it with `?.[1]` and narrow it.
+  - **The logic of an edge function lives in a module of its own, when it can
+    be tested.** `supabase/functions/sync-firstory/parse.ts` holds the parsing
+    and the band matching, and the entry point imports it. The reason is
+    testability: the entry point calls `Deno.serve` at module scope, so
+    importing it starts a listener, and the pure logic inside it could not be
+    reached by a test at all.
+    - That module is ordinary TypeScript — no Deno APIs — so its tests run
+      with **Bun**, in the same suite as the rest of the project
+      (`tests/firstory-parse.test.ts`). Nothing about a Deno function has to
+      mean a Deno test runner.
+    - The cron calls the function every six hours, so a change in the band
+      matching quietly moves episodes between bands. The tests pin the
+      matching down: the exact artist name, the longest band name winning,
+      and the "Greg Benz belongs to Benz & MD" special case.
 - **Clear `.next` when the install layout changes.** Turbopack caches module
   identities, so a cache built against a different `node_modules` layout
   produces baffling errors — a null where a string is expected, in the middle
