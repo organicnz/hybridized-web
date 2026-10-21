@@ -506,6 +506,15 @@ fragment.
     It reports, and the headers do the enforcing. `frame-ancestors 'self'`
     is in the policy as well as `X-Frame-Options`, so the policy says the
     same thing when it is enforced.
+- **A server component renders to a stream.** `renderToReadableStream` from
+  `react-dom/server` — a dependency the project already has — reads the
+  markup of an async page back, so the artist page can be tested: the
+  artist, their episodes, an episode that belongs to nobody, the skip-link
+  target, and the 404 for an artist that does not exist.
+  - It needs three things the test has to provide: the database (the static
+    client is mocked), the app router (`next/navigation` is mocked, because
+    the nav asks for the router), and the audio player context (the provider
+    wraps the page, the way the root layout does).
 - **A number from a query string is clamped _and_ checked.** `Math.max(NaN, 1)`
   is `NaN`, so clamping alone does not make a limit safe: `?limit=abc` would
   reach the database as `NaN` and the query would be nonsense. `clampInteger`
