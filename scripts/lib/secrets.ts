@@ -132,19 +132,20 @@ function git(args: string[]): string {
 /**
  * The blob objects, and the path each was last known by.
  *
- * By default this is the objects every ref reaches — the history as it
- * stands. `includeUnreferenced` adds the objects no ref points at any more,
- * which is where a secret in an amended commit ends up.
+ * By default this is the objects reachable from a *local* branch or from
+ * `HEAD` — the things that could be pushed. The remote-tracking refs are
+ * deliberately not included: they mirror what is already on the remote, and a
+ * pre-push gate has to judge the history it is about to push, not the one it
+ * is about to replace.
  *
- * The distinction matters: staging a file and then unstaging it leaves a
- * dangling blob, so a scan of *every* object reports a credential for
- * something that was never committed.
+ * `includeUnreferenced` adds the objects no ref points at any more, which is
+ * where a secret in an amended commit ends up.
  */
 export function blobObjects(
   options: { includeUnreferenced?: boolean } = {},
 ): Map<string, { path: string; reachable: boolean }> {
   const paths = new Map<string, string>();
-  for (const line of git(["rev-list", "--objects", "--all"]).split("\n")) {
+  for (const line of git(["rev-list", "--objects", "--branches", "HEAD"]).split("\n")) {
     const space = line.indexOf(" ");
     if (space === -1) continue;
     paths.set(line.slice(0, space), line.slice(space + 1));

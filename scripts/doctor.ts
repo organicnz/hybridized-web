@@ -824,7 +824,7 @@ if (historyError) {
     `${knownHistory.length} known leak(s) still in the history — rotate the credential, then rewrite it`,
   );
 } else {
-  pass("no secret is in the git history", "every object the repository has held is clean");
+  pass("no secret is in the git history", "the reachable history is clean");
 }
 
 // ── The migrations create the columns the application reads ──────────────────

@@ -14,8 +14,8 @@
  *
  * How a finding is treated:
  *
- *   - in a commit, and not known → **fails**. It is in the history, on the
- *     remote, and in every clone.
+ *   - in a commit that could be pushed, and not known → **fails**. It is in
+ *     the history, and it would be on the remote and in every clone.
  *   - in a commit, and known → reported. It is recorded in
  *     `scripts/known-secret-digests.json` and is being rotated.
  *   - only in an unreachable object → reported. Staging a file and unstaging
@@ -60,7 +60,7 @@ if (unreachable.length > 0) {
 }
 
 if (committed.length === 0) {
-  console.log("\n✓ no new credential in any commit");
+  console.log("\n✓ no new credential in any commit that could be pushed");
   process.exit(0);
 }
 
