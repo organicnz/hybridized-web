@@ -1021,6 +1021,74 @@ if (conflictTargets.length === 0) {
   );
 }
 
+// ── Every module is imported by something ─────────────────────────────────────
+//
+// A module nothing imports is dead code: it is read, reviewed and carried
+// through every refactor, and it never runs. Two were here — a design-token
+// file that had drifted from the CSS that replaced it, and a set of scroll
+// hooks that duplicated a component — and nothing said so.
+//
+// The check looks at the whole tree, because a module is usually imported
+// from somewhere else: the components import from `lib/`, the routes import
+// from both, and the tests import everything.
+
+const MODULE_ROOTS = ["lib", "components", "hooks"];
+
+/** The file an import specifier points at, if it points at one. */
+function resolveImport(specifier: string, from: string): string | null {
+  let base: string;
+
+  if (specifier.startsWith("@/")) {
+    base = specifier.slice(2);
+  } else if (specifier.startsWith(".")) {
+    base = join(dirname(from), specifier);
+  } else {
+    return null;
+  }
+
+  for (const candidate of [
+    `${base}.ts`,
+    `${base}.tsx`,
+    join(base, "index.ts"),
+    join(base, "index.tsx"),
+  ]) {
+    if (existsSync(candidate)) return candidate;
+  }
+
+  return null;
+}
+
+const importedFiles = new Set<string>();
+
+for await (const file of new Bun.Glob("**/*.{ts,tsx}").scan({ cwd: "." })) {
+  if (file.startsWith("node_modules/") || file.startsWith(".next/")) continue;
+
+  const source = await Bun.file(file).text();
+  // `from "…"`, `import "…"`, and the dynamic `import("…")`.
+  for (const match of source.matchAll(/(?:from|import)\s*\(?\s*["']([^"']+)["']/g)) {
+    const resolved = resolveImport(match[1], file);
+    if (resolved) importedFiles.add(resolved);
+  }
+}
+
+const unimported: string[] = [];
+
+for (const root of MODULE_ROOTS) {
+  for await (const file of new Bun.Glob(`${root}/**/*.{ts,tsx}`).scan({ cwd: "." })) {
+    if (file.endsWith(".d.ts")) continue;
+    if (!importedFiles.has(file)) unimported.push(file);
+  }
+}
+
+if (unimported.length === 0) {
+  pass("every module is imported by something", `${MODULE_ROOTS.length} tree(s), no dead code`);
+} else {
+  fail(
+    "every module is imported by something",
+    `${unimported.join(", ")} — nothing imports ${unimported.length === 1 ? "it" : "them"}; delete ${unimported.length === 1 ? "it" : "them"} or use ${unimported.length === 1 ? "it" : "them"}`,
+  );
+}
+
 // ── The migrations create the functions the application calls ─────────────────
 //
 // The generated types declare the database's functions, and the application

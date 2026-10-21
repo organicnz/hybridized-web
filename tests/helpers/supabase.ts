@@ -34,8 +34,19 @@ export const createServerClient = mock((_url: string, _key: string, _options: un
   id: "fake-server-client",
 }));
 
+/**
+ * The plain SDK, used by the service and static clients.
+ *
+ * `mock.module` is global to the process, so this is registered here rather
+ * than in the test file that needs it.
+ */
+export const createSupabaseClient = mock((_url: string, _key: string, _options?: unknown) => ({
+  id: "fake-supabase-client",
+}));
+
 // A mock factory replaces the module's *entire* export set, so it has to
 // provide every named export the real module has. Anything left out is
 // missing from the module for the rest of the run, and Bun's ESM linking
 // cannot add an export back to an existing import.
 mock.module("@supabase/ssr", () => ({ createBrowserClient, createServerClient }));
+mock.module("@supabase/supabase-js", () => ({ createClient: createSupabaseClient }));

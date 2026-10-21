@@ -324,6 +324,16 @@ doctor` fails when the exemption list rots.
     their own panel, and neither is inside the other.
   - A DOM test environment would cover the rest of the React surface. That
     is a dependency decision, not a tooling one.
+  - **Every module in the measured scope has to be in the report.** The floor
+    only measures the files a test imported, so a module nothing imports
+    never reaches the report and the floor cannot see it. The coverage script
+    closes that: every module under `lib/`, `app/api/` and `scripts/lib/` has
+    to be measured, or to be in the exemption list with a reason for it.
+  - **A module nothing imports is dead code.** `bun run doctor` fails when a
+    file under `lib/`, `components/` or `hooks/` is not imported by anything —
+    statically or dynamically. Two were here and are gone: a design-token
+    file that had drifted from the CSS that replaced it, and a set of scroll
+    hooks that duplicated `components/scroll-reveal.tsx`.
 - **A component renders on the server, so its markup can be read back.**
   `renderToStaticMarkup` from `react-dom` — a dependency the project already
   has — renders the client components without a browser. The rules:

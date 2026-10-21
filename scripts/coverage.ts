@@ -124,6 +124,56 @@ const coverage = parseLcov(await Bun.file(lcovPath).text());
 const linePct = percent(coverage.lines.hit, coverage.lines.found);
 const functionPct = percent(coverage.functions.hit, coverage.functions.found);
 
+/**
+ * Every module in the measured scope has to be in the report.
+ *
+ * The floor only measures the files that a test imported: a module that
+ * nothing imports never appears in the lcov report, so the floor cannot see
+ * it, and a new file with no test at all would pass the gate. This closes
+ * that: the scope is every module under these roots, and each one has to be
+ * measured or explicitly exempt.
+ */
+const MEASURED_ROOTS = ["lib", "app/api", "scripts/lib"];
+
+/**
+ * The modules that cannot be covered without a browser.
+ *
+ * Each one is here for a reason: it needs a DOM, a canvas or a GPU, or it is
+ * generated. A new module in this list needs the same reason.
+ */
+const EXEMPT = new Set([
+  // A React context provider: the behaviour needs a DOM.
+  "lib/audio-player-context.tsx",
+  // Web Audio: it builds an oscillator graph in the browser.
+  "lib/audio/note-player.ts",
+  // It drives the SoundCloud widget, which is a script in the page.
+  "lib/soundcloud-widget-manager.ts",
+  // Generated from the database by `bun run types:supabase`.
+  "lib/types/database.types.ts",
+  // WebGPU: it needs a device and a shader pipeline.
+  "lib/vgpu/audio-visualizer.ts",
+]);
+
+const measuredFiles = new Set(coverage.files.map((file) => file.path));
+const unmeasured: string[] = [];
+
+for (const root of MEASURED_ROOTS) {
+  for await (const file of new Bun.Glob(`${root}/**/*.{ts,tsx}`).scan({ cwd: repoRoot })) {
+    const relative = file.replace(`${repoRoot}/`, "");
+    if (relative.endsWith(".d.ts")) continue;
+    if (EXEMPT.has(relative)) continue;
+    if (!measuredFiles.has(relative)) unmeasured.push(relative);
+  }
+}
+
+if (unmeasured.length > 0) {
+  console.error(
+    `\n✗ ${unmeasured.length} module(s) are not covered by any test: ${unmeasured.join(", ")}`,
+  );
+  console.error("  A module no test imports never reaches the report, so the floor cannot see it.");
+  process.exit(1);
+}
+
 console.log("\nCoverage");
 console.log("─".repeat(64));
 console.log(

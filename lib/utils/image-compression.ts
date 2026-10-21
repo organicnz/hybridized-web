@@ -1,4 +1,31 @@
 /**
+ * The size an image should be resized to, keeping its aspect ratio.
+ *
+ * A landscape image is bounded by its width and a portrait one by its
+ * height, and an image that already fits is left alone.
+ *
+ * It is a function of its arguments rather than a block inside the reader
+ * callback, because it is the part with the arithmetic in it — and the part
+ * that has to be right for the image not to be stretched.
+ */
+export function fitDimensions(
+  width: number,
+  height: number,
+  maxWidth = 800,
+  maxHeight = 800,
+): { width: number; height: number } {
+  if (width > height) {
+    if (width > maxWidth) {
+      return { width: maxWidth, height: (height * maxWidth) / width };
+    }
+  } else if (height > maxHeight) {
+    return { width: (width * maxHeight) / height, height: maxHeight };
+  }
+
+  return { width, height };
+}
+
+/**
  * Compress an image file to reduce size while maintaining quality
  * @param file - The image file to compress
  * @param maxWidth - Maximum width in pixels (default: 800)
@@ -20,20 +47,7 @@ export async function compressImage(
 
       img.onload = () => {
         // Calculate new dimensions while maintaining aspect ratio
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
-        }
+        const { width, height } = fitDimensions(img.width, img.height, maxWidth, maxHeight);
 
         // Create canvas and draw resized image
         const canvas = document.createElement("canvas");
