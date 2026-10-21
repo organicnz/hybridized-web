@@ -4,7 +4,7 @@ import { createSettingsSaver, loadUserSettings } from "@/lib/settings-utils";
 import { getSupabase } from "@/lib/supabase/client";
 import {
   clearCurrentUserStorage,
-  getUserStorageItemSync,
+  getUserStorageItemAsJson,
   migrateToUserStorage,
   setCurrentUserId,
   setUserStorageItemSync,
@@ -103,13 +103,21 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
             await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
           }
 
-          // Load from user-scoped localStorage
-          const saved = getUserStorageItemSync(STORAGE_KEY);
-          if (saved) {
-            const state = JSON.parse(saved);
+          // Load from user-scoped localStorage. The value is whatever was in
+          // storage, and it can be anything: an older version wrote a
+          // different shape, and a half-finished write leaves a broken one.
+          const state = getUserStorageItemAsJson<{
+            currentTrack?: unknown;
+            playlist?: unknown[];
+            currentIndex?: number;
+            currentTime?: number;
+            volume?: number;
+          }>(STORAGE_KEY);
+
+          if (state) {
             if (state.currentTrack) {
-              setCurrentTrackState(state.currentTrack);
-              setPlaylistState(state.playlist || []);
+              setCurrentTrackState(state.currentTrack as never);
+              setPlaylistState((state.playlist as never[]) || []);
               setCurrentIndex(state.currentIndex || 0);
               setCurrentTime(state.currentTime || 0);
               setVolumeState(state.volume ?? 0.7);

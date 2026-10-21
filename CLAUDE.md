@@ -506,6 +506,15 @@ fragment.
     It reports, and the headers do the enforcing. `frame-ancestors 'self'`
     is in the policy as well as `X-Frame-Options`, so the policy says the
     same thing when it is enforced.
+- **A number from a query string is clamped _and_ checked.** `Math.max(NaN, 1)`
+  is `NaN`, so clamping alone does not make a limit safe: `?limit=abc` would
+  reach the database as `NaN` and the query would be nonsense. `clampInteger`
+  in `lib/api/validation.ts` falls back to the default for a value that is
+  not a number, and clamps the rest.
+- **A value in storage is not to be trusted.** It is whatever was written
+  there — an older version wrote a different shape, and a half-finished write
+  leaves a broken one. `getUserStorageItemAsJson` returns `null` for a value
+  that does not parse, so a parse error cannot take the player down with it.
 - **The proxy is the boundary, and it has a test.** `proxy.ts` rate limits
   the API per address and guards the protected pages. `tests/proxy.test.ts`
   covers both: the quota headers are on every answer (including the first

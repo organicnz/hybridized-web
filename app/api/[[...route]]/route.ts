@@ -9,7 +9,7 @@ import {
 } from "@/lib/api/constants";
 import { generateRequestId, logger, toError } from "@/lib/api/errors";
 import { findEpisodeById, parseFeed, parseFeedFull } from "@/lib/api/rss";
-import { isValidSlug } from "@/lib/api/validation";
+import { clampInteger, isValidSlug } from "@/lib/api/validation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { Hono } from "hono";
@@ -61,8 +61,8 @@ app.onError((err, c) => {
 
 app.get("/v1/episodes", async (c) => {
   const bandId = c.req.query("bandId");
-  const limit = Math.min(Math.max(Number.parseInt(c.req.query("limit") || "50", 10), 1), 100);
-  const offset = Math.max(Number.parseInt(c.req.query("offset") || "0", 10), 0);
+  const limit = clampInteger(c.req.query("limit"), 50, 1, 100);
+  const offset = clampInteger(c.req.query("offset"), 0, 0, Number.MAX_SAFE_INTEGER);
 
   if (bandId !== undefined && !/^\d+$/.test(bandId)) {
     return c.json({ error: "Invalid bandId" }, 400);

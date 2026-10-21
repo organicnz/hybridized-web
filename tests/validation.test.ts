@@ -1,5 +1,34 @@
 import { describe, expect, it } from "bun:test";
-import { isValidSlug, requiredSlug } from "@/lib/api/validation";
+import { clampInteger, isValidSlug, requiredSlug } from "@/lib/api/validation";
+
+describe("clampInteger", () => {
+  it("reads a number", () => {
+    expect(clampInteger("25", 50, 1, 100)).toBe(25);
+  });
+
+  it("uses the default when there is no value", () => {
+    expect(clampInteger(null, 50, 1, 100)).toBe(50);
+    expect(clampInteger(undefined, 50, 1, 100)).toBe(50);
+    expect(clampInteger("", 50, 1, 100)).toBe(50);
+  });
+
+  it("uses the default when the value is not a number", () => {
+    // `Math.max(NaN, 1)` is `NaN`, so a limit of "abc" would reach the
+    // database as `NaN` if it were only clamped.
+    expect(clampInteger("abc", 50, 1, 100)).toBe(50);
+    expect(clampInteger("NaN", 50, 1, 100)).toBe(50);
+  });
+
+  it("keeps the value inside the range", () => {
+    expect(clampInteger("0", 50, 1, 100)).toBe(1);
+    expect(clampInteger("-5", 50, 1, 100)).toBe(1);
+    expect(clampInteger("9999", 50, 1, 100)).toBe(100);
+  });
+
+  it("reads the number at the start of the value", () => {
+    expect(clampInteger("12abc", 50, 1, 100)).toBe(12);
+  });
+});
 
 describe("isValidSlug", () => {
   it("accepts alphanumerics, hyphens and underscores", () => {

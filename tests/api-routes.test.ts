@@ -185,6 +185,16 @@ describe("GET /api/v1/episodes", () => {
     expect(body.pagination.offset).toBe(0);
   });
 
+  it("falls back to the default when the limit is not a number", async () => {
+    // The clamping alone is not enough: `Math.max(NaN, 1)` is `NaN`, and a
+    // limit of `NaN` would reach the database as nonsense.
+    const response = await GET(new Request("http://localhost/api/v1/episodes?limit=abc"));
+    const body = await response.json();
+
+    expect(body.pagination.limit).toBe(50);
+    expect(body.pagination.offset).toBe(0);
+  });
+
   it("rejects a bandId that is not a number", async () => {
     const response = await GET(new Request("http://localhost/api/v1/episodes?bandId=abc"));
 

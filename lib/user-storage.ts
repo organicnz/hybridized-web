@@ -64,6 +64,25 @@ export function getUserStorageItemSync(key: string): string | null {
 }
 
 /**
+ * Get an item from user-scoped localStorage, parsed as JSON.
+ *
+ * The value in storage is whatever was written there: an older version wrote
+ * a different shape, and a half-finished write leaves a broken one. A parse
+ * error must not take the caller down with it, so a value that does not
+ * parse is `null` — the same as a value that is not there.
+ */
+export function getUserStorageItemAsJson<T>(key: string): T | null {
+  const raw = getUserStorageItemSync(key);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Set an item in user-scoped localStorage.
  */
 export async function setUserStorageItem(key: string, value: string): Promise<void> {

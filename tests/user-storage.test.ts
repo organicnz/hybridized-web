@@ -3,6 +3,7 @@ import { localStorage } from "./helpers/local-storage";
 
 import {
   clearCurrentUserStorage,
+  getUserStorageItemAsJson,
   getUserStorageItemSync,
   migrateToUserStorage,
   removeUserStorageItemSync,
@@ -87,5 +88,31 @@ describe("user-storage", () => {
 
     expect(localStorage.getItem("recentSearches")).toBe("legacy-value");
     expect(localStorage.getItem("anonymous:recentSearches")).toBeNull();
+  });
+});
+
+describe("getUserStorageItemAsJson", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    setCurrentUserId(null);
+  });
+
+  it("reads the value back", () => {
+    setUserStorageItemSync("state", JSON.stringify({ volume: 0.5 }));
+
+    expect(getUserStorageItemAsJson<{ volume: number }>("state")).toEqual({ volume: 0.5 });
+  });
+
+  it("is null when there is nothing there", () => {
+    expect(getUserStorageItemAsJson("state")).toBeNull();
+  });
+
+  it("is null when the value is not JSON", () => {
+    // The value in storage is whatever was written there: an older version
+    // wrote a different shape, and a half-finished write leaves a broken one.
+    // A parse error must not take the caller down with it.
+    setUserStorageItemSync("state", "{not json");
+
+    expect(getUserStorageItemAsJson("state")).toBeNull();
   });
 });
