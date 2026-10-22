@@ -420,6 +420,12 @@ left every `typescript/…` rule in it dead: `no-explicit-any`,
 is not enabled. It is a static check — it reads the configuration — and it
 costs nothing.
 
+The doctor also checks the linter's **reach**: `bun lint --list-files` says
+which files it would take, and the difference against the repository is the
+answer. A file the linter cannot see is a file only `tsrs` covers. The
+generated database types are the one exemption; the configuration files used
+to be excluded as well, and are not now.
+
 ### Tailwind class sorting
 
 `bun fmt` sorts the Tailwind classes in every `className`, into the order

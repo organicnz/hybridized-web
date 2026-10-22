@@ -559,6 +559,54 @@ if (/^\s*typeAware\s*=\s*true\s*$/m.test(bunfig)) {
   );
 }
 
+// Every source file in the repository is seen by the linter.
+//
+// The linter is the second gate on the code — `tsrs` proves the types, the
+// linter proves the shape — so a file the linter cannot see is a file that
+// only one of the two gates covers. The linter is asked which files it would
+// take, and the difference against the repository is the answer.
+//
+// The generated types are the one exception: they come from the live
+// database, and the rules about the shape of a type do not apply to code
+// nobody writes by hand.
+const lintFileList = Bun.spawnSync([process.execPath, "run", "lint", "--list-files"], {
+  stdout: "pipe",
+  stderr: "pipe",
+});
+
+if (!lintFileList.success) {
+  fail("every source file is linted", "the linter could not say which files it would take");
+} else {
+  const lintedFiles = new Set(
+    new TextDecoder()
+      .decode(lintFileList.stdout)
+      .split("\n")
+      .filter((line) => line.trim().length > 0)
+      .map((line) => line.replace(`${process.cwd()}/`, "")),
+  );
+
+  const trackedFiles = Bun.spawnSync(["git", "ls-files"], { stdout: "pipe" });
+  const sourceFiles = new TextDecoder()
+    .decode(trackedFiles.stdout)
+    .split("\n")
+    .filter((file) => /\.(ts|tsx|js|jsx|mjs|cjs)$/.test(file));
+
+  const LINT_EXEMPT = new Set(["lib/types/database.types.ts"]);
+  const unlinted = sourceFiles.filter((file) => !lintedFiles.has(file) && !LINT_EXEMPT.has(file));
+
+  if (unlinted.length === 0) {
+    pass(
+      "every source file is linted",
+      `${lintedFiles.size} file(s) — the repository has ${sourceFiles.length} source file(s)`,
+    );
+  } else {
+    fail(
+      "every source file is linted",
+      `${unlinted.join(", ")} — the linter cannot see them, so only the type checker does`,
+    );
+  }
+}
+
 // The lint configuration names the plugins its rules come from, and that
 // list replaces the defaults rather than adding to them. A rule from a
 // plugin that is not named never runs — and it fails silently, so the file
@@ -1582,6 +1630,13 @@ for await (const file of new Bun.Glob(".githooks/*").scan({ cwd: "." })) {
 
 for await (const file of new Bun.Glob(".github/workflows/*.{yml,yaml}").scan({ cwd: "." })) {
   commandSources.push({ where: file, command: await Bun.file(file).text() });
+}
+
+// The task runner is a fourth place a command can live. `mise` tasks are run
+// by name, so a task that type checks is a second type checker as much as a
+// script is.
+for (const file of [".mise.toml", "mise.toml", "mise.local.toml"]) {
+  if (existsSync(file)) commandSources.push({ where: file, command: await Bun.file(file).text() });
 }
 
 const secondCheckers = commandSources

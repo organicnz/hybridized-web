@@ -276,13 +276,13 @@ doctor` fails when the exemption list rots.
   nightly produces disagreement rather than signal, and `bun run doctor` fails
   if one appears in a script.
   - **The scan covers every place a command can be run from** — the package
-    scripts, the git hooks and the CI workflows — because a second checker
-    added to a workflow is as much a second checker as one added to a script.
-    `deno check` is the one exception, and it is allowed in the edge script
-    and nowhere else: the edge functions run on Deno, their `jsr:` and `npm:`
-    specifiers are not resolvable by a Node-style checker, and the Deno
-    globals they use are declared nowhere else. It checks a different
-    runtime, not the same code twice.
+    scripts, the git hooks, the CI workflows and the `mise` tasks — because a
+    second checker added to a workflow is as much a second checker as one
+    added to a script. `deno check` is the one exception, and it is allowed
+    in the edge script and nowhere else: the edge functions run on Deno, their
+    `jsr:` and `npm:` specifiers are not resolvable by a Node-style checker,
+    and the Deno globals they use are declared nowhere else. It checks a
+    different runtime, not the same code twice.
   - **Next.js' own type check is off, and the doctor keeps it off.**
     `next.config.ts` sets `typescript.ignoreBuildErrors: true` and
     `experimental.useTypeScriptCli: false`, so Next never reaches for a
@@ -344,6 +344,11 @@ build`, so the type gate covers the deployment and not only CI: the
     `typescript` and `unicorn`. A rule whose plugin is missing never runs,
     and it fails silently, so the file reads as if the rule were enforced
     while nothing enforces it. `bun run doctor` checks the pairing.
+  - **The linter sees every source file.** `bun lint --list-files` says which
+    files it would take, and the doctor compares that against the repository:
+    a file the linter cannot see is a file only `tsrs` covers. The generated
+    database types are the one exemption. The configuration files used to be
+    excluded as well — they are not now, and they are clean.
   - `typescript/no-floating-promises` is the rule that earns its keep: the
     type checker proves a promise is a promise, and this rule proves
     somebody is looking after it. `mock.module` is exempt, because Bun's
@@ -476,7 +481,8 @@ fragment.
     broken coverage threshold
   - the coverage gate is wired, the test suite is isolated, randomised and
     re-run, the lint warning count is ratcheted, the linter is type-aware,
-    and every lint rule comes from a plugin that is enabled
+    every lint rule comes from a plugin that is enabled, and the linter sees
+    every source file
   - every config file is TypeScript; every direct dependency is imported
   - the edge functions are checked with Deno; the migration chain is checked
     against a real Postgres, and the migrations create the tables and the
