@@ -261,8 +261,20 @@ Deno.serve(async (req: Request) => {
 
         console.log(`Fetching playlist for ${bandName}...`);
 
-        // Fetch playlist page HTML
-        const playlistUrl = `https://hybridized.firstory.io/episodes?playlist=${playlistId}`;
+        // Fetch the playlist page.
+        //
+        // The page used to be `hybridized.firstory.io/episodes?playlist=…`,
+        // and that domain no longer resolves at all — every band failed with
+        // a DNS error on every run. The site is at `open.firstory.me` now,
+        // and the band's playlist page is there.
+        //
+        // The page does not list the episodes in its HTML any more: it
+        // renders them in the browser, so there is nothing to match against
+        // and the phase has to say so rather than report a quiet zero. What
+        // the page needs is the API it calls for itself — the same shape the
+        // application's own `POST /api/v1/sync-playlists` expects from
+        // `open.firstory.me/api/playlists/{id}`, which answers 404 today.
+        const playlistUrl = `https://open.firstory.me/playlists/${playlistId}`;
         const response = await fetch(playlistUrl, {
           headers: {
             "User-Agent": "Mozilla/5.0 (compatible; HybridizedApp/1.0)",
@@ -278,6 +290,14 @@ Deno.serve(async (req: Request) => {
         // Extract episode IDs from HTML (format: /episodes/clXXXXXXXXXXXXXXXXXXXXXX)
         const episodeMatches = html.matchAll(/\/episodes\/(cl[a-z0-9]+)/g);
         const episodeIds = [...new Set(Array.from(episodeMatches).map((m) => m[1]))];
+
+        // A playlist page that lists no episodes is not a playlist with no
+        // episodes — it is a page that stopped listing them. Reporting it as
+        // a success with a count of zero is how the phase went unnoticed
+        // while every band failed.
+        if (episodeIds.length === 0) {
+          throw new Error("the playlist page does not list its episodes in the HTML any more");
+        }
 
         if (episodeIds.length > 0) {
           // Update episodes with correct band_id

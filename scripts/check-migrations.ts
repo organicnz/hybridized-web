@@ -31,8 +31,13 @@ const assertions = join(repoRoot, "scripts", "fixtures", "migration-assertions.s
 /** The port the throwaway cluster listens on. */
 const PORT = 54329;
 
-/** The migrations that need a Supabase-only extension, and so cannot run here. */
-const SUPABASE_ONLY = /sync_cron/;
+/**
+ * The migrations that need a Supabase-only extension, and so cannot run here.
+ *
+ * The name is the marker: a migration that schedules a job needs Supabase's
+ * `pg_cron`, which is not an extension a throwaway Postgres can load.
+ */
+const SUPABASE_ONLY = /cron/;
 
 /**
  * Where the Postgres binaries are.

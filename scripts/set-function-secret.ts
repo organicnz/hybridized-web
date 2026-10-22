@@ -38,7 +38,7 @@ import { join } from "bun:path";
 
 const PROJECT_REF = Bun.env.SUPABASE_PROJECT_REF ?? "neslxchdtibzhxijxcbg";
 const API = "https://api.supabase.com/v1";
-const FUNCTIONS = `${API}/projects/${PROJECT_REF}/functions`;
+const FUNCTIONS = `https://${PROJECT_REF}.supabase.co/functions/v1`;
 const QUERY = `${API}/projects/${PROJECT_REF}/database/query`;
 
 /** The name the secret has in the vault, and in the function's environment. */
@@ -56,20 +56,46 @@ const TOKEN_FILES = [
 /**
  * The access token, from the environment or from the file the machine keeps
  * it in.
+ *
+ * The first one the API accepts is the one that is used. A revoked token is
+ * refused with "Invalid access token", and a machine can easily have one in
+ * its environment: the environment wins over the file, and the file is
+ * usually the one that was rotated.
  */
-async function accessToken(): Promise<string> {
+async function accessToken(): Promise<{ token: string; source: string }> {
+  const candidates: { token: string; source: string }[] = [];
+
   const fromEnv = Bun.env.SUPABASE_ACCESS_TOKEN?.trim();
-  if (fromEnv) return fromEnv;
+  if (fromEnv) candidates.push({ token: fromEnv, source: "SUPABASE_ACCESS_TOKEN" });
 
   for (const path of TOKEN_FILES) {
     if (!existsSync(path)) continue;
     const value = (await Bun.file(path).text()).trim();
-    if (value) return value;
+    if (value) candidates.push({ token: value, source: path });
+  }
+
+  if (candidates.length === 0) {
+    throw new Error(`No access token. Set SUPABASE_ACCESS_TOKEN, or put one in ${TOKEN_FILES[0]}.`);
+  }
+
+  for (const candidate of candidates) {
+    if (await accepted(candidate.token)) return candidate;
+    console.log(`  · ${candidate.source} was refused`);
   }
 
   throw new Error(
-    "No access token. Set SUPABASE_ACCESS_TOKEN, or put one in " + `${TOKEN_FILES[0]}.`,
+    "None of the credentials on this machine is accepted by Supabase. The one in " +
+      "the environment may be a token that was rotated; the file is usually the " +
+      "current one.",
   );
+}
+
+/** Whether the management API accepts a token. */
+async function accepted(candidate: string): Promise<boolean> {
+  const response = await fetch(`${API}/projects/${PROJECT_REF}/secrets`, {
+    headers: { Authorization: `Bearer ${candidate}` },
+  });
+  return response.ok;
 }
 
 /** The token, for the management API. */
@@ -184,7 +210,7 @@ async function vaultHasSecret(): Promise<boolean> {
  * is recorded in `net._http_response`, which is where the answer shows up.
  */
 async function runJobNow(): Promise<number | null> {
-  await sql(`
+  const body = await sql(`
     select net.http_post(
       url := 'https://${PROJECT_REF}.supabase.co/functions/v1/sync-firstory',
       headers := jsonb_build_object(
@@ -195,22 +221,32 @@ async function runJobNow(): Promise<number | null> {
     ) as request_id;
   `);
 
+  // The request id is the id of the row the answer lands in.
+  const requestId = Number(rows(body)[0]?.request_id ?? 0);
+  if (!requestId) return null;
+
   // The request is asynchronous: the database queues it and records the
-  // answer when it lands. A few seconds is enough for a function that only
-  // reads a feed.
-  for (let attempt = 0; attempt < 12; attempt++) {
+  // answer when it lands. The sync takes a few seconds.
+  for (let attempt = 0; attempt < 30; attempt++) {
     await Bun.sleep(1000);
 
-    const body = await sql(`
-      select status_code
-        from net._http_response
-       where url like '%functions/v1/sync-firstory%'
-       order by created desc
-       limit 1;
-    `);
+    const answer = await sql(
+      `select status_code, error_msg from net._http_response where id = ${requestId}`,
+    );
 
-    const status = rows(body)[0]?.status_code;
-    if (status !== undefined && status !== null) return Number(status);
+    const row = rows(answer)[0];
+    if (!row) continue;
+
+    if (row.error_msg) {
+      const reported =
+        typeof row.error_msg === "string" ? row.error_msg : JSON.stringify(row.error_msg);
+      console.error(`  · the request reported: ${reported}`);
+      return null;
+    }
+
+    if (row.status_code !== null && row.status_code !== undefined) {
+      return Number(row.status_code);
+    }
   }
 
   return null;
@@ -262,9 +298,11 @@ async function setOnFunctions(secret: string): Promise<void> {
 
 const rotate = process.argv.includes("--rotate");
 
-token = await accessToken();
-
 console.log(`▸ project ${PROJECT_REF}`);
+
+const credential = await accessToken();
+token = credential.token;
+console.log(`  · using the credential from ${credential.source}`);
 
 let secret = await currentSecret();
 
