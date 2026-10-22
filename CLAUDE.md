@@ -283,11 +283,16 @@ doctor` fails when the exemption list rots.
   - **`tsrs` cannot replace that native preview**, and the reason is worth
     keeping: Next.js reaches a compiler by one of two roads, and `tsrs` is on
     neither. The CLI road runs `tsc --showConfig`, which `tsrs` does not
-    support. The API road loads `typescript/lib/typescript.js` and calls
-    `createProgram`, `sys` and `transpileModule`; `tsrs` ships a Node API,
-    but a different one — `Program`, `Project`, `Checker`, `LanguageService`
-    — and none of those three names. The native preview is only a marker
-    anyway: Next.js writes the route type declarations and never runs it.
+    support. The API road loads the JavaScript compiler API out of the
+    `typescript` package and calls `createProgram`, `sys` and
+    `transpileModule`; `tsrs` ships a Node API, but a different one —
+    `Program`, `Project`, `Checker`, `LanguageService` — and none of those
+    three names. The native preview is only a marker anyway: Next.js writes
+    the route type declarations and never runs it.
+  - **The build type checks.** `bun run build` is `bun run typecheck && next
+build`, so the type gate covers the deployment and not only CI: the
+    deployment pipeline runs the package's build script, and a type error
+    stops it. `bun run doctor` fails if the build stops type checking.
   - The linter's type-aware rules (`no-floating-promises` and the like) stay:
     they read type information to judge a rule, they do not report type
     errors, and they are a different kind of check from the compiler's.

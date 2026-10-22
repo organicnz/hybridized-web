@@ -1501,6 +1501,21 @@ if (secondCheckers.length === 0) {
   );
 }
 
+// The build type checks, so a type error cannot reach a deployment.
+//
+// Next.js' own type-check pass is off — it needs the JavaScript compiler API
+// that TypeScript 7 does not ship, and the `typescript` package is not
+// installed — so the build runs `tsrs` itself. The deployment pipeline runs
+// this script, which means the gate covers the deploy and not only CI.
+if ((pkg.scripts?.build ?? "").includes("typecheck")) {
+  pass("the build type checks", "tsrs runs before next build");
+} else {
+  fail(
+    "the build type checks",
+    "the build script does not run the type check, so a type error can reach a deployment",
+  );
+}
+
 if (!devDependencies.typescript && !pkg.dependencies?.typescript) {
   pass(
     "the typescript package is not installed",

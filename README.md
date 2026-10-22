@@ -225,17 +225,21 @@ on neither of them yet:
 - The **CLI** road (`experimental.useTypeScriptCli: true`) runs `tsc
 --showConfig` to read the resolved configuration. `tsrs` does not support
   `--showConfig`, so that road ends in an error.
-- The **API** road loads `typescript/lib/typescript.js` and calls
-  `createProgram`, `sys` and `transpileModule`. `tsrs` ships a Node API, but
-  a different one: it exposes `Program`, `Project`, `Checker` and
-  `LanguageService`, and none of the three names Next.js needs.
+- The **API** road loads the JavaScript compiler API out of the `typescript`
+  package and calls `createProgram`, `sys` and `transpileModule`. `tsrs` ships
+  a Node API, but a different one: it exposes `Program`, `Project`, `Checker`
+  and `LanguageService`, and none of the three names Next.js needs.
 
 So the native preview stays. It is a marker — Next.js writes the route type
 declarations and never runs it, and its `#!/usr/bin/env node` launcher cannot
 run in this tree anyway, because there is no Node.js here.
 
 Next.js' own type-check pass is disabled (`typescript.ignoreBuildErrors` in
-`next.config.ts`) because it would duplicate `tsrs` on every build.
+`next.config.ts`): it needs the JavaScript compiler API that TypeScript 7 does
+not ship, and the `typescript` package is not installed. So the build runs
+`tsrs` itself — `bun run build` is `bun run typecheck && next build` — and
+because the deployment pipeline runs that script, a type error cannot reach a
+deployment. `bun run doctor` fails if the build stops type checking.
 
 Getting the two to agree required three fixes, each a genuine improvement:
 
