@@ -16,11 +16,18 @@
 -- a database that already has them, which is every database built from the
 -- chain — and the function is created with the types the chain declares.
 --
--- The types matter: `id` and `id_new` are bigints on the live table, and a
--- `RETURNS TABLE` has to match the query exactly, or Postgres refuses the
--- result with "structure of query does not match function result type". The
--- function that was there declared `id integer`, which is how it came to be
--- broken in the first place.
+-- The types matter: a `RETURNS TABLE` has to match the query exactly, or
+-- Postgres refuses the result with "structure of query does not match
+-- function result type". The function that was there declared `id integer`
+-- while the table holds a bigint.
+--
+-- The return type is left as it is, and the two ids are cast to it. That is
+-- not a preference: `CREATE OR REPLACE` cannot change a function's return
+-- type at all — it answers "cannot change return type of existing function" —
+-- so the only ways to widen it are to drop the function and create it again,
+-- or to keep what the database has always declared. The ids are a bands
+-- table's serial numbers, so the narrowing is not a risk, and the generated
+-- types keep saying `id: number` either way.
 --
 -- Idempotent: `CREATE OR REPLACE` overwrites the same body.
 
@@ -33,13 +40,13 @@ ALTER TABLE public.bands ADD COLUMN IF NOT EXISTS id_new BIGINT;
 
 CREATE OR REPLACE FUNCTION public.search_bands(search_query text)
 RETURNS TABLE(
-  id bigint,
+  id integer,
   name text,
   description text,
   formula text,
   iframe_url text,
   cover_url text,
-  id_new bigint,
+  id_new integer,
   created_at timestamp with time zone
 )
 LANGUAGE plpgsql
@@ -50,13 +57,13 @@ AS $function$
 BEGIN
   RETURN QUERY
   SELECT
-    b.id,
+    b.id::integer,
     b.name,
     b.description,
     b.formula,
     b.iframe_url,
     b.cover_url,
-    b.id_new,
+    b.id_new::integer,
     b.created_at
   FROM public.bands b
   WHERE
