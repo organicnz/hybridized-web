@@ -84,6 +84,11 @@ async function advance(ms: number): Promise<void> {
   await settle();
 }
 
+/** Set whether the browser is online. */
+function setOnline(online: boolean): void {
+  Object.defineProperty(navigator, "onLine", { value: online, configurable: true, writable: true });
+}
+
 /** The write the module made, if it made one. */
 function write(): Query | undefined {
   return queries.find((query) => query.calls.includes("update") || query.calls.includes("insert"));
@@ -213,6 +218,84 @@ describe("createSettingsSaver", () => {
 
     expect(saver.getStatus()).toBe("error");
     expect(toastCalls.some((call) => call.kind === "error")).toBe(true);
+  });
+
+  it("writes the volume and the last track as well", async () => {
+    const saver = createSettingsSaver();
+    saver.save({ volume_settings: { master: 42 }, last_track: { id: "clabc123" } });
+
+    await advance(500);
+
+    const payload = writePayload();
+    expect(payload?.volume_settings).toEqual({ master: 42 });
+    expect(payload?.last_track).toEqual({ id: "clabc123" });
+  });
+
+  it("returns to idle once the save is confirmed", async () => {
+    const saver = createSettingsSaver();
+    saver.save({ gains: [1] });
+
+    await advance(500);
+    expect(saver.getStatus()).toBe("saved");
+
+    await advance(1500);
+    expect(saver.getStatus()).toBe("idle");
+  });
+
+  it("merges the queued updates for the same user", async () => {
+    setOnline(false);
+    const saver = createSettingsSaver();
+
+    saver.save({ gains: [1] });
+    await advance(500);
+    saver.save({ last_artist: "Alex Hall" });
+    await advance(500);
+
+    const queue = JSON.parse(localStorage.getItem("settings-offline-queue") ?? "[]");
+    expect(queue).toHaveLength(1);
+    expect(queue[0].updates.gains).toEqual([1]);
+    expect(queue[0].updates.last_artist).toBe("Alex Hall");
+  });
+
+  it("writes the queued settings when the browser comes back online", async () => {
+    setOnline(false);
+    const saver = createSettingsSaver();
+    saver.save({ gains: [1] });
+    await advance(500);
+    expect(write()).toBeUndefined();
+
+    setOnline(true);
+    onlineHandler?.();
+    await settle();
+
+    expect(write()).toBeDefined();
+    expect(localStorage.getItem("settings-offline-queue")).toBeNull();
+  });
+
+  it("queues the update when the connection is lost during the retry", async () => {
+    writeResult = { error: new Error("boom") };
+    const saver = createSettingsSaver();
+    saver.save({ gains: [1] });
+
+    await advance(500);
+    // The connection goes while the saver is retrying.
+    setOnline(false);
+    await advance(100);
+    await advance(200);
+
+    expect(saver.getStatus()).toBe("pending");
+    expect(localStorage.getItem("settings-offline-queue")).toContain("user-1");
+  });
+
+  it("survives a queue that is not JSON", async () => {
+    localStorage.setItem("settings-offline-queue", "{not json");
+
+    const saver = createSettingsSaver();
+    saver.save({ gains: [1] });
+    await advance(500);
+
+    // The broken queue is ignored, and the update is written as usual.
+    expect(saver.getStatus()).toBe("saved");
   });
 
   it("flushes the pending update at once", async () => {
