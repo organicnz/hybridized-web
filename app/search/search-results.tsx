@@ -1,7 +1,7 @@
 "use client";
 
 import { IframePlayer } from "@/components/iframe-player";
-import { StaggerContainer, StaggerItem, motion } from "@/components/page-transition";
+import { StaggerContainer, StaggerItem, m } from "@/components/page-transition";
 import type { Database } from "@/lib/types/database.types";
 import { cn } from "@/lib/utils";
 import { Music } from "lucide-react";
@@ -27,7 +27,7 @@ const itemVariants = {
 export function SearchResults({ results, query }: { results: EpisodeRow[]; query: string }) {
   if (results.length === 0) {
     return (
-      <motion.div
+      <m.div
         className="card-flat p-8 text-center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -36,20 +36,20 @@ export function SearchResults({ results, query }: { results: EpisodeRow[]; query
         <Music className="mx-auto mb-4 h-16 w-16 text-primary/30" />
         <p className="text-lg text-muted-foreground">No results found for "{query}"</p>
         <p className="mt-2 text-sm text-muted-foreground/70">Try a different search term</p>
-      </motion.div>
+      </m.div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <motion.p
+      <m.p
         className="mb-4 text-muted-foreground"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.05 }}
       >
         Found {results.length} {results.length === 1 ? "episode" : "episodes"}
-      </motion.p>
+      </m.p>
 
       <StaggerContainer stagger={0.05} delayChildren={0.1}>
         <div className="grid gap-4">
@@ -59,7 +59,7 @@ export function SearchResults({ results, query }: { results: EpisodeRow[]; query
 
             return (
               <StaggerItem key={episode.id} custom={index}>
-                <motion.div
+                <m.div
                   className={cn("card-raised group overflow-hidden")}
                   variants={itemVariants}
                   whileHover={{ y: -4, boxShadow: "0 20px 40px -12px hsl(0 0% 0% / 0.5)" }}
@@ -94,7 +94,7 @@ export function SearchResults({ results, query }: { results: EpisodeRow[]; query
                       <IframePlayer episode={episode} artist={artistName} />
                     </div>
                   </div>
-                </motion.div>
+                </m.div>
               </StaggerItem>
             );
           })}

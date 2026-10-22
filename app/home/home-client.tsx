@@ -5,7 +5,7 @@ import { IframePlayer } from "@/components/iframe-player";
 import { StaggerContainer, StaggerItem } from "@/components/page-transition";
 import { useAudioPlayer } from "@/lib/audio-player-context";
 import { soundCloudManager } from "@/lib/soundcloud-widget-manager";
-import { motion } from "framer-motion";
+import { m } from "@/lib/motion";
 import { Disc3, ExternalLink } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -190,19 +190,19 @@ export function HomeClient({
             <StaggerContainer stagger={0.04} delayChildren={0.05} className="space-y-3">
               {allEpisodes.map((episode, index) => (
                 <StaggerItem key={episode.id} custom={index}>
-                  <motion.div
+                  <m.div
                     variants={itemVariants}
                     whileHover={{ y: -2 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
                     <IframePlayer episode={episode} artist={currentArtist ?? ""} index={index} />
-                  </motion.div>
+                  </m.div>
                 </StaggerItem>
               ))}
             </StaggerContainer>
 
             {allEpisodes.length === 0 && !soundcloudUrl && (
-              <motion.div
+              <m.div
                 className="glass p-12 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -217,7 +217,7 @@ export function HomeClient({
                     ? `New mixes from ${currentArtist} will appear here as soon as they're published.`
                     : "No episodes available for this artist."}
                 </p>
-              </motion.div>
+              </m.div>
             )}
           </div>
         )}

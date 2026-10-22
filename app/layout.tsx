@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { MotionProvider } from "@/components/motion-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
@@ -109,8 +110,14 @@ export default function RootLayout({
             }}
           />
           <AudioPlayerProvider>
-            {children}
-            <AudioPlayerBar />
+            {/* The animations run on framer-motion's mini renderer, and their
+                features are fetched after the page. The provider is here so
+                that every animated component below it — the player bar, the
+                menu, the sets — is covered by one loader. */}
+            <MotionProvider>
+              {children}
+              <AudioPlayerBar />
+            </MotionProvider>
           </AudioPlayerProvider>
           {/* SpeedInsights reads the route params to report the page path, so
               it has to sit behind a Suspense boundary in the shared root

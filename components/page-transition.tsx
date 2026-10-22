@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "@/lib/motion";
 import type { ReactNode } from "react";
 
 const pageVariants = {
@@ -25,7 +25,7 @@ export function PageTransition({
 }) {
   return (
     <AnimatePresence mode="wait">
-      <motion.div
+      <m.div
         className={className}
         initial="initial"
         animate="animate"
@@ -35,7 +35,7 @@ export function PageTransition({
         style={{ position: "relative", width: "100%" }}
       >
         {children}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }
@@ -77,7 +77,7 @@ export function StaggerContainer({
   delayChildren?: number;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       variants={staggerContainerVariants}
       initial="hidden"
@@ -85,7 +85,7 @@ export function StaggerContainer({
       custom={{ stagger, delayChildren }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -101,9 +101,9 @@ export function StaggerItem({
   variants?: typeof staggerItemVariants;
 }) {
   return (
-    <motion.div className={className} variants={variants} custom={custom}>
+    <m.div className={className} variants={variants} custom={custom}>
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -119,14 +119,14 @@ export function FadeInUp({
   duration?: number;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -140,14 +140,14 @@ export function ScaleIn({
   delay?: number;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay, ease: [0.34, 1.56, 0.64, 1] }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -163,14 +163,14 @@ export function SlideInFromLeft({
   distance?: number;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={{ opacity: 0, x: -distance }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -186,14 +186,14 @@ export function SlideInFromRight({
   distance?: number;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={{ opacity: 0, x: distance }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -204,7 +204,7 @@ export function useReducedMotion() {
 }
 
 export function MotionConfigWrapper({ children }: { children: ReactNode }) {
-  return <motion.div style={{ willChange: "transform, opacity" }}>{children}</motion.div>;
+  return <m.div style={{ willChange: "transform, opacity" }}>{children}</m.div>;
 }
 
-export { motion, AnimatePresence } from "framer-motion";
+export { m, AnimatePresence } from "@/lib/motion";

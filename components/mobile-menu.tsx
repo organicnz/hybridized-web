@@ -2,7 +2,7 @@
 
 import type { NavLink as NavLinkType } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "@/lib/motion";
 import { useEffect } from "react";
 import { NavLink } from "./nav-link";
 
@@ -33,7 +33,7 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
   return (
     <AnimatePresence initial={false}>
       {isOpen && (
-        <motion.nav
+        <m.nav
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
@@ -43,7 +43,7 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
           )}
           aria-label="Mobile navigation"
         >
-          <motion.div
+          <m.div
             initial="hidden"
             animate="visible"
             exit="hidden"
@@ -54,7 +54,7 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
             className="space-y-1 px-4 py-3"
           >
             {navLinks.map((link) => (
-              <motion.div
+              <m.div
                 key={link.href}
                 variants={{
                   hidden: { opacity: 0, x: -12 },
@@ -68,10 +68,10 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
                   variant="mobile"
                   onClick={onClose}
                 />
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
-        </motion.nav>
+          </m.div>
+        </m.nav>
       )}
     </AnimatePresence>
   );

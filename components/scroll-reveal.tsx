@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "@/lib/motion";
 import { useEffect, useRef, useState } from "react";
 
 import type { TargetAndTransition, Variants } from "framer-motion";
@@ -97,7 +97,7 @@ export function ScrollReveal({
   }, [rootMargin, threshold, once]);
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       variants={containerVariantsSr}
       initial="hidden"
@@ -108,9 +108,9 @@ export function ScrollReveal({
       {typeof children === "function" ? (
         children({ variants: itemVariantsSr })
       ) : (
-        <motion.div variants={itemVariantsSr}>{children}</motion.div>
+        <m.div variants={itemVariantsSr}>{children}</m.div>
       )}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -145,7 +145,7 @@ export function StaggerContainer({
     visible: { opacity: 1, transition: { staggerChildren: stagger, delayChildren } },
   };
   return (
-    <motion.div
+    <m.div
       ref={intersectionRef}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
@@ -153,7 +153,7 @@ export function StaggerContainer({
       className={className}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -171,8 +171,8 @@ export function StaggerItem({
     visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },
   };
   return (
-    <motion.div className={className} variants={variants || defaultVariants}>
+    <m.div className={className} variants={variants || defaultVariants}>
       {children}
-    </motion.div>
+    </m.div>
   );
 }

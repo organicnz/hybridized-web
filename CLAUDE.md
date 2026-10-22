@@ -334,6 +334,19 @@ build`, so the type gate covers the deployment and not only CI: the
     checker ships `NavigatorGPU`, and a global augmentation collides with it.
 - **Linting and formatting are Bun built-ins.** `bun lint` runs the same
   oxlint engine as the standalone binary, and `bun fmt` replaces Biome.
+  - **The page's JavaScript is measured, not guessed.** The numbers come from
+    a phone-sized browser on the live site, and from the build's own chunks:
+    - the artist page's HTML is 145 KB — the episode rows name the columns
+      they need, because the description averages 1,778 characters and the
+      client never reads it;
+    - the session is asked once per page, not once per card: the player knows
+      whether anybody is signed in, and the cards read the answer;
+    - the animations run on framer-motion's **mini** renderer. The app uses
+      fades, slides, scales and staggers and nothing the full renderer has,
+      and the full renderer was 111 KB of every page's JavaScript;
+    - Sentry is imported only when there is a `NEXT_PUBLIC_SENTRY_DSN`. The
+      deployment has none, so the SDK was downloaded by every visitor to
+      report nothing.
   - `oxlint.json` stays the rule config: `bun lint -c oxlint.json` is the
     supported invocation. The `jsx-a11y` plugin is enabled explicitly, and
     `typescript/no-explicit-any`, `eqeqeq` and `typescript/ban-ts-comment`

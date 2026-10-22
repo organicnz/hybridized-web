@@ -2,7 +2,7 @@
 
 import { useAudioPlayer } from "@/lib/audio-player-context";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "@/lib/motion";
 import { ChevronUp, ListMusic, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -111,7 +111,7 @@ export function AudioPlayerBar() {
   }
 
   return (
-    <motion.div
+    <m.div
       initial={{ y: 80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -182,7 +182,7 @@ export function AudioPlayerBar() {
 
               <AnimatePresence>
                 {volumePopoverOpen && (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0, y: 8, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
@@ -215,7 +215,7 @@ export function AudioPlayerBar() {
                       }}
                       aria-label="Volume"
                     />
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </div>
@@ -267,7 +267,7 @@ export function AudioPlayerBar() {
       <AnimatePresence>
         {queueOpen && (
           <>
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -276,7 +276,7 @@ export function AudioPlayerBar() {
               onClick={() => setQueueOpen(false)}
               aria-hidden="true"
             />
-            <motion.dialog
+            <m.dialog
               open
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -414,10 +414,10 @@ export function AudioPlayerBar() {
                   </button>
                 </div>
               )}
-            </motion.dialog>
+            </m.dialog>
           </>
         )}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
   );
 }
