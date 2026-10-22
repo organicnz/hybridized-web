@@ -54,20 +54,25 @@ export function ResetPasswordPage() {
         }
       } else {
         // Check if user already has a valid session
-        const supabase = await getSupabase();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session) {
-          setValidSession(true);
-        } else {
-          setError("No valid reset link found. Please request a new password reset.");
+        try {
+          const supabase = await getSupabase();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (session) {
+            setValidSession(true);
+          } else {
+            setError("No valid reset link found. Please request a new password reset.");
+          }
+        } catch (err) {
+          console.error("Exception during getSession:", err);
+          setError("An error occurred. Please try again.");
         }
         setVerifying(false);
       }
     };
 
-    handleRecoveryToken();
+    void handleRecoveryToken();
   }, []);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {

@@ -20,18 +20,22 @@ export function ArtistNav({ activeArtist = "", className }: ArtistNavProps) {
 
   useEffect(() => {
     async function fetchArtists() {
-      const supabase = await getSupabase();
-      const { data } = await supabase.from("bands").select("name").order("name");
+      try {
+        const supabase = await getSupabase();
+        const { data } = await supabase.from("bands").select("name").order("name");
 
-      if (data) {
-        setArtists(
-          data
-            .map((band: { name: string | null }) => band.name)
-            .filter((name): name is string => Boolean(name)),
-        );
+        if (data) {
+          setArtists(
+            data
+              .map((band: { name: string | null }) => band.name)
+              .filter((name): name is string => Boolean(name)),
+          );
+        }
+      } catch {
+        // The nav is a convenience, not the page. A failed fetch leaves it empty.
       }
     }
-    fetchArtists();
+    void fetchArtists();
   }, []);
 
   // Scroll the active artist into view, within the nav.

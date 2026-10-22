@@ -39,7 +39,9 @@ export function getOptimalSampleRate(): number {
 
   const tempContext = new Ctor();
   const sampleRate = tempContext.sampleRate;
-  tempContext.close();
+  // The context is only being measured. Closing it is tidying up, and a
+  // browser that refuses to close it changes nothing.
+  void tempContext.close().catch(() => {});
 
   return sampleRate;
 }
@@ -77,7 +79,7 @@ export function supportsHRTF(): boolean {
     const tempContext = new Ctor();
     const panner = tempContext.createPanner();
     const supported = "HRTF" in panner;
-    tempContext.close();
+    void tempContext.close().catch(() => {});
     return supported;
   } catch {
     return false;

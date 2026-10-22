@@ -169,7 +169,10 @@ describe("supportsHRTF", () => {
     setWindow({
       AudioContext: class extends MockAudioContext {
         override createPanner() {
-          return { ...new MockPanner(), HRTF: "HRTF" };
+          // The panner that supports HRTF is the same one, with the marker on
+          // it. The marker is assigned rather than spread, so the object keeps
+          // the prototype it is pretending to have.
+          return Object.assign(new MockPanner(), { HRTF: "HRTF" });
         }
       },
     });

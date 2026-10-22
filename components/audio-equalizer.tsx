@@ -65,10 +65,14 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
   // Load settings when user authenticates
   const loadSettings = useCallback(async () => {
-    const settings = await loadUserSettings();
-    if (settings?.gains) {
-      setGains(settings.gains);
-      setCurrentPreset("Custom");
+    try {
+      const settings = await loadUserSettings();
+      if (settings?.gains) {
+        setGains(settings.gains);
+        setCurrentPreset("Custom");
+      }
+    } catch {
+      // The equalizer falls back to its defaults.
     }
   }, []);
 
@@ -86,7 +90,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
         setIsAuthenticated(!!session?.user);
         // Reload settings when user signs in
         if (event === "SIGNED_IN" && session?.user) {
-          loadSettings();
+          void loadSettings();
         }
       });
 
@@ -96,7 +100,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
         } = await supabase.auth.getUser();
         if (cancelled) return;
         setIsAuthenticated(!!user);
-        if (user) loadSettings();
+        if (user) void loadSettings();
       } catch {
         if (!cancelled) setIsAuthenticated(false);
       }
@@ -113,7 +117,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
   useEffect(() => {
     const saver = settingsSaverRef.current;
     return () => {
-      saver?.flush();
+      void saver?.flush();
     };
   }, []);
 
@@ -124,7 +128,9 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
     const handlePlay = () => {
       if (audioContext.state === "suspended") {
-        audioContext.resume();
+        // A context that cannot be resumed stays suspended; the audio plays
+        // without the equalizer rather than not at all.
+        void audioContext.resume().catch(() => {});
       }
     };
 
@@ -151,7 +157,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
         } catch {
           // Audio element already has a source node - EQ unavailable
           setInitError(true);
-          ctx.close();
+          void ctx.close().catch(() => {});
           setIsInitialized(true);
           return;
         }
@@ -180,7 +186,7 @@ export function AudioEqualizer({ audioRef, className = "" }: AudioEqualizerProps
 
         // Resume audio context if suspended (required for autoplay)
         if (ctx.state === "suspended") {
-          ctx.resume();
+          void ctx.resume().catch(() => {});
         }
 
         setAudioContext(ctx);

@@ -303,6 +303,7 @@ scripts, not the runtime, not production.
 | Type checking      | `tsrs` (Rust)                                                         |
 | Linting            | `bun lint` — the oxlint engine, built in, type-aware                  |
 | Lint ratchet       | `bunfig.toml` → `[lint] maxWarnings` — the count cannot creep up      |
+| Lint plugins       | `oxlint.json` → `plugins` — every rule's plugin is enabled            |
 | Formatting         | `bun fmt` — built in, with Tailwind class sorting                     |
 | Language server    | `tsrs --lsp -stdio` — built into `tsrs`                               |
 | File system        | `bun:fs` / `bun:path` / `Bun.file()` / `Bun.Glob`                     |
@@ -393,6 +394,19 @@ and the findings are listed in `oxlint.json` and in `CLAUDE.md`.
 does not move up: a new warning fails the lint, and the fix is to resolve it
 or to raise the count deliberately. Lowering it as warnings are fixed is the
 other half of the ratchet.
+
+### The plugins a rule needs
+
+The `plugins` list in `oxlint.json` replaces the defaults rather than adding
+to them, so a rule whose plugin is not named never runs — and it fails
+silently. The file named five plugins and none of them was `typescript`, which
+left every `typescript/…` rule in it dead: `no-explicit-any`,
+`ban-ts-comment`, and the type-aware ones that need the type information
+`[lint] typeAware = true` asks for.
+
+`bun run doctor` now checks the pairing, so a rule cannot name a plugin that
+is not enabled. It is a static check — it reads the configuration — and it
+costs nothing.
 
 ### Tailwind class sorting
 

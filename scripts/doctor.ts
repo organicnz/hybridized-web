@@ -74,6 +74,17 @@ function releaseLine(version: string): string {
   return version.split(".").slice(0, 2).join(".");
 }
 
+/**
+ * Take the comments out of a JSON file.
+ *
+ * The lint configuration is JSON with `//` comments in it, so it has to be
+ * stripped before it can be parsed. The strings are matched first, so a `//`
+ * inside one — a path, a URL — survives.
+ */
+function stripJsonComments(text: string): string {
+  return text.replace(/("(?:[^"\\\n]|\\.)*")|\/\/[^\n]*/g, "$1");
+}
+
 // ── 1. Version pin ───────────────────────────────────────────────────────────
 //
 // The Bun build is pinned once, in `.bun-version`, as the npm publish
@@ -531,6 +542,49 @@ if (/^\s*typeAware\s*=\s*true\s*$/m.test(bunfig)) {
     "the linter is type-aware",
     "[lint] typeAware is missing — the rules that need types stay off",
   );
+}
+
+// The lint configuration names the plugins its rules come from, and that
+// list replaces the defaults rather than adding to them. A rule from a
+// plugin that is not named never runs — and it fails silently, so the file
+// reads as if the rule were being enforced while nothing enforces it.
+//
+// This is not a hypothetical: the configuration named five plugins and none
+// of them was `typescript`, so every `typescript/…` rule in it — including
+// the type-aware ones — was dead. The check keeps that from happening
+// again, and it is why the plugins are named explicitly now.
+const lintConfigPath = "oxlint.json";
+
+if (!existsSync(lintConfigPath)) {
+  fail("the lint rules come from plugins that are enabled", "oxlint.json is missing");
+} else {
+  const lintConfig = JSON.parse(stripJsonComments(await Bun.file(lintConfigPath).text())) as {
+    plugins?: string[];
+    rules?: Record<string, unknown>;
+  };
+
+  const enabledPlugins = new Set(lintConfig.plugins ?? []);
+  const rules = Object.keys(lintConfig.rules ?? {});
+
+  // A rule is written `plugin/rule`, or `rule` on its own — and a bare name
+  // is one of ESLint's.
+  const orphaned = rules.filter((rule) => {
+    const slash = rule.indexOf("/");
+    if (slash === -1) return !enabledPlugins.has("eslint");
+    return !enabledPlugins.has(rule.slice(0, slash));
+  });
+
+  if (orphaned.length === 0) {
+    pass(
+      "the lint rules come from plugins that are enabled",
+      `${rules.length} rule(s), ${enabledPlugins.size} plugin(s) — every rule can run`,
+    );
+  } else {
+    fail(
+      "the lint rules come from plugins that are enabled",
+      `${orphaned.join(", ")} — the plugin is not in "plugins", so the rule never runs`,
+    );
+  }
 }
 
 // Every configuration file is TypeScript. A `.mjs` or `.cjs` config is a

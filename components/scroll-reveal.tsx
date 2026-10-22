@@ -3,9 +3,22 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
-import type { Variants } from "framer-motion";
+import type { TargetAndTransition, Variants } from "framer-motion";
 
-const VARIANTS: Record<string, Variants> = {
+/** The name of one of the reveal animations. */
+type VariantName = "fade-up" | "fade-down" | "fade-left" | "fade-right" | "scale-up" | "blur-in";
+
+/**
+ * The shapes behind one reveal.
+ *
+ * The type is `TargetAndTransition` rather than framer-motion's `Variants`,
+ * because `Variants` allows a function — and a function has no properties to
+ * spread. The record is keyed by the variant names rather than by `string`, so
+ * a typo in a `variant` prop is a type error instead of an empty reveal.
+ */
+type RevealVariant = { hidden: TargetAndTransition; visible: TargetAndTransition };
+
+const VARIANTS: Record<VariantName, RevealVariant> = {
   "fade-up": { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } },
   "fade-down": { hidden: { opacity: 0, y: -40 }, visible: { opacity: 1, y: 0 } },
   "fade-left": { hidden: { opacity: 0, x: 40 }, visible: { opacity: 1, x: 0 } },
@@ -19,7 +32,7 @@ const VARIANTS: Record<string, Variants> = {
 
 interface ScrollRevealProps {
   children: React.ReactNode | ((props: { variants: Variants }) => React.ReactNode);
-  variant?: "fade-up" | "fade-down" | "fade-left" | "fade-right" | "scale-up" | "blur-in";
+  variant?: VariantName;
   delay?: number;
   duration?: number;
   staggerChildren?: number;

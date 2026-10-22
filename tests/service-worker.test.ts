@@ -138,6 +138,9 @@ beforeEach(async () => {
  */
 function loadWorker(): void {
   const source = readFileSync("public/sw.js", "utf8");
+  // The worker is a script the browser evaluates, so the test evaluates it
+  // the same way. It is the worker's own source, read from this repository.
+  // oxlint-disable-next-line typescript/no-implied-eval
   const evaluate = new Function(source) as () => void;
   evaluate();
 }

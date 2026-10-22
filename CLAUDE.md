@@ -260,6 +260,12 @@ doctor` fails when the exemption list rots.
 - **`bunfig.toml` sets `[lint] typeAware = true`.** The type-aware rules —
   `@typescript-eslint/no-floating-promises` and friends — are the ones that
   need the type information to be useful. The codebase is clean under them.
+  - The rules only run if their plugin is named in `oxlint.json`, and the
+    `plugins` list replaces the defaults rather than adding to them. It
+    named five plugins and none of them was `typescript`, so every
+    `typescript/…` rule in the file was dead — including the type-aware
+    ones. `bun run doctor` now fails if a rule names a plugin that is not
+    enabled.
 - **Every configuration file is TypeScript.** `postcss.config.ts`, not
   `.mjs` — a `.mjs` config is a file the type checker never sees.
   `bun run doctor` fails if a `.js`, `.mjs` or `.cjs` config reappears.
@@ -315,6 +321,16 @@ build`, so the type gate covers the deployment and not only CI: the
     `typescript/no-explicit-any`, `eqeqeq` and `typescript/ban-ts-comment`
     are listed by hand because they were Biome rules with no default-on
     oxlint equivalent.
+  - **`plugins` replaces the defaults, so it names every plugin the rules
+    come from** — `eslint`, `jsx-a11y`, `nextjs`, `react`, `react-hooks`,
+    `typescript` and `unicorn`. A rule whose plugin is missing never runs,
+    and it fails silently, so the file reads as if the rule were enforced
+    while nothing enforces it. `bun run doctor` checks the pairing.
+  - `typescript/no-floating-promises` is the rule that earns its keep: the
+    type checker proves a promise is a promise, and this rule proves
+    somebody is looking after it. `mock.module` is exempt, because Bun's
+    types say it returns `void | Promise<void>` and the rule cannot tell
+    which.
   - The `lint` script name shadows the built-in, so every invocation passes
     `--no-script` to avoid recursing into the script. The same applies to
     `check` and `fmt` — **do not add a `check` script** to `package.json`.
@@ -441,7 +457,8 @@ fragment.
     releases, does not use the global virtual store, and does not use the
     broken coverage threshold
   - the coverage gate is wired, the test suite is isolated, randomised and
-    re-run, the lint warning count is ratcheted, the linter is type-aware
+    re-run, the lint warning count is ratcheted, the linter is type-aware,
+    and every lint rule comes from a plugin that is enabled
   - every config file is TypeScript; every direct dependency is imported
   - the edge functions are checked with Deno; the migration chain is checked
     against a real Postgres, and the migrations create the tables and the

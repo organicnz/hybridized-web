@@ -242,12 +242,12 @@ export function createSettingsSaver() {
   // Listen for online event to process queue
   if (typeof window !== "undefined") {
     window.addEventListener("online", () => {
-      processOfflineQueue();
+      void processOfflineQueue();
     });
 
     // Also process queue on creation if online and queue exists
     if (isOnline()) {
-      processOfflineQueue();
+      void processOfflineQueue();
     }
   }
 
@@ -321,6 +321,10 @@ export function createSettingsSaver() {
         if (user) {
           await saveWithRetry(user.id, updatesToSave);
         }
+      } catch {
+        // The page is going away and there is nobody left to tell. The status
+        // is still set, so the saver is not left saying "saving" for ever.
+        setStatus("error");
       } finally {
         state.isSaving = false;
       }

@@ -75,10 +75,14 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 
   // Load volume settings from database
   const loadVolumeFromDb = useCallback(async () => {
-    const settings = await loadUserSettings();
-    if (settings?.volume_settings?.master !== undefined) {
-      const dbVolume = settings.volume_settings.master / 100; // Convert from 0-100 to 0-1
-      setVolumeState(dbVolume);
+    try {
+      const settings = await loadUserSettings();
+      if (settings?.volume_settings?.master !== undefined) {
+        const dbVolume = settings.volume_settings.master / 100; // Convert from 0-100 to 0-1
+        setVolumeState(dbVolume);
+      }
+    } catch {
+      // The stored volume stands; there is nothing to replace it with.
     }
   }, []);
 
@@ -149,7 +153,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         if (event === "SIGNED_IN" && session?.user) {
           // Migrate storage and reload settings
           await migrateToUserStorage([STORAGE_KEY, "recentSearches", "language"]);
-          loadVolumeFromDb();
+          void loadVolumeFromDb();
         } else if (event === "SIGNED_OUT") {
           // Clear user-specific storage on sign out
           clearCurrentUserStorage();
@@ -168,7 +172,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const saver = settingsSaverRef.current;
     return () => {
-      saver?.flush();
+      void saver?.flush();
     };
   }, []);
 

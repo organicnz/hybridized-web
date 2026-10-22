@@ -62,7 +62,9 @@ for (const { band, url } of playlists) {
     });
     count = countEpisodes(await response.text());
   } catch (error) {
-    console.error(`Failed to fetch ${url}: ${error}`);
+    console.error(
+      `Failed to fetch ${url}: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 
   console.log(`${band.padEnd(20)} | ${count}`);

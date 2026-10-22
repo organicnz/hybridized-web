@@ -16,9 +16,17 @@ try {
 }
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function (registrations) {
-    for (const registration of registrations) {
-      registration.unregister();
-    }
-  });
+  navigator.serviceWorker
+    .getRegistrations()
+    .then(function (registrations) {
+      return Promise.all(
+        registrations.map(function (registration) {
+          return registration.unregister();
+        }),
+      );
+    })
+    .catch(function () {
+      // The worker may already be gone, or the browser may refuse. The flag
+      // above is what matters; this is the tidying up.
+    });
 }

@@ -220,7 +220,9 @@ Deno.serve(async (req: Request) => {
             }
           }
         } catch (itemError) {
-          console.error(`Item processing error: ${itemError}`);
+          console.error(
+            `Item processing error: ${itemError instanceof Error ? itemError.message : String(itemError)}`,
+          );
           errors++;
         }
       }
@@ -301,7 +303,9 @@ Deno.serve(async (req: Request) => {
         // Delay between requests
         await sleep(BATCH_DELAY_MS);
       } catch (error) {
-        console.error(`Error processing playlist for ${bandName}: ${error}`);
+        console.error(
+          `Error processing playlist for ${bandName}: ${error instanceof Error ? error.message : String(error)}`,
+        );
         playlistErrors++;
         playlistResults.push({
           band: bandName,

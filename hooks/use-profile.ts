@@ -19,9 +19,9 @@ export function useProfile() {
       return;
     }
 
-    const supabase = await getSupabase();
-
     try {
+      const supabase = await getSupabase();
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -39,7 +39,7 @@ export function useProfile() {
   }, [user]);
 
   useEffect(() => {
-    fetchProfile();
+    void fetchProfile();
   }, [fetchProfile]);
 
   const updateProfile = async (updates: Partial<Profile>) => {

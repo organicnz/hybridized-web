@@ -49,7 +49,6 @@ declare namespace BunModules {
     | "ax"
     | "a+"
     | "ax+"
-    | "as+"
     | "r"
     | "rs"
     | "r+"

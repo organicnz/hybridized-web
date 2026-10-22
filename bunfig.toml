@@ -112,6 +112,11 @@ rerunEach = 2
 # Type-aware rules: the ones that need the type information to be useful,
 # such as `@typescript-eslint/no-floating-promises`. The codebase is clean
 # under them.
+#
+# They only run if `oxlint.json` names the `typescript` plugin — the `plugins`
+# list there replaces the defaults rather than adding to them — so the two
+# have to agree. `bun run doctor` fails if a rule names a plugin that is not
+# enabled, which is what stopped these from running at all.
 typeAware = true
 
 # A ratchet on the React Compiler findings, which are warnings rather than
