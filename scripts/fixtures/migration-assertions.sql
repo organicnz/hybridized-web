@@ -103,6 +103,33 @@ BEGIN
 END
 $$;
 
+-- ─── the band search ─────────────────────────────────────────────────────────
+-- `search_bands` is what the public band search calls. It existed only on
+-- the live database until a migration created it, so a database built from
+-- the chain did not have it at all.
+DO $$
+DECLARE
+  hits int;
+  found_name text;
+BEGIN
+  SELECT count(*) INTO hits FROM public.search_bands('Ada');
+  IF hits < 1 THEN
+    RAISE EXCEPTION 'search_bands did not find the band by name';
+  END IF;
+
+  SELECT max(name) INTO found_name FROM public.search_bands('Another band');
+  IF found_name <> 'Ada Band' THEN
+    RAISE EXCEPTION 'search_bands returned the wrong band: %', found_name;
+  END IF;
+
+  -- It searches the description too.
+  SELECT count(*) INTO hits FROM public.search_bands('Another band');
+  IF hits < 1 THEN
+    RAISE EXCEPTION 'search_bands did not find the band by description';
+  END IF;
+END
+$$;
+
 -- ─── the upsert the sync endpoint performs ───────────────────────────────────
 -- `POST /api/v1/sync-episodes` upserts with `onConflict: "episode_id"`, and
 -- PostgREST turns that into `INSERT ... ON CONFLICT (episode_id) DO UPDATE`.

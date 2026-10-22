@@ -25,6 +25,7 @@
     "shader:check": "vgpu check shaders/*.wgsl --require-validation",
     "shader:doctor": "vgpu doctor",
     "types:supabase": "supabase gen types typescript --project-id neslxchdtibzhxijxcbg > lib/types/database.types.ts",
+    "secret:function": "bun scripts/set-function-secret.ts",
     "prepare": "bun scripts/hooks/install.ts",
     "hooks:install": "bun scripts/hooks/install.ts",
     "hooks:run": "bun scripts/hooks/run.ts",
