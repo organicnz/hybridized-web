@@ -217,7 +217,8 @@ async function runJobNow(): Promise<number | null> {
         'Content-Type', 'application/json',
         'Authorization', 'Bearer ' || app_private.function_secret()
       ),
-      body := '{}'::jsonb
+      body := '{}'::jsonb,
+      timeout_milliseconds := 30000
     ) as request_id;
   `);
 
