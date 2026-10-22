@@ -1,15 +1,24 @@
 "use client";
 
 import { useAudioPlayer } from "@/lib/audio-player-context";
-import { getSupabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/types/database.types";
 import { cn } from "@/lib/utils";
 import { CalendarDays, Clock3, Play } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AuthRequiredModal } from "./auth-required-modal";
 
-type Episode = Database["public"]["Tables"]["episodes"]["Row"] & {
+/**
+ * The episode, with only the columns that are sent.
+ *
+ * The player shows the title, the cover, the date and the length. The
+ * description is a kilobyte and a half per episode and the player never
+ * reads it, so it is not asked for and not sent.
+ */
+type Episode = Pick<
+  Database["public"]["Tables"]["episodes"]["Row"],
+  "id" | "band_id" | "title" | "audio_url" | "cover_url" | "duration" | "pub_date"
+> & {
   bandName?: string | null;
   bandCoverUrl?: string | null;
 };
@@ -38,39 +47,15 @@ function formatDate(iso: string | null): string | null {
 }
 
 export function IframePlayer({ episode, artist, index }: IframePlayerProps) {
-  const { playPlaylist } = useAudioPlayer();
+  // The sign-in state comes from the player, which asks the auth server
+  // once for the whole page.
+  //
+  // This card used to ask for itself: it opened its own auth subscription
+  // and called `getUser()`. An artist page has a card per episode — up to a
+  // hundred — so the page asked the auth server a hundred times, and every
+  // answer was the same answer.
+  const { playPlaylist, isAuthenticated } = useAudioPlayer();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      const supabase = await getSupabase();
-      if (cancelled) return;
-
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        setIsAuthenticated(!!session?.user);
-      });
-
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!cancelled) setIsAuthenticated(!!user);
-      } catch {
-        if (!cancelled) setIsAuthenticated(false);
-      }
-
-      return () => subscription.unsubscribe();
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const handlePlayClick = async () => {
     // Check authentication

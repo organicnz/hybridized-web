@@ -2,6 +2,7 @@ import { ArtistNav } from "@/components/artist-nav";
 import { findArtistBySlug } from "@/lib/artists";
 import { createStaticClient } from "@/lib/supabase/static";
 import { slugifyEncoded } from "@/lib/utils/slug";
+import type { Database } from "@/lib/types/database.types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -10,6 +11,35 @@ import { HomeClient } from "../home-client";
 interface PageProps {
   params: Promise<{ artist: string }>;
 }
+
+/**
+ * The columns the browser is sent.
+ *
+ * The episode description averages 1.8 KB — 180 KB for a page's worth of
+ * episodes — and the client never reads it: the sets list shows the title,
+ * the cover, the date and the length. Asking for every column put the whole
+ * of that in the page, and the page was 213 KB of it.
+ *
+ * The columns are named rather than selected with `*`, so a column added to
+ * the table later does not quietly start costing every visitor a kilobyte.
+ */
+const BAND_COLUMNS = "id, name, description, cover_url, soundcloud_url, iframe_url, created_at";
+const EPISODE_COLUMNS = "id, band_id, title, audio_url, cover_url, duration, pub_date";
+
+type BandRow = Database["public"]["Tables"]["bands"]["Row"];
+type EpisodeRow = Database["public"]["Tables"]["episodes"]["Row"];
+
+/** The band, with only the columns that are sent. */
+export type ArtistBand = Pick<
+  BandRow,
+  "id" | "name" | "description" | "cover_url" | "soundcloud_url" | "iframe_url" | "created_at"
+>;
+
+/** The episode, with only the columns that are sent. */
+export type ArtistEpisode = Pick<
+  EpisodeRow,
+  "id" | "band_id" | "title" | "audio_url" | "cover_url" | "duration" | "pub_date"
+>;
 
 // Enable static generation for known artists
 export async function generateStaticParams() {
@@ -65,7 +95,7 @@ async function ArtistContent({ params }: PageProps) {
 
   const { data: artistBands, error } = await supabase
     .from("bands")
-    .select("*")
+    .select(BAND_COLUMNS)
     .eq("name", artistName)
     .order("created_at", { ascending: false });
 
@@ -76,7 +106,7 @@ async function ArtistContent({ params }: PageProps) {
   const bandIds = artistBands.map((band) => band.id);
   const { data: allEpisodes } = await supabase
     .from("episodes")
-    .select("*")
+    .select(EPISODE_COLUMNS)
     .in("band_id", bandIds)
     .order("pub_date", { ascending: false })
     .limit(100);

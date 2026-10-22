@@ -5,10 +5,11 @@ import { IframePlayer } from "@/components/iframe-player";
 import { StaggerContainer, StaggerItem } from "@/components/page-transition";
 import { useAudioPlayer } from "@/lib/audio-player-context";
 import { soundCloudManager } from "@/lib/soundcloud-widget-manager";
-import type { Database } from "@/lib/types/database.types";
 import { motion } from "framer-motion";
 import { Disc3, ExternalLink } from "lucide-react";
 import { useEffect, useRef } from "react";
+
+import type { ArtistBand, ArtistEpisode } from "./[artist]/page";
 
 // Extend Window interface for SoundCloud Widget API
 declare global {
@@ -22,8 +23,8 @@ declare global {
   }
 }
 
-type HybridizedItem = Database["public"]["Tables"]["bands"]["Row"] & {
-  episodes?: Database["public"]["Tables"]["episodes"]["Row"][];
+type HybridizedItem = ArtistBand & {
+  episodes?: ArtistEpisode[];
 };
 
 interface HomeClientProps {

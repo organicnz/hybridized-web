@@ -35,6 +35,18 @@ interface AudioPlayerContextType {
   currentTime: number;
   shouldAutoPlay: boolean;
   volume: number;
+  /**
+   * Whether somebody is signed in.
+   *
+   * `null` until the answer is known: the check is a round trip to the auth
+   * server, and a card that said "sign in" before the answer arrived would
+   * be lying to a signed-in visitor.
+   *
+   * It lives here because the answer is about the *session*, not about the
+   * card: an artist page has a card per episode, and a card that asked the
+   * auth server on its own would ask it a hundred times.
+   */
+  isAuthenticated: boolean | null;
   audioRef: React.RefObject<HTMLAudioElement | null> | null;
   setCurrentTrack: (track: Track | null) => void;
   setPlaylist: (tracks: Track[], startIndex?: number) => void;
@@ -65,6 +77,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [volume, setVolumeState] = useState(0.7);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Create settings saver instance (persists across renders)
@@ -101,6 +114,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
             data: { user },
           } = await supabase.auth.getUser();
           setCurrentUserId(user?.id ?? null);
+          setIsAuthenticated(!!user);
 
           // Migrate old non-scoped storage to user-scoped (one-time)
           if (user) {
@@ -149,6 +163,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       } = supabase.auth.onAuthStateChange(async (event, session) => {
         // Update cached user ID
         setCurrentUserId(session?.user?.id ?? null);
+        setIsAuthenticated(!!session?.user);
 
         if (event === "SIGNED_IN" && session?.user) {
           // Migrate storage and reload settings
@@ -322,6 +337,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         currentTime,
         volume,
         shouldAutoPlay,
+        isAuthenticated,
         audioRef,
         setCurrentTrack,
         setPlaylist,
