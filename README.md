@@ -111,7 +111,6 @@ bun run lint       # bun lint (Bun's built-in oxlint engine)
 bun run format     # bun fmt (Bun's built-in formatter)
 bun run fix        # lint --fix + format
 bun run typecheck  # tsrs --noEmit (Rust port of the TypeScript compiler)
-bun run typecheck:fast # bun check (Bun's own multi-core checker)
 bun run typecheck:edge # deno check — the Supabase edge functions
 bun run lint:edge  # deno lint — the Supabase edge functions
 bun run check:migrations # apply the migration chain to a throwaway Postgres
@@ -183,17 +182,19 @@ listed fails the run. The list is empty now — the history is clean.
 
 ### Two type checkers, both in the gate
 
-`bun run verify` runs two independent checkers over the whole project, and
-both must agree:
+`bun run verify` runs the linter, the type checker and the tests:
 
-| Command                  | Engine                           | Wall time |
-| ------------------------ | -------------------------------- | --------- |
-| `bun run typecheck`      | `tsrs` — Rust port of TypeScript | ~0.16 s   |
-| `bun run typecheck:fast` | `bun check` — Bun's own checker  | ~0.15 s   |
+| Command             | Engine                           | Wall time |
+| ------------------- | -------------------------------- | --------- |
+| `bun run typecheck` | `tsrs` — Rust port of TypeScript | ~0.16 s   |
 
-`tsrs` is the fast, faithful port of the TypeScript compiler — it reports the
-same diagnostics as `tsc` with the same error codes, and it is the primary
-gate. `bun check` is the multi-core gate that runs in a fraction of a second.
+`tsrs` is the **only** type checker in this project. It is the fast, faithful
+port of the TypeScript compiler — it reports the same diagnostics as `tsc`
+with the same error codes, it follows the TypeScript nightly rather than
+forking it, and it is a fraction of a second over the whole tree. A second
+checker is not a safety net: it is a second opinion from an implementation
+that does not follow the nightly, and the disagreements it produces are
+noise rather than signal. `bun run doctor` fails if a second one appears.
 
 Measured on this project, the same `tsconfig.json`, the same machine:
 
@@ -216,6 +217,22 @@ JavaScript compiler API, so it cannot act as a gate here, and its
 dependency tree. `next.config.ts` sets `experimental.useTypeScriptCli: false`
 and `@typescript/native-preview` is installed instead, which is what tells
 Next.js not to look for the `typescript` package at all.
+
+That package cannot be replaced by `tsrs`, and it is worth knowing why before
+anyone tries. Next.js reaches a compiler by one of two roads, and `tsrs` is
+on neither of them yet:
+
+- The **CLI** road (`experimental.useTypeScriptCli: true`) runs `tsc
+--showConfig` to read the resolved configuration. `tsrs` does not support
+  `--showConfig`, so that road ends in an error.
+- The **API** road loads `typescript/lib/typescript.js` and calls
+  `createProgram`, `sys` and `transpileModule`. `tsrs` ships a Node API, but
+  a different one: it exposes `Program`, `Project`, `Checker` and
+  `LanguageService`, and none of the three names Next.js needs.
+
+So the native preview stays. It is a marker — Next.js writes the route type
+declarations and never runs it, and its `#!/usr/bin/env node` launcher cannot
+run in this tree anyway, because there is no Node.js here.
 
 Next.js' own type-check pass is disabled (`typescript.ignoreBuildErrors` in
 `next.config.ts`) because it would duplicate `tsrs` on every build.
@@ -279,7 +296,7 @@ scripts, not the runtime, not production.
 | Test re-runs       | `bunfig.toml` → `[test] rerunEach = 2` — no stale-module dependencies |
 | Module mocking     | `mock.module` from `bun:test` — no seams in the production code       |
 | Coverage           | `bun scripts/coverage.ts` — a native floor gate over the lcov report  |
-| Type checking      | `tsrs` (Rust) + `bun check`                                           |
+| Type checking      | `tsrs` (Rust)                                                         |
 | Linting            | `bun lint` — the oxlint engine, built in, type-aware                  |
 | Lint ratchet       | `bunfig.toml` → `[lint] maxWarnings` — the count cannot creep up      |
 | Formatting         | `bun fmt` — built in, with Tailwind class sorting                     |
@@ -467,10 +484,10 @@ Git at them with `core.hooksPath`. This replaced `lefthook`, which was an npm
 package that downloaded a Go binary at install time and then shelled out to
 `bun x lefthook` on every hook run.
 
-| Hook         | Gates                                                                                            |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| `pre-commit` | `bun fmt` and `bun lint` on the staged files, then `tsrs` and `bun check` over the whole project |
-| `pre-push`   | `bun test`, then `bun run build`                                                                 |
+| Hook         | Gates                                                                            |
+| ------------ | -------------------------------------------------------------------------------- |
+| `pre-commit` | `bun fmt` and `bun lint` on the staged files, then `tsrs` over the whole project |
+| `pre-push`   | `bun test`, then `bun run build`                                                 |
 
 `pre-commit` re-stages the files the formatter rewrote, so the commit records
 the formatted content rather than the pre-format content.

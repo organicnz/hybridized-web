@@ -1485,6 +1485,22 @@ if (devDependencies.tsrs) {
   fail("the type gate is tsrs", "tsrs is not a devDependency");
 }
 
+// tsrs is the *only* type checker. A second one is not a safety net: it is
+// a second opinion from an implementation that does not follow the TypeScript
+// nightly, and the disagreements it causes are noise rather than signal.
+const secondCheckers = Object.entries(pkg.scripts ?? {}).filter(([, command]) =>
+  /\bbun\s+check\b|\btsc\b|\btsgo\b|\btsrsc\b/.test(command),
+);
+
+if (secondCheckers.length === 0) {
+  pass("tsrs is the only type checker", "no script runs a second one");
+} else {
+  fail(
+    "tsrs is the only type checker",
+    `${secondCheckers.map(([name]) => name).join(", ")} — tsrs is the gate; a second checker only adds disagreement`,
+  );
+}
+
 if (!devDependencies.typescript && !pkg.dependencies?.typescript) {
   pass(
     "the typescript package is not installed",

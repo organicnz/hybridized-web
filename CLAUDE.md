@@ -65,10 +65,9 @@ bun run lint       # bun lint (Bun's built-in oxlint engine)
 bun run format     # bun fmt (Bun's built-in formatter)
 bun run fix        # lint --fix + format
 bun run typecheck  # tsrs --noEmit (Rust port of the TypeScript compiler)
-bun run typecheck:fast # bun check (Bun's own multi-core checker)
 bun test           # unit tests
 bun run test:coverage # unit tests with the coverage floor
-bun run verify     # lint + both type checkers + test
+bun run verify     # lint + the type checker + test
 bun run doctor     # assert the Bun environment invariants
 bun run setup:bun  # install the exact Bun build pinned by .bun-version
 bun run setup:tsdk # wire tsrs up as the editor's language server
@@ -80,8 +79,6 @@ bun x <pkg>        # one-off package execution (replaces npx)
 Bun-native extras:
 
 ```bash
-bun check              # Bun's own multi-core type checker (whole project)
-bun run typecheck:fast # alias for `bun check`
 bun lint               # built-in linter (oxlint engine, no extra binary)
 bun fmt                # built-in formatter
 bun audit              # vulnerability scan
@@ -266,15 +263,15 @@ doctor` fails when the exemption list rots.
 - **Every configuration file is TypeScript.** `postcss.config.ts`, not
   `.mjs` — a `.mjs` config is a file the type checker never sees.
   `bun run doctor` fails if a `.js`, `.mjs` or `.cjs` config reappears.
-- **Two type checkers run in `verify` and must agree:** `tsrs` (the Rust
-  port — the primary gate) and `bun check` (multi-core, ~150 ms). Run
-  `bun run verify`, not just one of them.
+- **`tsrs` is the only type checker.** It is the Rust port of the TypeScript
+  compiler, it follows the TypeScript nightly rather than forking it, and it
+  checks the whole project in about a sixth of a second. There is no second
+  checker: a second opinion from an implementation that does not follow the
+  nightly produces disagreement rather than signal, and `bun run doctor` fails
+  if one appears in a script.
   - `tsrs` is a [collaboration between Cloudflare, VoidZero and the TypeScript
     team](https://blog.cloudflare.com/typescript-rust-port), incubated in the
-    Oxc toolchain. It follows the TypeScript nightly rather than forking it,
-    so it is the faithful port — which is exactly why `bun check` stays: it is
-    a _different_ implementation, and a second opinion only counts if it is
-    independent. On this project it is 2.8x the speed of the Go compiler and
+    Oxc toolchain. On this project it is 2.8x the speed of the Go compiler and
     38% of the memory.
   - The `typescript` npm package is **not** installed. TypeScript 7 ships no
     JavaScript compiler API, so it cannot serve as a gate here, and its
@@ -283,6 +280,17 @@ doctor` fails when the exemption list rots.
     `experimental.useTypeScriptCli: false` plus
     `@typescript/native-preview`; without the native preview, Next would try
     to install `typescript@^6` on every build.
+  - **`tsrs` cannot replace that native preview**, and the reason is worth
+    keeping: Next.js reaches a compiler by one of two roads, and `tsrs` is on
+    neither. The CLI road runs `tsc --showConfig`, which `tsrs` does not
+    support. The API road loads `typescript/lib/typescript.js` and calls
+    `createProgram`, `sys` and `transpileModule`; `tsrs` ships a Node API,
+    but a different one — `Program`, `Project`, `Checker`, `LanguageService`
+    — and none of those three names. The native preview is only a marker
+    anyway: Next.js writes the route type declarations and never runs it.
+  - The linter's type-aware rules (`no-floating-promises` and the like) stay:
+    they read type information to judge a rule, they do not report type
+    errors, and they are a different kind of check from the compiler's.
   - `tsrs` has performance knobs of its own (`--checkers`, `--maxMemory`,
     `--singleThreaded`, `--checkerCostCache`) — the README lists them. The
     defaults are already adaptive, so there is nothing to set unless a

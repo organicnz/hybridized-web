@@ -2,14 +2,14 @@
 /**
  * Pre-commit hook — the fast gates, on the staged files.
  *
- *   1. `bun fmt`   — format the staged source, config and style files
- *   2. `bun lint`  — lint the staged source files
- *   3. `tsrs`      — type-check the project
- *   4. `bun check` — type-check the project again, with Bun's own checker
+ *   1. `bun fmt`  — format the staged source, config and style files
+ *   2. `bun lint` — lint the staged source files
+ *   3. `tsrs`     — type-check the project
  *
- * Steps 3 and 4 are both sub-second and both are gates, so running both here
- * means a broken type never reaches a commit. `bun run verify` runs exactly
- * the same pair.
+ * `tsrs` is the only type checker in this project: it is the Rust port of
+ * the TypeScript compiler, it follows the TypeScript nightly rather than
+ * forking it, and it is a fraction of a second over the whole tree.
+ * `bun run verify` runs exactly the same pair.
  *
  * The formatter rewrites files in the working tree, so the reformatted files
  * are re-staged before the commit continues — otherwise the commit would
@@ -51,4 +51,3 @@ if (lintable.length > 0) {
 }
 
 if (!gate("typecheck", [bun, "x", "--bun", "tsrs", "--noEmit"])) process.exit(1);
-if (!gate("typecheck:fast", [bun, "check"])) process.exit(1);
