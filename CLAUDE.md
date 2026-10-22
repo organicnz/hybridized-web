@@ -269,6 +269,13 @@ doctor` fails when the exemption list rots.
 - **Two type checkers run in `verify` and must agree:** `tsrs` (the Rust
   port — the primary gate) and `bun check` (multi-core, ~150 ms). Run
   `bun run verify`, not just one of them.
+  - `tsrs` is a [collaboration between Cloudflare, VoidZero and the TypeScript
+    team](https://blog.cloudflare.com/typescript-rust-port), incubated in the
+    Oxc toolchain. It follows the TypeScript nightly rather than forking it,
+    so it is the faithful port — which is exactly why `bun check` stays: it is
+    a _different_ implementation, and a second opinion only counts if it is
+    independent. On this project it is 2.8x the speed of the Go compiler and
+    38% of the memory.
   - The `typescript` npm package is **not** installed. TypeScript 7 ships no
     JavaScript compiler API, so it cannot serve as a gate here, and its
     `#!/usr/bin/env node` launcher would be the last Node-flavoured entry in
@@ -276,6 +283,10 @@ doctor` fails when the exemption list rots.
     `experimental.useTypeScriptCli: false` plus
     `@typescript/native-preview`; without the native preview, Next would try
     to install `typescript@^6` on every build.
+  - `tsrs` has performance knobs of its own (`--checkers`, `--maxMemory`,
+    `--singleThreaded`, `--checkerCostCache`) — the README lists them. The
+    defaults are already adaptive, so there is nothing to set unless a
+    machine is short of memory.
   - `noUncheckedSideEffectImports: true` is on, so an unresolvable
     side-effect import is an error in both.
   - `types/css.d.ts` declares `*.css`; `types/bun-modules.d.ts` declares

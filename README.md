@@ -188,12 +188,27 @@ both must agree:
 
 | Command                  | Engine                           | Wall time |
 | ------------------------ | -------------------------------- | --------- |
-| `bun run typecheck`      | `tsrs` — Rust port of TypeScript | ~0.9 s    |
+| `bun run typecheck`      | `tsrs` — Rust port of TypeScript | ~0.16 s   |
 | `bun run typecheck:fast` | `bun check` — Bun's own checker  | ~0.15 s   |
 
 `tsrs` is the fast, faithful port of the TypeScript compiler — it reports the
 same diagnostics as `tsc` with the same error codes, and it is the primary
 gate. `bun check` is the multi-core gate that runs in a fraction of a second.
+
+Measured on this project, the same `tsconfig.json`, the same machine:
+
+|                          | Cold   | Warm   | Peak memory |
+| ------------------------ | ------ | ------ | ----------- |
+| `tsgo` — the Go compiler | 0.44 s | 0.37 s | 462 MB      |
+| `tsrs` — the Rust port   | 0.16 s | 0.12 s | 174 MB      |
+
+That is 2.8x the speed and 38% of the memory. The port's own benchmarks
+against large projects report up to 8x the speed of TypeScript 7.0 and ~70%
+less memory; this project is small enough that the difference is smaller.
+`tsrs` is a [collaboration between Cloudflare, VoidZero and the TypeScript
+team](https://blog.cloudflare.com/typescript-rust-port), incubated in the
+[Oxc](https://github.com/oxc-project) toolchain, and it follows the
+TypeScript nightly rather than forking it.
 
 The `typescript` npm package is **not** installed. TypeScript 7 ships no
 JavaScript compiler API, so it cannot act as a gate here, and its
@@ -214,6 +229,22 @@ Getting the two to agree required three fixes, each a genuine improvement:
 - `lib/webgpu.ts` reads `navigator.gpu` through a local type instead of
   augmenting the global `Navigator`, which collided with the `NavigatorGPU`
   interface Bun's checker ships.
+
+### Tuning the type check
+
+`tsrs` is a `tsc` drop-in with a few performance knobs of its own:
+
+- `--checkers N` sets the number of checker threads. The default is already
+  adaptive — one per core up to sixteen, then half the cores, capped at
+  thirty-two, and never more checkers than files — so there is nothing to set
+  on a normal machine.
+- `--maxMemory 12G` keeps the process near that much memory, trading CPU
+  for it. Worth reaching for on a runner with a small memory limit.
+- `--singleThreaded` is the opposite: the lowest memory use, for a machine
+  that is short of it.
+- `--checkerCostCache <file>` remembers how long each file took to check and
+  balances the threads with it, which is up to ~15% faster on repeated
+  runs. The pinned build accepts the flag but does not write the file yet.
 
 ### tsrs as the editor's language server
 
