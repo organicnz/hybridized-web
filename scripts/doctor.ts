@@ -19,7 +19,8 @@
  *   10. bunfig.toml uses the isolated linker and the supply-chain guard,
  *   11. no source file imports a `node:` module,
  *   12. `@types/node` is a direct dependency and nothing else Node.js is,
- *   13. the type gate is `tsrs` and not the `typescript` package,
+ *   13. the type gate is `tsrs` and not the `typescript` package — and no
+ *      second checker can be added to a script, a hook or a workflow,
  *   14. CI never pulls in Node.js and installs the pinned Bun,
  *   15. the git hooks are Bun scripts, not a Node.js tool.
  */
@@ -83,6 +84,20 @@ function releaseLine(version: string): string {
  */
 function stripJsonComments(text: string): string {
   return text.replace(/("(?:[^"\\\n]|\\.)*")|\/\/[^\n]*/g, "$1");
+}
+
+/**
+ * Take the comments out of a file, so a mention is not a command.
+ *
+ * The hooks and the workflows both *talk* about the tools they run — one of
+ * them lists `deno check` in its own documentation — and the scan for a
+ * second type checker has to see the commands, not the prose about them.
+ */
+function stripComments(text: string): string {
+  return text
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/\/\/[^\n]*/g, " ")
+    .replace(/#[^\n]*/g, " ");
 }
 
 // ── 1. Version pin ───────────────────────────────────────────────────────────
@@ -1542,16 +1557,70 @@ if (devDependencies.tsrs) {
 // tsrs is the *only* type checker. A second one is not a safety net: it is
 // a second opinion from an implementation that does not follow the TypeScript
 // nightly, and the disagreements it causes are noise rather than signal.
-const secondCheckers = Object.entries(pkg.scripts ?? {}).filter(([, command]) =>
-  /\bbun\s+check\b|\btsc\b|\btsgo\b|\btsrsc\b/.test(command),
-);
+//
+// The scan covers every place a command can be run from — the package
+// scripts, the git hooks and the CI workflows — because a second checker
+// added to a workflow is as much a second checker as one added to a script.
+//
+// `deno check` is the one exception, and it is not a second opinion: the
+// Supabase edge functions run on Deno, their `jsr:` and `npm:` specifiers
+// are not resolvable by a Node-style checker, and the Deno globals they use
+// are declared nowhere else. It checks a different runtime, so it is allowed
+// in the edge script and nowhere else.
+const CHECKERS_THAT_ARE_NOT_TSRS =
+  /\btsc\b|\btsgo\b|\btsrsc\b|\btsserver\b|\bbun\s+check\b|\bsvelte-check\b|\bvue-tsc\b|\bastro\s+check\b|\bngc\b/;
+
+const commandSources: { where: string; command: string }[] = [];
+
+for (const [name, command] of Object.entries(pkg.scripts ?? {})) {
+  commandSources.push({ where: `the "${name}" script`, command });
+}
+
+for await (const file of new Bun.Glob(".githooks/*").scan({ cwd: "." })) {
+  commandSources.push({ where: file, command: await Bun.file(file).text() });
+}
+
+for await (const file of new Bun.Glob(".github/workflows/*.{yml,yaml}").scan({ cwd: "." })) {
+  commandSources.push({ where: file, command: await Bun.file(file).text() });
+}
+
+const secondCheckers = commandSources
+  .map(({ where, command }) => ({ where, command: stripComments(command) }))
+  .filter(({ where, command }) => {
+    if (CHECKERS_THAT_ARE_NOT_TSRS.test(command)) return true;
+    // `deno check` belongs to the edge script and nowhere else.
+    return /\bdeno\s+check\b/.test(command) && where !== 'the "typecheck:edge" script';
+  });
 
 if (secondCheckers.length === 0) {
-  pass("tsrs is the only type checker", "no script runs a second one");
+  pass(
+    "tsrs is the only type checker",
+    `${commandSources.length} place(s) a command can run — no second checker in any of them`,
+  );
 } else {
   fail(
     "tsrs is the only type checker",
-    `${secondCheckers.map(([name]) => name).join(", ")} — tsrs is the gate; a second checker only adds disagreement`,
+    `${secondCheckers.map(({ where }) => where).join(", ")} — tsrs is the gate; a second checker only adds disagreement`,
+  );
+}
+
+// Next.js runs a type check of its own during the build. It is off, and the
+// reason is in `next.config.ts`: TypeScript 7 ships no JavaScript compiler
+// API, so Next cannot check anything here even if it wanted to. Left on, it
+// would reach for the `typescript` package — the one Node-flavoured thing
+// this project does not install.
+const nextConfig = existsSync("next.config.ts") ? await Bun.file("next.config.ts").text() : "";
+
+if (
+  nextConfig &&
+  /ignoreBuildErrors:\s*true/.test(nextConfig) &&
+  /useTypeScriptCli:\s*false/.test(nextConfig)
+) {
+  pass("Next's own type check is off", "ignoreBuildErrors, and the CLI road is not taken");
+} else {
+  fail(
+    "Next's own type check is off",
+    "next.config.ts must set typescript.ignoreBuildErrors and experimental.useTypeScriptCli — Next would otherwise reach for a compiler",
   );
 }
 
@@ -1570,7 +1639,20 @@ if ((pkg.scripts?.build ?? "").includes("typecheck")) {
   );
 }
 
-if (!devDependencies.typescript && !pkg.dependencies?.typescript) {
+// The `typescript` package is not a dependency *and* does not resolve from
+// the project root. The second half is the one that matters: Next looks the
+// package up by resolving it, and the isolated linker does not hoist a
+// transitive copy into the root, so a package nobody declared cannot become
+// the compiler behind the build.
+let typescriptResolves = false;
+try {
+  Bun.resolveSync("typescript", process.cwd());
+  typescriptResolves = true;
+} catch {
+  typescriptResolves = false;
+}
+
+if (!devDependencies.typescript && !pkg.dependencies?.typescript && !typescriptResolves) {
   pass(
     "the typescript package is not installed",
     "TypeScript 7 ships no JS API; tsrs covers the type gate",
@@ -1578,7 +1660,9 @@ if (!devDependencies.typescript && !pkg.dependencies?.typescript) {
 } else {
   fail(
     "the typescript package is not installed",
-    "the typescript package re-enters a Node.js launcher into the dependency tree",
+    typescriptResolves
+      ? "the typescript package resolves from the project root, so Next could reach for it"
+      : "the typescript package re-enters a Node.js launcher into the dependency tree",
   );
 }
 

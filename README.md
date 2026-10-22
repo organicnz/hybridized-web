@@ -194,7 +194,15 @@ with the same error codes, it follows the TypeScript nightly rather than
 forking it, and it is a fraction of a second over the whole tree. A second
 checker is not a safety net: it is a second opinion from an implementation
 that does not follow the nightly, and the disagreements it produces are
-noise rather than signal. `bun run doctor` fails if a second one appears.
+noise rather than signal. `bun run doctor` fails if a second one appears —
+in a package script, in a git hook or in a CI workflow, because a checker
+added to a workflow is as much a second checker as one added to a script.
+
+The one exception is `deno check`, and it is not a second opinion: the
+Supabase edge functions run on Deno, their `jsr:` and `npm:` specifiers are
+not resolvable by a Node-style checker, and the Deno globals they use are
+declared nowhere else. It checks a different runtime, so the doctor allows it
+in the edge script and nowhere else.
 
 Measured on this project, the same `tsconfig.json`, the same machine:
 
@@ -216,7 +224,11 @@ JavaScript compiler API, so it cannot act as a gate here, and its
 `#!/usr/bin/env node` launcher would be the last Node-flavoured entry in the
 dependency tree. `next.config.ts` sets `experimental.useTypeScriptCli: false`
 and `@typescript/native-preview` is installed instead, which is what tells
-Next.js not to look for the `typescript` package at all.
+Next.js not to look for the `typescript` package at all. The doctor checks
+both halves of that: the package is not a dependency, and it does not resolve
+from the project root — the isolated linker does not hoist a transitive copy
+there, so a package nobody declared cannot become the compiler behind the
+build.
 
 That package cannot be replaced by `tsrs`, and it is worth knowing why before
 anyone tries. Next.js reaches a compiler by one of two roads, and `tsrs` is

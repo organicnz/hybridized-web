@@ -275,6 +275,24 @@ doctor` fails when the exemption list rots.
   checker: a second opinion from an implementation that does not follow the
   nightly produces disagreement rather than signal, and `bun run doctor` fails
   if one appears in a script.
+  - **The scan covers every place a command can be run from** — the package
+    scripts, the git hooks and the CI workflows — because a second checker
+    added to a workflow is as much a second checker as one added to a script.
+    `deno check` is the one exception, and it is allowed in the edge script
+    and nowhere else: the edge functions run on Deno, their `jsr:` and `npm:`
+    specifiers are not resolvable by a Node-style checker, and the Deno
+    globals they use are declared nowhere else. It checks a different
+    runtime, not the same code twice.
+  - **Next.js' own type check is off, and the doctor keeps it off.**
+    `next.config.ts` sets `typescript.ignoreBuildErrors: true` and
+    `experimental.useTypeScriptCli: false`, so Next never reaches for a
+    compiler — it writes the route type declarations from strings and stops
+    there. The doctor fails if either setting is turned back.
+  - **The `typescript` package does not resolve from the project root.**
+    The dependency list is not enough: Next looks the package up by
+    resolving it, and the isolated linker does not hoist a transitive copy
+    into the root, so a package nobody declared cannot become the compiler
+    behind the build. The doctor checks both.
   - `tsrs` is a [collaboration between Cloudflare, VoidZero and the TypeScript
     team](https://blog.cloudflare.com/typescript-rust-port), incubated in the
     Oxc toolchain. On this project it is 2.8x the speed of the Go compiler and
@@ -465,7 +483,9 @@ fragment.
     columns the application reads
   - no source file names a `node:` module; `@types/node` is a direct
     dependency because Next.js needs it, and no other Node.js package is
-  - `tsrs` is the type gate and the `typescript` package is not installed
+  - `tsrs` is the type gate and the `typescript` package is not installed;
+    no second checker can be added to a script, a hook or a workflow, and
+    Next's own type check stays off
   - the git hooks are Bun scripts and no hook runner is a dependency
   - no credential is committed or in the history; the documentation points at
     files that exist; `.env.example` and the code agree
